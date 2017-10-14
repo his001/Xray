@@ -1,0 +1,59 @@
+<ContentControl
+  x:Class="XrayTEXT.TalkBoxLayerControl"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:local="clr-namespace:XrayTEXT"
+  x:Name="mainControl"
+  >
+  <ContentControl.Resources>
+    <!-- edit annotation. -->
+    <DataTemplate x:Key="EditModeTemplate">
+      <TextBox
+        KeyDown="OnTextBoxKeyDown"
+        Loaded="OnTextBoxLoaded"
+        LostFocus="OnTextBoxLostFocus"
+        Style="{DynamicResource STYLE_AnnotationEditor}"
+        Text="{Binding ElementName=mainControl, Path=Content, UpdateSourceTrigger=PropertyChanged}"
+        />
+    </DataTemplate>
+
+    <!-- read annotation. -->
+    <DataTemplate x:Key="DisplayModeTemplate">
+      <TextBlock
+        MouseLeftButtonDown="OnTextBlockMouseLeftButtonDown"
+        Style="{DynamicResource STYLE_Annotation}"
+        Text="{Binding ElementName=mainControl, Path=Content}"
+        >
+        <TextBlock.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Delete" Click="OnDeleteAnnotation">
+              <MenuItem.Icon>
+                <Image Source="delete.ico" />
+              </MenuItem.Icon>
+            </MenuItem>
+          </ContextMenu>
+        </TextBlock.ContextMenu>
+      </TextBlock>
+    </DataTemplate>
+
+    <Style TargetType="{x:Type local:TalkBoxLayerControl}">
+      <Style.Triggers>
+        <!-- edit mode template -->
+        <Trigger Property="IsInEditMode" Value="True">
+          <Setter
+            Property="ContentTemplate" 
+            Value="{StaticResource EditModeTemplate}" 
+            />
+        </Trigger>
+
+        <!-- display mode -->
+        <Trigger Property="IsInEditMode" Value="False">
+          <Setter
+            Property="ContentTemplate" 
+            Value="{StaticResource DisplayModeTemplate}" 
+            />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </ContentControl.Resources>
+</ContentControl>
