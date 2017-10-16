@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -15,11 +17,10 @@ namespace XrayTEXT
     public partial class MainWin : System.Windows.Window
     {
         #region ######################### 선언 #########################
-        protected string _drawType = "소견";  // 소견 원 네모
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
 
-        string _PicFolder = @"E:\project\XrayTEXT\XrayTEXT\Images";
+        protected string _PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\Images";
         public PhotoCollection Photos;
 
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
@@ -48,21 +49,10 @@ namespace XrayTEXT
             Zoom.CenterX = ViewedPhoto.Width / 2;
             Zoom.CenterY = ViewedPhoto.Height / 2;
             //회전은 Angle 만 돌리면 되나 일단 보류
-            //DataContext = new ModelTextbox { TxWidth._tW = 10, _tH = 10 };
+
+            //DataContext = new ModelTextbox() { TxWidth = 100, TxHeight=100 };
         }
         #endregion ######################### MainWin #########################
-
-        #region ######## 라디오 버튼 이벤트 ################
-        private void rdo_EventCheck(object sender, RoutedEventArgs e)
-        {
-
-            var radioButton = sender as RadioButton;
-            if (radioButton == null)
-                return;
-            _drawType = radioButton.Content.ToString();
-            //MessageBox.Show(_drawType);
-        }
-        #endregion ######## 라디오 버튼 이벤트 ################
 
         #region ######## 마우스 관련 ################
 
@@ -168,56 +158,86 @@ namespace XrayTEXT
             this.root.ReleaseMouseCapture(); //마우스 캡춰를 제거한다.
             SetRectangleProperty();
 
-            #region ########## 사각형 안에 _talkLayer 삽입 ##########
-            Point currnetPosition = e.GetPosition(this.root);
-            double left = prePosition.X;
-            double top = prePosition.Y;
-
-            if (currentRect != null)
-            {
-                if (prePosition.X > currnetPosition.X)
-                {
-                    left = currnetPosition.X;
-                }
-                if (prePosition.Y > currnetPosition.Y)
-                {
-                    top = currnetPosition.Y;
-                }
-            }
-
             Image image = ViewedPhoto;
-            Point talkBoxLocationXY = new Point(left, top);
-            Size _size = new Size(Math.Abs(prePosition.X - currnetPosition.X), Math.Abs(prePosition.Y - currnetPosition.Y)); // 사각형 크기 만큼 텍스트 레이어 크기 지정
-            image.RenderSize = _size; // 텍스 트 박스 크기
+            if (Math.Abs(image.ActualWidth) > 10 && PhotosListBox.SelectedItem != null)
+            {
+                #region ########## 사각형 안에 _talkLayer 삽입 ##########
+                Point currnetPosition = e.GetPosition(this.root);
+                double left = prePosition.X;
+                double top = prePosition.Y;
 
-            Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
-            Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
-            //_cssTalkBoxEdit.Setters.Add(new Setter(TextBox.WidthProperty, _size.Width));
-            //_cssTalkBoxEdit.Setters.Add(new Setter(TextBox.HeightProperty, _size.Height));
+                if (currentRect != null)
+                {
+                    if (prePosition.X > currnetPosition.X)
+                    {
+                        left = currnetPosition.X;
+                    }
+                    if (prePosition.Y > currnetPosition.Y)
+                    {
+                        top = currnetPosition.Y;
+                    }
+                }
 
-            //_cssTalkBox.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.WidthProperty).Value = _size.Width;
-            //_cssTalkBoxEdit.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.WidthProperty).Value = _size.Width;
-            //_cssTalkBox.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.HeightProperty).Value = _size.Height;
-            //_cssTalkBoxEdit.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.HeightProperty).Value = _size.Height;
-            ModelTextbox mt = new ModelTextbox();
-            mt.TxWidth = _size.Width;
-            mt.TxHeight = _size.Height;
-            this.DataContext = mt;
+                Point talkBoxLocationXY = new Point(left, top);
+                Size _size = new Size(Math.Abs(prePosition.X - currnetPosition.X), Math.Abs(prePosition.Y - currnetPosition.Y)); // 사각형 크기 만큼 텍스트 레이어 크기 지정
+                image.RenderSize = _size; // 텍스 트 박스 크기
 
-            TalkBoxLayer _talkBoxLayer = TalkBoxLayer.Create(
-                image,
-                talkBoxLocationXY,
-                _cssTalkBox,
-                _cssTalkBoxEdit);
-            this.CurTalkBox.Add(_talkBoxLayer);
-            //_talkBoxLayer.TalkBoxLyerSizeW = _size.Width.ToString();
-            //_talkBoxLayer.TalkBoxLyerSizeH = _size.Height.ToString();
+                Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
+                Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
 
-            #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
-            root.Children.Remove(currentRect); // 그려진 네모는 삭제 - obj 삭제 했더니 재사용이 안되 히든 및 null 처리
-            currentRect.Visibility = Visibility.Hidden;
-            currentRect = null;
-            GC.Collect();
+                #region ########### 삭제 ###########
+                //_cssTalkBox.Setters.Add(new Setter(TextBox.WidthProperty, _size.Width));
+                //_cssTalkBox.Setters.Add(new Setter(TextBox.HeightProperty, _size.Height));
+                //_cssTalkBoxEdit.Setters.Add(new Setter(TextBox.WidthProperty, _size.Width));
+                //_cssTalkBoxEdit.Setters.Add(new Setter(TextBox.HeightProperty, _size.Height));
+
+                //_cssTalkBox.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.WidthProperty).Value = _size.Width;
+                //_cssTalkBox.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.HeightProperty).Value = _size.Height;
+
+                //_cssTalkBoxEdit.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.WidthProperty).Value = _size.Width;
+                //_cssTalkBoxEdit.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.HeightProperty).Value = _size.Height;
+
+                //ModelTextbox mt = new ModelTextbox();
+                //mt.TxWidth = _size.Width;
+                //mt.TxHeight = _size.Height;
+                //this.DataContext = mt;
+                //this.DataContext = new ModelTextbox() { TxWidth = _size.Width, TxHeight = _size.Height };
+                #endregion ########### 삭제 ###########
+
+                TalkBoxLayer _talkBoxLayer = TalkBoxLayer.Create(
+                    image,
+                    talkBoxLocationXY,
+                    _cssTalkBox,
+                    _cssTalkBoxEdit);
+                this.CurTalkBox.Add(_talkBoxLayer);
+
+                //string _savePath = @"D:\DEV\WPF\saveImg\" + PhotosListBox.SelectedItem.ToString() + "\\" + _LstTalkBoxLayer.Count.ToString() + ".png";
+                string _savePath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".jpg", "").Replace("/", "\\");
+                System.IO.Directory.CreateDirectory(_savePath); // 폴더가 없으면 생성
+                string _savePathFull = _savePath + "\\" + _LstTalkBoxLayer.Count.ToString() + ".png";
+                
+                ExportToPng(_savePath, image, top, left);
+
+                #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
+                root.Children.Remove(currentRect); // 그려진 네모는 삭제 - obj 삭제 했더니 재사용이 안되 히든 및 null 처리
+                currentRect.Visibility = Visibility.Hidden;
+                currentRect = null;
+                GC.Collect();
+            }
+            
+        }
+
+        public void ExportToPng(string _path, Image _img, double top, double left)
+        {
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)_img.Width,(int)_img.Height, 96d, 96d, System.Windows.Media.PixelFormats.Default);
+            rtb.Render(_img);
+            var crop = new CroppedBitmap(rtb, new Int32Rect((int)left, (int)top, (int)_img.ActualWidth, (int)_img.ActualHeight));
+            BitmapEncoder pngEncoder = new PngBitmapEncoder();
+            pngEncoder.Frames.Add(BitmapFrame.Create(crop));
+            using (var fs = System.IO.File.OpenWrite(_path))
+            {
+                pngEncoder.Save(fs);
+            }
         }
 
         #region ######## 네모 ################
@@ -257,8 +277,6 @@ namespace XrayTEXT
         }
 
         #endregion ######## 네모 ################
-
-        
 
         #endregion ######## 마우스 관련 ################
 
@@ -482,37 +500,32 @@ namespace XrayTEXT
 
     public class ModelTextbox
     {
-        public double _tW;
-        public double _tH;
-
+        public double _TxWidth, _TxHeight;
         public double TxWidth
         {
             get
             {
-                return _tW;
+                return _TxWidth;
             }
             set
             {
-                if (_tW == value)
-                    return;
-
-                _tW = value;
+                _TxWidth = value;
+                PropertyChanged(this, new PropertyChangedEventArgs("ModelTextbox"));
             }
         }
-
         public double TxHeight
         {
             get
             {
-                return _tH;
+                return _TxHeight;
             }
             set
             {
-                if (_tH == value)
-                    return;
-
-                _tH = value;
+                _TxHeight = value;
+                PropertyChanged(this, new PropertyChangedEventArgs("ModelTextbox"));
             }
         }
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
     }
-}
+
+ }

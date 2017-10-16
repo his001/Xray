@@ -35,7 +35,8 @@ namespace XrayTEXT
             _location = location;
 
             _control = new TalkBoxLayerControl(txtLayer, _txt_layerStyle, TalkBoxEditorStyle);
-
+            _control.Width = adornedImage.ActualWidth;
+            _control.Height = adornedImage.ActualHeight;
             base.AddLogicalChild(_control);
             base.AddVisualChild(_control);
         }

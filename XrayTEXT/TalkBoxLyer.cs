@@ -34,29 +34,32 @@ namespace XrayTEXT
             Style TalkBoxStyle,
             Style TalkBoxEditorStyle)
         {
-            if (image == null)
-                throw new ArgumentNullException("image");
+            try {
+                if (image == null)
+                    throw new ArgumentNullException("image");
 
-            _image = image;
-            this.HookImageEvents(true);
+                _image = image;
+                this.HookImageEvents(true);
 
-            Size imageSize = _image.RenderSize;
-            if (imageSize.Height == 0 || imageSize.Width == 0)
-                throw new ArgumentException("image has invalid dimensions");
+                Size imageSize = _image.RenderSize;
+                if (imageSize.Height == 0 || imageSize.Width == 0)
+                    throw new ArgumentException("image has invalid dimensions");
 
-            // Determine the relative location of the TextBlock.
-            _horizPercent = TalkBoxLocation.X / imageSize.Width;
-            _vertPercent = TalkBoxLocation.Y / imageSize.Height;
+                // Determine the relative location of the TextBlock.
+                _horizPercent = TalkBoxLocation.X / imageSize.Width;
+                _vertPercent = TalkBoxLocation.Y / imageSize.Height;
 
-            // Create the adorner which displays the annotation.
-            _TxtBoxL_AddCont = new TalkBoxLayerCtrl(
-                this,
-                _image,
-                TalkBoxStyle,
-                TalkBoxEditorStyle,
-                TalkBoxLocation);
+                // Create the adorner which displays the annotation.
+                _TxtBoxL_AddCont = new TalkBoxLayerCtrl(
+                    this,
+                    _image,
+                    TalkBoxStyle,
+                    TalkBoxEditorStyle,
+                    TalkBoxLocation);
 
-            this.TalkBoxLyer_Insert();
+                this.TalkBoxLyer_Insert();
+            } catch (Exception ex) {
+            }
         }
 
         #endregion // Private Constructor

@@ -7,6 +7,7 @@
         WindowState="Maximized" 
         Loaded="OnLoaded"
         xmlns:er="clr-namespace:XrayTEXT" 
+        DataContext="{Binding ElementName = CodeBehind}"
     >
     <!--WindowStyle="ToolWindow" ResizeMode="NoResize"-->
     <Window.Resources>
@@ -15,10 +16,11 @@
         <Style x:Key="cssTalkBox" TargetType="TextBlock">
             <Setter Property="Background" Value="LightYellow" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Width" Value="{Binding TxWidth, Mode=TwoWay}" />
-            <Setter Property="Height" Value="{Binding TxHeight, Mode=TwoWay}" />
-            <!--<Setter Property="Width" Value="{Binding Width}" />
-            <Setter Property="Height" Value="{Binding Height}" />-->
+            <Setter Property="Opacity" Value="0.35" />
+            <!--<Setter Property="Width" Value="10"></Setter>
+            <Setter Property="Height" Value="10"></Setter>-->
+            <!--<Setter Property="Width" Value="{Binding ModelTextbox.TxWidth}" />
+            <Setter Property="Height" Value="{Binding ModelTextbox.TxHeight}" />-->
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#CCFFFFFF" />
@@ -33,10 +35,11 @@
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Padding" Value="-2,0,-1,0" />
             <Setter Property="Opacity" Value="0.35" />
-            <Setter Property="Width" Value="{Binding TxWidth, Mode=TwoWay}" />
-            <Setter Property="Height" Value="{Binding TxHeight, Mode=TwoWay}" />
-            <!--<Setter Property="Width" Value="{Binding Width}" />
-            <Setter Property="Height" Value="{Binding Height}" />-->
+            <!--<Setter Property="Width" Value="10"></Setter>
+            <Setter Property="Height" Value="10"></Setter>-->
+            <!--<Setter Property="Width" Value="{Binding ModelTextbox.TxWidth}" />
+            <Setter Property="Height" Value="{Binding ModelTextbox.TxHeight}" />-->
+            
         </Style>
 
         <!-- Photo Template -->
@@ -163,7 +166,7 @@
                       x:Name="ImageViewer">
                         <Grid x:Name="root" Background="White">
                             <Canvas Name="Xcanvas" Width="1500" Height="960">
-                                <Image Name="ViewedPhoto" Width="1500" Height="960" Margin="1" Stretch="UniformToFill" Source="E:\project\XrayTEXT\XrayTEXT\Images\hand.jpg"
+                                <Image Name="ViewedPhoto" Width="1500" Height="960" Margin="1" Stretch="UniformToFill" 
                                        
 >                                    <Image.RenderTransform>
                                         <ScaleTransform x:Name="Zoom" ScaleX="1" ScaleY="1">
@@ -220,7 +223,7 @@
 
 
         <!-- 이미지경로 -->
-        <TextBox Name="ImagesDir" Margin="0,0.333,120.333,-0.333" Width="290" Grid.Row="2" Grid.Column="1" Text="E:\project\XrayTEXT\XrayTEXT\Images"  HorizontalAlignment="Right" />
+        <TextBox Name="ImagesDir" Margin="0,0.333,120.333,-0.333" Width="290" Grid.Row="2" Grid.Column="1" Text="D:\DEV\WPF\PRJ\XrayTEXT\Images"  HorizontalAlignment="Right" />
         <!-- 이미지경로 변경 버튼 -->
         <Button Grid.Row="2" Grid.Column="1"  Margin="20,0,0,0" Width="80" Click="OnImagesDirChangeClick" HorizontalAlignment="Right">폴더변경</Button>
     </Grid>

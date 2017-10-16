@@ -1,15 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace XrayTEXT
@@ -23,9 +16,7 @@ namespace XrayTEXT
     public partial class TalkBoxLayerControl : ContentControl
 	{
 		#region Data
-
 		private readonly TalkBoxLayer _talkBoxLayer;
-
 		#endregion // Data
 
 		#region Constructor
@@ -51,10 +42,7 @@ namespace XrayTEXT
             //이 컨트롤에 포커스 허용.
             //우리가 포커스를 capture 할 수 있도록 주석을 편집하는 데 사용되는 TextBox.
             base.Focusable = true;
-
-            // Prevent the control from having a focus rect.
             base.FocusVisualStyle = null;
-
             if (_txt_layerStyle != null)
             {
                 base.Resources.Add("STYLE_Annotation", _txt_layerStyle);
@@ -64,7 +52,6 @@ namespace XrayTEXT
             {
                 base.Resources.Add("STYLE_AnnotationEditor", TalkBoxEditorStyle);
             }
-
             this.IsInEditMode = true;
         }
 
