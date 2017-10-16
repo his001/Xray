@@ -223,7 +223,7 @@
 
 
         <!-- 이미지경로 -->
-        <TextBox Name="ImagesDir" Margin="0,0.333,120.333,-0.333" Width="290" Grid.Row="2" Grid.Column="1" Text="D:\DEV\WPF\PRJ\XrayTEXT\Images"  HorizontalAlignment="Right" />
+        <TextBox Name="ImagesDir" Margin="0,0.333,120.333,-0.333" Width="290" Grid.Row="2" Grid.Column="1" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images"  HorizontalAlignment="Right" />
         <!-- 이미지경로 변경 버튼 -->
         <Button Grid.Row="2" Grid.Column="1"  Margin="20,0,0,0" Width="80" Click="OnImagesDirChangeClick" HorizontalAlignment="Right">폴더변경</Button>
     </Grid>

@@ -20,7 +20,7 @@ namespace XrayTEXT
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
 
-        protected string _PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\Images";
+        protected string _PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
         public PhotoCollection Photos;
 
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
@@ -216,7 +216,7 @@ namespace XrayTEXT
                 System.IO.Directory.CreateDirectory(_savePath); // 폴더가 없으면 생성
                 string _savePathFull = _savePath + "\\" + _LstTalkBoxLayer.Count.ToString() + ".png";
                 
-                ExportToPng(_savePath, image, top, left);
+                ExportToPng(_savePathFull, image, top, left);
 
                 #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
                 root.Children.Remove(currentRect); // 그려진 네모는 삭제 - obj 삭제 했더니 재사용이 안되 히든 및 null 처리
@@ -229,14 +229,22 @@ namespace XrayTEXT
 
         public void ExportToPng(string _path, Image _img, double top, double left)
         {
-            RenderTargetBitmap rtb = new RenderTargetBitmap((int)_img.Width,(int)_img.Height, 96d, 96d, System.Windows.Media.PixelFormats.Default);
-            rtb.Render(_img);
-            var crop = new CroppedBitmap(rtb, new Int32Rect((int)left, (int)top, (int)_img.ActualWidth, (int)_img.ActualHeight));
-            BitmapEncoder pngEncoder = new PngBitmapEncoder();
-            pngEncoder.Frames.Add(BitmapFrame.Create(crop));
-            using (var fs = System.IO.File.OpenWrite(_path))
+            try
             {
-                pngEncoder.Save(fs);
+                RenderTargetBitmap rtb = new RenderTargetBitmap((int)_img.Width, (int)_img.Height, 96d, 96d, System.Windows.Media.PixelFormats.Default);
+                rtb.Render(_img);
+                var crop = new CroppedBitmap(rtb, new Int32Rect((int)left, (int)top, (int)_img.ActualWidth, (int)_img.ActualHeight));
+                BitmapEncoder pngEncoder = new PngBitmapEncoder();
+                pngEncoder.Frames.Add(BitmapFrame.Create(crop));
+
+                //FileInfo file = new FileInfo(_path);  // 읽기전용일때의 에러 처리
+                //file.IsReadOnly = false;
+                using (var fs = System.IO.File.OpenWrite(_path))
+                {
+                    pngEncoder.Save(fs);
+                }
+            }
+            catch (Exception ex) {
             }
         }
 
@@ -281,27 +289,6 @@ namespace XrayTEXT
         #endregion ######## 마우스 관련 ################
 
         #region ######################### 메인 사진 #########################
-        /// <summary>
-        /// 이미지 상에 클릭이 일어났을때 의사 주석 달기 위해
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            //Image image = sender as Image;
-            //Point talkBoxLocationXY = e.GetPosition(image);
-            //talkBoxLocationXY.Offset(-4, -4);
-            //Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
-            //Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
-            //TalkBoxLayer _talkBoxLayer = TalkBoxLayer.Create(
-            //    image,
-            //    talkBoxLocationXY,
-            //    _cssTalkBox,
-            //    _cssTalkBoxEdit);
-
-            //this.CurTalkBox.Add(_talkBoxLayer);
-        }
-
         #region ######### 소견삭제 #########
         /// <summary>
         /// 소견삭제
@@ -491,9 +478,30 @@ namespace XrayTEXT
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
-            Photos.Path = _PicFolder;//Environment.CurrentDirectory + "\\images";
+            //LoadAsync(this, e);
+            Photos.Path = _PicFolder; //Environment.CurrentDirectory + "\\images";
         }
 
+        //private void LoadAsync(object sender, DoWorkEventArgs e)
+        //{
+        //    BitmapDecoder decoder;
+        //    using (Stream imageStreamSource = new FileStream(_PicFolder, FileMode.Open, FileAccess.Read, FileShare.Read))
+        //    {
+        //        decoder = BitmapDecoder.Create(imageStreamSource, BitmapCreateOptions.PreservePixelFormat,
+        //            BitmapCacheOption.OnLoad);
+        //    }
+        //    foreach (var frame in decoder.Frames)
+        //    {
+        //        frame.Freeze();
+        //        (sender as BackgroundWorker).ReportProgress(0, frame);
+        //    }
+        //}
+
+        //private void UpdateAsync(object send, ProgressChangedEventArgs e)
+        //{
+        //    //SyncImages.Add((BitmapSource)e.UserState);
+        //    //OnPropertyChanged("SyncImages");
+        //}
         #endregion ######################### 좌측 트리에서 사진 #########################
 
     }

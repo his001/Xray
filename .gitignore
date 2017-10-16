@@ -259,3 +259,5 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/XrayTEXT/Images/Medical_X-Ray_imaging_OPC06_nevit/2.png
+/XrayTEXT/Images/Medical_X-Ray_imaging_OPC06_nevit/1.png
