@@ -15,16 +15,9 @@ namespace XrayTEXT
     /// </summary>
     public partial class TalkBoxLayerControl : ContentControl
 	{
-		#region Data
 		private readonly TalkBoxLayer _talkBoxLayer;
-		#endregion // Data
-
 		#region Constructor
-
-		public TalkBoxLayerControl(
-            TalkBoxLayer talkBoxLayer, 
-            Style _txt_layerStyle, 
-            Style TalkBoxEditorStyle)
+		public TalkBoxLayerControl( TalkBoxLayer talkBoxLayer, Style _txt_layerStyle,  Style TalkBoxEditorStyle)
         {
             InitializeComponent();
 
@@ -53,6 +46,7 @@ namespace XrayTEXT
                 base.Resources.Add("STYLE_AnnotationEditor", TalkBoxEditorStyle);
             }
             this.IsInEditMode = true;
+          
         }
 
         #endregion // Constructor
@@ -116,6 +110,13 @@ namespace XrayTEXT
                 txt.SelectionStart = charIdx;
         }
 
+        //MainWin ParentForm;
+        //public TalkBoxLayerControl(MainWin form)
+        //{
+        //    this.ParentForm = form;
+        //    InitializeComponent();
+        //}
+
         // Invoked 편집 모드 종료 시
         void OnTextBoxLostFocus(object sender, RoutedEventArgs e)
         {
@@ -125,9 +126,18 @@ namespace XrayTEXT
                 (NoArgDelegate)delegate
                 {
                     this.IsInEditMode = false;
+                    //MainWin.SetSaveAllTextBox();
+                    //btnSaveText
+                    //Parent.SetCurrentValue.;
+                    //ParentForm.SetSaveAllTextBox();
                 }
             );
         }
+
+
+
+
+
 
         // 사용자가 주석을 편집 할 때 
         void OnTextBoxKeyDown(object sender, KeyEventArgs e)

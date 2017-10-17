@@ -223,6 +223,8 @@ namespace XrayTEXT
                 currentRect.Visibility = Visibility.Hidden;
                 currentRect = null;
                 GC.Collect();
+
+                SetSaveAllTextBox();//
             }
             
         }
@@ -330,7 +332,7 @@ namespace XrayTEXT
             }
         }
 
-        private string SetSaveAllTextBox()
+        public string SetSaveAllTextBox()
         {
             string _rtn = "";
 
@@ -425,6 +427,7 @@ namespace XrayTEXT
 
             TxtDocTalkShow.Text = sb2.ToString();
         }
+
 
         List<TalkBoxLayer> CurTalkBox
         {

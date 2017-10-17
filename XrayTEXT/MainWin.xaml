@@ -106,9 +106,6 @@
         <ObjectDataProvider x:Key="Photos" ObjectType="{x:Type er:PhotoCollection}" />
     </Window.Resources>
 
-
-
-
     <Grid Margin="1" DataContext="{Binding Source={StaticResource Photos}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
@@ -199,8 +196,8 @@
           Grid.Row="2" Grid.Column="1"
           Click="OnSaveButtonClick"
           HorizontalAlignment="Left"
-          Margin="65,0,0,0"
-          >소견저장
+          Margin="65,0,0,0" 
+          x:FieldModifier="public">소견저장
         </Button>
 
         <!-- 소견삭제 버튼 -->
