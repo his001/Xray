@@ -45,11 +45,9 @@ namespace XrayTEXT
                 if (imageSize.Height == 0 || imageSize.Width == 0)
                     throw new ArgumentException("image has invalid dimensions");
 
-                // Determine the relative location of the TextBlock.
                 _horizPercent = TalkBoxLocation.X / imageSize.Width;
                 _vertPercent = TalkBoxLocation.Y / imageSize.Height;
 
-                // Create the adorner which displays the annotation.
                 _TxtBoxL_AddCont = new TalkBoxLayerCtrl(
                     this,
                     _image,
@@ -64,58 +62,7 @@ namespace XrayTEXT
 
         #endregion // Private Constructor
 
-        #region ############### _innerText 추가 ###############
-    //    private TalkBoxLayer(
-    //Point TalkBoxLocation,
-    //Image image,
-    //Style TalkBoxStyle,
-    //Style TalkBoxEditorStyle, string innerText)
-    //    {
-    //        // 이하는 기존과 동일
-    //        if (image == null)
-    //            throw new ArgumentNullException("image");
 
-    //        _image = image;
-    //        this.HookImageEvents(true);
-
-    //        Size imageSize = _image.RenderSize;
-    //        if (imageSize.Height == 0 || imageSize.Width == 0)
-    //            throw new ArgumentException("image has invalid dimensions");
-
-    //        // Determine the relative location of the TextBlock.
-    //        _horizPercent = TalkBoxLocation.X / imageSize.Width;
-    //        _vertPercent = TalkBoxLocation.Y / imageSize.Height;
-
-    //        // Create the adorner which displays the annotation.
-    //        _TxtBoxL_AddCont = new TalkBoxLayerCtrl(
-    //            this,
-    //            _image,
-    //            TalkBoxStyle,
-    //            TalkBoxEditorStyle,
-    //            TalkBoxLocation
-    //            );
-
-    //        //this.TalkBoxLyer_Insert(innerText);
-    //    }
-
-        //void TalkBoxLyer_Insert(string innerText)
-        //{
-        //    if (_isDeleted)
-        //        return;
-
-        //    _TxtBoxLayer = AdornerLayer.GetAdornerLayer(_image);
-        //    if (_TxtBoxLayer == null)
-        //    {
-        //        throw new ArgumentException("image does not have have an adorner layer.");
-        //    }
-        //    else
-        //    {
-        //        // Add the adorner to the Image's adorner layer.
-        //        _TxtBoxLayer.Add(_TxtBoxL_AddCont); //innerText
-        //    }
-        //}
-
-        #endregion ############### _innerText 추가 ###############
 
         #region Create/Delete
 
@@ -131,13 +78,7 @@ namespace XrayTEXT
         {
             return new TalkBoxLayer(TalkBoxLocation, image, TalkBoxStyle, TalkBoxEditorStyle);
         }
-
-        //public static TalkBoxLayer Create(Image image, Point TalkBoxLocation, Style TalkBoxStyle
-        //    , Style TalkBoxEditorStyle, string innerText)
-        //{
-        //    return new TalkBoxLayer(TalkBoxLocation, image, TalkBoxStyle, TalkBoxEditorStyle, innerText);
-        //}
-
+        
 
         /// <summary>
         /// Removes the adorner from the element tree.
@@ -249,7 +190,7 @@ namespace XrayTEXT
         {
             get
             {
-                return (_image.RenderSize.Width).ToString();
+                return (_TxtBoxL_AddCont.RenderSize.Width).ToString();
             }
             set
             {
@@ -264,7 +205,7 @@ namespace XrayTEXT
         {
             get
             {
-                return (_image.RenderSize.Height).ToString();
+                return (_TxtBoxL_AddCont.RenderSize.Height).ToString();
             }
             set
             {

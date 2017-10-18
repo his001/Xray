@@ -14,13 +14,9 @@ namespace XrayTEXT
     /// </summary>
     public class TalkBoxLayerCtrl : Adorner
     {
-        #region Data
-
-        private TalkBoxLayerControl _control;
+        public TalkBoxLayerControl _control;
         private Point _location;
         private ArrayList _logicalChildren;
-
-        #endregion // Data
 
         #region Constructor
 
@@ -29,7 +25,9 @@ namespace XrayTEXT
             Image adornedImage,
             Style _txt_layerStyle,
             Style TalkBoxEditorStyle,
-            Point location)
+            Point location
+            //, double width, double height
+            )
             : base(adornedImage)
         {
             _location = location;
@@ -72,9 +70,7 @@ namespace XrayTEXT
         protected override Size ArrangeOverride(Size finalSize)
         {
             Rect rect = new Rect(_location, finalSize);
-
             _control.Arrange(rect);
-
             return finalSize;
         }
 

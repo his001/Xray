@@ -36,7 +36,7 @@ namespace XrayTEXT
 
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
             Photos.Path = _PicFolder;
-            
+
             this.root.MouseLeftButtonDown += new MouseButtonEventHandler(root_MouseLeftButtonDown);
             this.root.MouseLeftButtonUp += new MouseButtonEventHandler(root_MouseLeftButtonUp);
             this.root.MouseWheel += new MouseWheelEventHandler(root_MouseWheel);
@@ -185,25 +185,6 @@ namespace XrayTEXT
                 Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
                 Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
 
-                #region ########### 삭제 ###########
-                //_cssTalkBox.Setters.Add(new Setter(TextBox.WidthProperty, _size.Width));
-                //_cssTalkBox.Setters.Add(new Setter(TextBox.HeightProperty, _size.Height));
-                //_cssTalkBoxEdit.Setters.Add(new Setter(TextBox.WidthProperty, _size.Width));
-                //_cssTalkBoxEdit.Setters.Add(new Setter(TextBox.HeightProperty, _size.Height));
-
-                //_cssTalkBox.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.WidthProperty).Value = _size.Width;
-                //_cssTalkBox.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.HeightProperty).Value = _size.Height;
-
-                //_cssTalkBoxEdit.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.WidthProperty).Value = _size.Width;
-                //_cssTalkBoxEdit.Setters.OfType<Setter>().FirstOrDefault(X => X.Property == TextBox.HeightProperty).Value = _size.Height;
-
-                //ModelTextbox mt = new ModelTextbox();
-                //mt.TxWidth = _size.Width;
-                //mt.TxHeight = _size.Height;
-                //this.DataContext = mt;
-                //this.DataContext = new ModelTextbox() { TxWidth = _size.Width, TxHeight = _size.Height };
-                #endregion ########### 삭제 ###########
-
                 TalkBoxLayer _talkBoxLayer = TalkBoxLayer.Create(
                     image,
                     talkBoxLocationXY,
@@ -211,11 +192,11 @@ namespace XrayTEXT
                     _cssTalkBoxEdit);
                 this.CurTalkBox.Add(_talkBoxLayer);
 
-                //string _savePath = @"D:\DEV\WPF\saveImg\" + PhotosListBox.SelectedItem.ToString() + "\\" + _LstTalkBoxLayer.Count.ToString() + ".png";
                 string _savePath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".jpg", "").Replace("/", "\\");
+                string _savePathTxt = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
                 System.IO.Directory.CreateDirectory(_savePath); // 폴더가 없으면 생성
                 string _savePathFull = _savePath + "\\" + _LstTalkBoxLayer.Count.ToString() + ".png";
-                
+                string _saveFileName = _savePath + "\\" + System.IO.Path.GetFileNameWithoutExtension(_savePathTxt) + ".dat";
                 ExportToPng(_savePathFull, image, top, left);
 
                 #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
@@ -224,9 +205,9 @@ namespace XrayTEXT
                 currentRect = null;
                 GC.Collect();
 
-                SetSaveAllTextBox();//
+                SetSaveAllTextBox(_saveFileName);
             }
-            
+
         }
 
         public void ExportToPng(string _path, Image _img, double top, double left)
@@ -246,7 +227,8 @@ namespace XrayTEXT
                     pngEncoder.Save(fs);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
             }
         }
 
@@ -306,7 +288,8 @@ namespace XrayTEXT
         /// 소견삭제
         /// </summary>
         /// <returns></returns>
-        private string SetDeleteAllTextBox() {
+        private string SetDeleteAllTextBox()
+        {
             string _rtn = "";
             if (this.CurTalkBox.Count > 0)
             {
@@ -332,13 +315,12 @@ namespace XrayTEXT
             }
         }
 
-        public string SetSaveAllTextBox()
+        public void SetSaveAllTextBox(string _path = "")
         {
-            string _rtn = "";
-
             string str_text = string.Empty;
             StringBuilder sb = new StringBuilder(); // 저장용(파일, 위치,크기 정보)
             StringBuilder sb2 = new StringBuilder(); // 시각용(위치,크기 정보 X)
+
             for (int i = 0; i < _LstTalkBoxLayer.Count; i++)
             {
                 if (_LstTalkBoxLayer[i].Text != null)
@@ -350,16 +332,19 @@ namespace XrayTEXT
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerPointY
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerSizeW
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerSizeH
+                        //+ "▤" + CurTalkBox[i].TalkBoxLyerSizeW
+                        //+ "▤" + CurTalkBox[i].TalkBoxLyerSizeH
                         + "▥\r\n");
                     sb2.AppendLine(_LstTalkBoxLayer[i].Text.ToString());
                 }
             }
             TxtDocTalk.Text = sb.ToString();
             TxtDocTalkShow.Text = sb2.ToString();
-            return _rtn;
+            if (_path != "") { File.WriteAllText(_path, sb.ToString()); }
         }
 
-        public string getTxtDocTalk() {
+        public string getTxtDocTalk()
+        {
             string _Talk = string.Empty;
             _Talk = TxtDocTalk.Text.ToString();
             return _Talk;
@@ -388,10 +373,24 @@ namespace XrayTEXT
         /// <summary>
         /// 소견 data Load
         /// </summary>
-        void LoadTxtBox() {
+        void LoadTxtBox(string _path = "")
+        {
             string _str = TxtDocTalk.Text;
-            if (_str.Trim().Length == 0) {
-                MessageBox.Show("소견이 없습니다.");
+            if (_path != "")
+            {
+                string _loadPath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".jpg", "").Replace("/", "\\");
+                string _loadPathTxt = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
+                string _loadFileName = _loadPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(_loadPathTxt) + ".dat";
+                //
+                if (File.Exists(_loadFileName))
+                {
+                    _str = File.ReadAllText(_path);
+                }
+            }
+
+            if (_str.Trim().Length == 0)
+            {
+                //MessageBox.Show("소견이 없습니다.");
                 return;
             }
             string[] _strArr = _str.Split('▥');
@@ -399,7 +398,8 @@ namespace XrayTEXT
             string _innerText = string.Empty;    // 글내용
             StringBuilder sb2 = new StringBuilder();
             #region ########## text 바인딩 S ##########
-            for (int i = 0; i < _strArr.Length - 1; i++) {
+            for (int i = 0; i < _strArr.Length - 1; i++)
+            {
                 string[] _strArr2 = _strArr[i].Split('▤');
 
                 _filePathWithName = _strArr2[0];
@@ -454,7 +454,7 @@ namespace XrayTEXT
             btnDelText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             TxtDocTalk.Text = string.Empty; // 소견 data 삭제
             TxtDocTalkShow.Text = string.Empty;
-            //OnDeleteButtonClick
+
             ImageSource imageSource = new BitmapImage(new Uri(PhotosListBox.SelectedItem.ToString()));
             ViewedPhoto.Source = imageSource;
             this.SizeToContent = SizeToContent.WidthAndHeight;
@@ -465,12 +465,10 @@ namespace XrayTEXT
         {
             string _delFile = PhotosListBox.SelectedItem.ToString();
             MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("삭제 하시겠습니까?", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
-            if (messageBoxResult == MessageBoxResult.Yes) {
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
                 MessageBox.Show(_delFile + " 가 삭제 되었습니다.");
             }
-
-            //ImageSource imageSource = new BitmapImage(new Uri(PhotosListBox.SelectedItem.ToString()));
-            //ViewedPhoto.Source = imageSource;
         }
 
         private void OnImagesDirChangeClick(object sender, RoutedEventArgs e)
@@ -481,62 +479,41 @@ namespace XrayTEXT
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
-            //LoadAsync(this, e);
             Photos.Path = _PicFolder; //Environment.CurrentDirectory + "\\images";
         }
 
-        //private void LoadAsync(object sender, DoWorkEventArgs e)
-        //{
-        //    BitmapDecoder decoder;
-        //    using (Stream imageStreamSource = new FileStream(_PicFolder, FileMode.Open, FileAccess.Read, FileShare.Read))
-        //    {
-        //        decoder = BitmapDecoder.Create(imageStreamSource, BitmapCreateOptions.PreservePixelFormat,
-        //            BitmapCacheOption.OnLoad);
-        //    }
-        //    foreach (var frame in decoder.Frames)
-        //    {
-        //        frame.Freeze();
-        //        (sender as BackgroundWorker).ReportProgress(0, frame);
-        //    }
-        //}
-
-        //private void UpdateAsync(object send, ProgressChangedEventArgs e)
-        //{
-        //    //SyncImages.Add((BitmapSource)e.UserState);
-        //    //OnPropertyChanged("SyncImages");
-        //}
         #endregion ######################### 좌측 트리에서 사진 #########################
 
     }
 
-    public class ModelTextbox
-    {
-        public double _TxWidth, _TxHeight;
-        public double TxWidth
-        {
-            get
-            {
-                return _TxWidth;
-            }
-            set
-            {
-                _TxWidth = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("ModelTextbox"));
-            }
-        }
-        public double TxHeight
-        {
-            get
-            {
-                return _TxHeight;
-            }
-            set
-            {
-                _TxHeight = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("ModelTextbox"));
-            }
-        }
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
-    }
+    //public class ModelTextbox
+    //{
+    //    public double _TxWidth, _TxHeight;
+    //    public double TxWidth
+    //    {
+    //        get
+    //        {
+    //            return _TxWidth;
+    //        }
+    //        set
+    //        {
+    //            _TxWidth = value;
+    //            PropertyChanged(this, new PropertyChangedEventArgs("ModelTextbox"));
+    //        }
+    //    }
+    //    public double TxHeight
+    //    {
+    //        get
+    //        {
+    //            return _TxHeight;
+    //        }
+    //        set
+    //        {
+    //            _TxHeight = value;
+    //            PropertyChanged(this, new PropertyChangedEventArgs("ModelTextbox"));
+    //        }
+    //    }
+    //    public event PropertyChangedEventHandler PropertyChanged = delegate { };
+    //}
 
- }
+}
