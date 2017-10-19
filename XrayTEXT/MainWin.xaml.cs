@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,6 +29,7 @@ namespace XrayTEXT
         double scaleX = 1;
         double scaleY = 1;
         TranslateTransform translate = new TranslateTransform();
+        DataSet ds;
         #endregion ######################### 선언 #########################
 
         #region ######################### MainWin #########################
@@ -192,7 +195,8 @@ namespace XrayTEXT
                     _cssTalkBoxEdit);
                 this.CurTalkBox.Add(_talkBoxLayer);
 
-                string _savePath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".jpg", "").Replace("/", "\\");
+                string _savePath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".png", "").Replace("/", "\\");
+                string _savePathDB = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
                 string _savePathTxt = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
                 System.IO.Directory.CreateDirectory(_savePath); // 폴더가 없으면 생성
                 string _savePathFull = _savePath + "\\" + _LstTalkBoxLayer.Count.ToString() + ".png";
@@ -231,6 +235,40 @@ namespace XrayTEXT
             {
             }
         }
+
+        public string SaveDB(Image _img, string top, string left,string _savePathDB)
+        {
+            string rtn = "";
+            try
+            {
+                string _text = string.Empty;
+                //Save binary data in database
+                string constr = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xray.mdf;Integrated Security=True;User Instance=True";
+                using (SqlConnection conn = new SqlConnection(constr))
+                {
+                    conn.Open();
+                    string sql = "insert into TBL_TalkBoxLayer(filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg) values ";
+                    sql = sql + "('" + _savePathDB + "','" + TxtDocTalk.Text.ToString() + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _savePathDB + "' ),'" + _text + "','" + left + "','" + top + "','" + _img.ActualWidth + "','" + _img.ActualHeight + "',@img)";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.Add(new SqlParameter("img", _img));
+                        int result = cmd.ExecuteNonQuery();
+                        if (result == 1)
+                        {
+                            //MessageBox.Show("Image Added");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+            }
+
+            return rtn;
+        }
+
 
         #region ######## 네모 ################
         private void SetRectangleProperty()
@@ -341,6 +379,7 @@ namespace XrayTEXT
             TxtDocTalk.Text = sb.ToString();
             TxtDocTalkShow.Text = sb2.ToString();
             if (_path != "") { File.WriteAllText(_path, sb.ToString()); }
+
         }
 
         public string getTxtDocTalk()
@@ -378,7 +417,7 @@ namespace XrayTEXT
             string _str = TxtDocTalk.Text;
             if (_path != "")
             {
-                string _loadPath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".jpg", "").Replace("/", "\\");
+                string _loadPath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".png", "").Replace("/", "\\");
                 string _loadPathTxt = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
                 string _loadFileName = _loadPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(_loadPathTxt) + ".dat";
                 //
@@ -485,35 +524,4 @@ namespace XrayTEXT
         #endregion ######################### 좌측 트리에서 사진 #########################
 
     }
-
-    //public class ModelTextbox
-    //{
-    //    public double _TxWidth, _TxHeight;
-    //    public double TxWidth
-    //    {
-    //        get
-    //        {
-    //            return _TxWidth;
-    //        }
-    //        set
-    //        {
-    //            _TxWidth = value;
-    //            PropertyChanged(this, new PropertyChangedEventArgs("ModelTextbox"));
-    //        }
-    //    }
-    //    public double TxHeight
-    //    {
-    //        get
-    //        {
-    //            return _TxHeight;
-    //        }
-    //        set
-    //        {
-    //            _TxHeight = value;
-    //            PropertyChanged(this, new PropertyChangedEventArgs("ModelTextbox"));
-    //        }
-    //    }
-    //    public event PropertyChangedEventHandler PropertyChanged = delegate { };
-    //}
-
 }

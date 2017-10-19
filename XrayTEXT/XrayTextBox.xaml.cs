@@ -139,13 +139,18 @@ namespace XrayTEXT
 				else
 				{
 					this.IsInEditMode = false;
-				}
+
+                    MainWin mw = new MainWin();
+                    mw.btnSaveText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));  // 엔터로 빠져나감
+                }
             }
             else if (e.Key == Key.Escape)
             {
                 //삭제되지 않은 경우 (텍스트가있는 경우) 편집 모드에서 빠져 나옵니다..
                 if (!this.AttemptToDelete())
+                {
                     this.IsInEditMode = false;
+                }
             }
         }
 
