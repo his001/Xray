@@ -21,6 +21,9 @@ namespace XrayTEXT
         #region Constructor
 
         public TalkBoxLayerCtrl(
+            string fileName,
+            string fullPath,
+            Int32 fileNum,
             TalkBoxLayer txtLayer,
             Image adornedImage,
             Style _txt_layerStyle,

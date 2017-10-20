@@ -26,10 +26,14 @@ namespace XrayTEXT
         public PhotoCollection Photos;
 
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
+
         double scaleX = 1;
         double scaleY = 1;
         TranslateTransform translate = new TranslateTransform();
         DataSet ds;
+
+        public TalkBoxLayer Last_talkBoxLayer = null; // 마지막 선택/작업 되었던 레이어
+        public Image Last_image = null; // 마지막 선택/작업 되었던 이미지
         #endregion ######################### 선언 #########################
 
         #region ######################### MainWin #########################
@@ -62,21 +66,24 @@ namespace XrayTEXT
         #region ####### 마우스 휠 ###########
         void root_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta > 0)
+            if (PhotosListBox.SelectedItem != null)
             {
-                scaleX += 0.1;
-                scaleY += 0.1;
-                Zoom.ScaleX = scaleX;
-                Zoom.ScaleY = scaleY;
-            }
-            else if (e.Delta < 0)
-            {
-                if (Zoom.ScaleX >= 0.1 && Zoom.ScaleY >= 0.1)
+                if (e.Delta > 0)
                 {
-                    scaleX = scaleX - 0.1;
-                    scaleY = scaleY - 0.1;
+                    scaleX += 0.1;
+                    scaleY += 0.1;
                     Zoom.ScaleX = scaleX;
                     Zoom.ScaleY = scaleY;
+                }
+                else if (e.Delta < 0)
+                {
+                    if (Zoom.ScaleX >= 0.1 && Zoom.ScaleY >= 0.1)
+                    {
+                        scaleX = scaleX - 0.1;
+                        scaleY = scaleY - 0.1;
+                        Zoom.ScaleX = scaleX;
+                        Zoom.ScaleY = scaleY;
+                    }
                 }
             }
         }
@@ -89,14 +96,17 @@ namespace XrayTEXT
         /// <param name="e"></param>
         void root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            //마우스의 좌표를 저장한다.
-            prePosition = e.GetPosition(this.root);
-            //마우스가 Grid밖으로 나가도 위치를 알 수 있도록 마우스 이벤트를 캡처한다.
-            this.root.CaptureMouse();
-            if (currentRect == null)
+            if (PhotosListBox.SelectedItem != null)
             {
-                //사각형을 생성한다.
-                CreteRectangle();
+                //마우스의 좌표를 저장한다.
+                prePosition = e.GetPosition(this.root);
+                //마우스가 Grid밖으로 나가도 위치를 알 수 있도록 마우스 이벤트를 캡처한다.
+                this.root.CaptureMouse();
+                if (currentRect == null)
+                {
+                    //사각형을 생성한다.
+                    CreteRectangle();
+                }
             }
         }
 
@@ -107,47 +117,50 @@ namespace XrayTEXT
         /// <param name="e"></param>
         void root_MouseMove(object sender, MouseEventArgs e)
         {
-            //현재 이동한 마우스의 좌표를 얻어온다
-            Point currnetPosition = e.GetPosition(this.root);
-            //좌표를 표시한다.
-            //this.tbPosition.Text = string.Format("마우스 좌표 : [{0},{1}]", currnetPosition.X, currnetPosition.Y);
-            //마우스 왼쪽 버튼이 눌려있으면
-            if (e.MouseDevice.LeftButton == MouseButtonState.Pressed)
+            if (PhotosListBox.SelectedItem != null)
             {
-                if (currentRect != null)
+                //현재 이동한 마우스의 좌표를 얻어온다
+                Point currnetPosition = e.GetPosition(this.root);
+                //좌표를 표시한다.
+                //this.tbPosition.Text = string.Format("마우스 좌표 : [{0},{1}]", currnetPosition.X, currnetPosition.Y);
+                //마우스 왼쪽 버튼이 눌려있으면
+                if (e.MouseDevice.LeftButton == MouseButtonState.Pressed)
                 {
-                    //사각형이 나타날 기준점을 설정한다.
-                    double left = prePosition.X;
-                    double top = prePosition.Y;
-                    //마우스의 위치에 따라 적절히 기준점을 변경한다.
-                    if (prePosition.X > currnetPosition.X)
+                    if (currentRect != null)
                     {
-                        left = currnetPosition.X;
+                        //사각형이 나타날 기준점을 설정한다.
+                        double left = prePosition.X;
+                        double top = prePosition.Y;
+                        //마우스의 위치에 따라 적절히 기준점을 변경한다.
+                        if (prePosition.X > currnetPosition.X)
+                        {
+                            left = currnetPosition.X;
+                        }
+                        if (prePosition.Y > currnetPosition.Y)
+                        {
+                            top = currnetPosition.Y;
+                        }
+                        currentRect.Margin = new Thickness(left, top, 0, 0); //사각형의 위치 기준점(Margin)을 설정한다
+                        currentRect.Width = Math.Abs(prePosition.X - currnetPosition.X); //사각형의 크기를 설정한다. 음수가 나올 수 없으므로 절대값을 취해준다.
+                        currentRect.Height = Math.Abs(prePosition.Y - currnetPosition.Y);
                     }
-                    if (prePosition.Y > currnetPosition.Y)
-                    {
-                        top = currnetPosition.Y;
-                    }
-                    currentRect.Margin = new Thickness(left, top, 0, 0); //사각형의 위치 기준점(Margin)을 설정한다
-                    currentRect.Width = Math.Abs(prePosition.X - currnetPosition.X); //사각형의 크기를 설정한다. 음수가 나올 수 없으므로 절대값을 취해준다.
-                    currentRect.Height = Math.Abs(prePosition.Y - currnetPosition.Y);
                 }
-            }
-            if (e.RightButton == MouseButtonState.Pressed)
-            {
-                Mouse.OverrideCursor = Cursors.Hand;
-                this.root.CaptureMouse();
-                Image image = ViewedPhoto;
-                Point mousePre = e.GetPosition(this.root);
-                double imgX = mousePre.X - (ViewedPhoto.Width / 2);
-                double imgY = mousePre.Y - (ViewedPhoto.Height / 2);
+                if (e.RightButton == MouseButtonState.Pressed)
+                {
+                    Mouse.OverrideCursor = Cursors.Hand;
+                    this.root.CaptureMouse();
+                    Image image = ViewedPhoto;
+                    Point mousePre = e.GetPosition(this.root);
+                    double imgX = mousePre.X - (ViewedPhoto.Width / 2);
+                    double imgY = mousePre.Y - (ViewedPhoto.Height / 2);
 
-                image.SetCurrentValue(LeftProperty, imgX);
-                image.SetCurrentValue(TopProperty, imgY);
-            }
-            else
-            {
-                Mouse.OverrideCursor = null;
+                    image.SetCurrentValue(LeftProperty, imgX);
+                    image.SetCurrentValue(TopProperty, imgY);
+                }
+                else
+                {
+                    Mouse.OverrideCursor = null;
+                }
             }
         }
 
@@ -158,60 +171,66 @@ namespace XrayTEXT
         /// <param name="e"></param>
         void root_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            this.root.ReleaseMouseCapture(); //마우스 캡춰를 제거한다.
-            SetRectangleProperty();
-
-            Image image = ViewedPhoto;
-            if (Math.Abs(image.ActualWidth) > 10 && PhotosListBox.SelectedItem != null)
+            if (PhotosListBox.SelectedItem != null)
             {
-                #region ########## 사각형 안에 _talkLayer 삽입 ##########
-                Point currnetPosition = e.GetPosition(this.root);
-                double left = prePosition.X;
-                double top = prePosition.Y;
+                this.root.ReleaseMouseCapture(); //마우스 캡춰를 제거한다.
+                SetRectangleProperty();
 
-                if (currentRect != null)
+                Image image = ViewedPhoto;
+                if (Math.Abs(image.ActualWidth) > 10 && PhotosListBox.SelectedItem != null)
                 {
-                    if (prePosition.X > currnetPosition.X)
+                    #region ########## 사각형 안에 _talkLayer 삽입 ##########
+                    Point currnetPosition = e.GetPosition(this.root);
+                    double left = prePosition.X;
+                    double top = prePosition.Y;
+
+                    if (currentRect != null)
                     {
-                        left = currnetPosition.X;
+                        if (prePosition.X > currnetPosition.X)
+                        {
+                            left = currnetPosition.X;
+                        }
+                        if (prePosition.Y > currnetPosition.Y)
+                        {
+                            top = currnetPosition.Y;
+                        }
                     }
-                    if (prePosition.Y > currnetPosition.Y)
-                    {
-                        top = currnetPosition.Y;
-                    }
+
+                    Point talkBoxLocationXY = new Point(left, top);
+                    Size _size = new Size(Math.Abs(prePosition.X - currnetPosition.X), Math.Abs(prePosition.Y - currnetPosition.Y)); // 사각형 크기 만큼 텍스트 레이어 크기 지정
+                    image.RenderSize = _size; // 텍스 트 박스 크기
+
+                    Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
+                    Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
+
+                    Int32 fileNum = _LstTalkBoxLayer.Count() + 1;
+                    string fileName = getSaveFile("_" + fileNum.ToString() + ".png");
+                    string fullPath = getSavePath();
+                    string info_fileTxt = getSaveFile(".dat");
+
+                    TalkBoxLayer _talkBoxLayer = TalkBoxLayer.Create(
+                        fileName,
+                        fullPath,
+                        fileNum, 
+                        image,
+                        talkBoxLocationXY,
+                        _cssTalkBox,
+                        _cssTalkBoxEdit);
+                    this.CurTalkBox.Add(_talkBoxLayer);
+
+                    Last_talkBoxLayer = _talkBoxLayer; //마지막 작업 레이어를 저장 하기 위해 ...
+                    Last_image = image; //마지막 작업 이미지를 저장 하기 위해 ...
+                    ExportToPng(fileName, image, top, left);
+
+                    #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
+                    root.Children.Remove(currentRect); // 그려진 네모는 삭제 - obj 삭제 했더니 재사용이 안되 히든 및 null 처리
+                    currentRect.Visibility = Visibility.Hidden;
+                    currentRect = null;
+                    GC.Collect();
+
+                    SetSaveAllTextBox(info_fileTxt);
                 }
-
-                Point talkBoxLocationXY = new Point(left, top);
-                Size _size = new Size(Math.Abs(prePosition.X - currnetPosition.X), Math.Abs(prePosition.Y - currnetPosition.Y)); // 사각형 크기 만큼 텍스트 레이어 크기 지정
-                image.RenderSize = _size; // 텍스 트 박스 크기
-
-                Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
-                Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
-
-                TalkBoxLayer _talkBoxLayer = TalkBoxLayer.Create(
-                    image,
-                    talkBoxLocationXY,
-                    _cssTalkBox,
-                    _cssTalkBoxEdit);
-                this.CurTalkBox.Add(_talkBoxLayer);
-
-                string _savePath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".png", "").Replace("/", "\\");
-                string _savePathDB = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
-                string _savePathTxt = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
-                System.IO.Directory.CreateDirectory(_savePath); // 폴더가 없으면 생성
-                string _savePathFull = _savePath + "\\" + _LstTalkBoxLayer.Count.ToString() + ".png";
-                string _saveFileName = _savePath + "\\" + System.IO.Path.GetFileNameWithoutExtension(_savePathTxt) + ".dat";
-                ExportToPng(_savePathFull, image, top, left);
-
-                #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
-                root.Children.Remove(currentRect); // 그려진 네모는 삭제 - obj 삭제 했더니 재사용이 안되 히든 및 null 처리
-                currentRect.Visibility = Visibility.Hidden;
-                currentRect = null;
-                GC.Collect();
-
-                SetSaveAllTextBox(_saveFileName);
             }
-
         }
 
         public void ExportToPng(string _path, Image _img, double top, double left)
@@ -262,13 +281,38 @@ namespace XrayTEXT
             }
             catch (Exception ex)
             {
-
                 MessageBox.Show(ex.Message);
             }
-
             return rtn;
         }
 
+
+        /// <summary>
+        /// 저장될 파일 경로
+        /// </summary>
+        /// <returns></returns>
+        public string getSavePath() {
+            //string _savePath = System.IO.Path.GetFileNameWithoutExtension(PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\"));
+            string _savePath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
+            if (_savePath.Length > 10) {
+                _savePath = _savePath.Substring(0, _savePath.Length - 4);
+            }
+            System.IO.Directory.CreateDirectory(_savePath); // 폴더가 없으면 생성
+            File.SetAttributes(_savePath, FileAttributes.Hidden); // 폴더 속성을 히든으로 처리
+            return _savePath;
+        }
+
+        /// <summary>
+        /// 저장될 파일명
+        /// </summary>
+        /// <returns></returns>
+        public string getSaveFile(string _extension=".dat")
+        {
+            string _saveFileName = getSavePath() + "\\" + System.IO.Path.GetFileNameWithoutExtension(
+                PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\")
+                ) + _extension;
+            return _saveFileName;
+        }
 
         #region ######## 네모 ################
         private void SetRectangleProperty()
@@ -351,7 +395,34 @@ namespace XrayTEXT
             {
                 SetSaveAllTextBox();
             }
+            else {
+                //MessageBox.Show();
+                //this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) { MessageBox.Show(_txt_layer.Text); });
+            }
         }
+
+        /// <summary>
+        /// 레이어 빠저 나갈때 DB 저장
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void OnSaveDBButtonClick(object sender, RoutedEventArgs e)
+        {
+            string _curFile = PhotosListBox.SelectedItem.ToString();
+            if (Last_talkBoxLayer != null && Last_image != null)
+            {
+                SaveDB(Last_image, Last_talkBoxLayer.TalkBoxLyerPointY, Last_talkBoxLayer.TalkBoxLyerPointX, getSavePath());
+            }
+        }
+
+        #region #### PropertyChangedEventHandler ####
+        public event PropertyChangedEventHandler PropertyChanged;
+        void OnPropertyChanged(string prop)
+        {
+            if (this.PropertyChanged != null)
+                this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
+        #endregion #### PropertyChangedEventHandler ####
 
         public void SetSaveAllTextBox(string _path = "")
         {
@@ -365,13 +436,14 @@ namespace XrayTEXT
                 {
                     sb.Append(
                         PhotosListBox.SelectedItem.ToString()
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerFileName.ToString()
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerFullPath.ToString()
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerFileNum.ToString()
                         + "▤" + _LstTalkBoxLayer[i].Text.ToString()
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerPointX
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerPointY
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerSizeW
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerSizeH
-                        //+ "▤" + CurTalkBox[i].TalkBoxLyerSizeW
-                        //+ "▤" + CurTalkBox[i].TalkBoxLyerSizeH
                         + "▥\r\n");
                     sb2.AppendLine(_LstTalkBoxLayer[i].Text.ToString());
                 }
@@ -417,9 +489,9 @@ namespace XrayTEXT
             string _str = TxtDocTalk.Text;
             if (_path != "")
             {
-                string _loadPath = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace(".png", "").Replace("/", "\\");
-                string _loadPathTxt = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
-                string _loadFileName = _loadPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(_loadPathTxt) + ".dat";
+                //string _loadPath = getSavePath();//System.IO.Path.GetFileNameWithoutExtension(PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\")); //확장자를 제외한 전체 경로
+                //string _loadPathTxt = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
+                string _loadFileName = getSaveFile(".dat");//_loadPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(_loadPathTxt) + ".dat";
                 //
                 if (File.Exists(_loadFileName))
                 {
@@ -435,24 +507,33 @@ namespace XrayTEXT
             string[] _strArr = _str.Split('▥');
             string _filePathWithName = string.Empty;    // 파일 명 추가
             string _innerText = string.Empty;    // 글내용
+            string _TalkBoxLyerFileName = "";
+            string _TalkBoxLyerFullPath = "";
+            string _TalkBoxLyerFileNum = "";
             StringBuilder sb2 = new StringBuilder();
             #region ########## text 바인딩 S ##########
             for (int i = 0; i < _strArr.Length - 1; i++)
             {
                 string[] _strArr2 = _strArr[i].Split('▤');
 
-                _filePathWithName = _strArr2[0];
+                _filePathWithName    = _strArr2[0];
+                _TalkBoxLyerFileName = _strArr2[1];
+                _TalkBoxLyerFullPath = _strArr2[2];
+                _TalkBoxLyerFileNum  = _strArr2[3];
                 _innerText = "";
-                _innerText = _strArr2[1];   // 글내용 (의사소견)
-                sb2.AppendLine(_strArr2[1]);
-                Point talkBoxLocationXY = new Point(Convert.ToDouble(_strArr2[2]), Convert.ToDouble(_strArr2[3]));
+                _innerText = _strArr2[4];   // 글내용 (의사소견)
+                sb2.AppendLine(_strArr2[4]);
+                Point talkBoxLocationXY = new Point(Convert.ToDouble(_strArr2[5]), Convert.ToDouble(_strArr2[6]));
                 Image image = new Image();
                 image = ViewedPhoto;
-                Size _size = new Size(Convert.ToDouble(_strArr2[4]), Convert.ToDouble(_strArr2[5]));
+                Size _size = new Size(Convert.ToDouble(_strArr2[7]), Convert.ToDouble(_strArr2[8]));
                 image.RenderSize = _size;
                 Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
                 Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
                 TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
+                    _TalkBoxLyerFileName,
+                    _TalkBoxLyerFullPath,
+                    Convert.ToInt32(_TalkBoxLyerFileNum),
                     image,
                     talkBoxLocationXY,
                     _cssTalkBox,

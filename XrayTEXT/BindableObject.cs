@@ -19,15 +19,10 @@ namespace XrayTEXT
 	[Serializable]
 	public abstract class BindableObject : INotifyPropertyChanged
 	{
-		#region Data
-
 		private static readonly Dictionary<string, PropertyChangedEventArgs> eventArgCache;
 		private const string ERROR_MSG = "{0} is not a public property of {1}";
 
-		#endregion // Data
-
 		#region Constructors
-
 		static BindableObject()
 		{
 			eventArgCache = new Dictionary<string, PropertyChangedEventArgs>();

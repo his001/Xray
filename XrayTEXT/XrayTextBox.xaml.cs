@@ -1,4 +1,6 @@
 using System;
+using System.Data;
+using System.Data.SqlClient;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -140,8 +142,15 @@ namespace XrayTEXT
 				{
 					this.IsInEditMode = false;
 
-                    MainWin mw = new MainWin();
-                    mw.btnSaveText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));  // 엔터로 빠져나감
+                    //MainWin mw = new MainWin();
+                    //mw.Owner = Window.GetWindow(this);
+                    //mw.btnSaveDBText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));  // 엔터로 빠져나감
+                    //MessageBox.Show(_talkBoxLayer.TalkBoxLyerFileNum + " : _talkBoxLayer.TalkBoxLyerFileNum ");
+                    //mw.btnSaveDBText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));  // 엔터로 빠져나감
+                    // _talkBoxLayer
+                    SelectDB();
+                    SaveDB();
+
                 }
             }
             else if (e.Key == Key.Escape)
@@ -180,5 +189,66 @@ namespace XrayTEXT
         }
 
         #endregion // Private Helpers
+
+        public DataSet SelectDB() {
+            DataSet ds = new DataSet();
+            string rtn = "";
+
+            try
+            {
+                string _text = string.Empty;
+                string constr = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
+                using (SqlConnection conn = new SqlConnection(constr))
+                {
+                    conn.Open();
+                    string sql = "Select * From TBL_TalkBoxLayer";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        var adapt = new SqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            return ds;
+        }
+
+        public string SaveDB()
+        {
+            string rtn = "";
+            try
+            {
+                string _text = string.Empty;
+                string constr = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
+                using (SqlConnection conn = new SqlConnection(constr))
+                {
+                    conn.Open();
+                    string sql = "insert into TBL_TalkBoxLayer(filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg) values ";
+                    sql = sql + "('" + _talkBoxLayer.TalkBoxLyerFileName + "','" + _talkBoxLayer.Text.ToString() 
+                        + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _talkBoxLayer.TalkBoxLyerFileName + "' ),'" 
+                        + _talkBoxLayer.Text + "','" + _talkBoxLayer.TalkBoxLyerPointX + "','" + _talkBoxLayer.TalkBoxLyerPointY 
+                        + "','" + _talkBoxLayer.TalkBoxLyerSizeW + "','" + _talkBoxLayer.TalkBoxLyerSizeH + "',@Fileimg)";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.Add(new SqlParameter("Fileimg", _talkBoxLayer.TalkBoxLyerImg));
+                        int result = cmd.ExecuteNonQuery();
+                        if (result == 1)
+                        {
+                            //MessageBox.Show("Image Added");
+                            //정상
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            return rtn;
+        }
     }
 }

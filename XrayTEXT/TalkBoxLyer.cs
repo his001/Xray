@@ -11,7 +11,7 @@ namespace XrayTEXT
     /// </summary>
     public class TalkBoxLayer : BindableObject
     {
-        #region Data
+        #region ¼±¾ð
 
         private TalkBoxLayerCtrl _TxtBoxL_AddCont;
         private AdornerLayer _TxtBoxLayer;
@@ -23,12 +23,17 @@ namespace XrayTEXT
         private string _pY;
         private string _pW;
         private string _pH;
+        private string _FileName;
+        private string _FullPath;
+        private Int32 _FileNum;
+        //private Image _Talkimg;
 
         #endregion // Data
 
         #region Private Constructor 
 
         private TalkBoxLayer(
+            string fileName, string fullPath, Int32 fileNum,
             Point TalkBoxLocation,
             Image image,
             Style TalkBoxStyle,
@@ -48,7 +53,13 @@ namespace XrayTEXT
                 _horizPercent = TalkBoxLocation.X / imageSize.Width;
                 _vertPercent = TalkBoxLocation.Y / imageSize.Height;
 
-                _TxtBoxL_AddCont = new TalkBoxLayerCtrl(
+                _FileName= fileName;
+                _FullPath= fullPath;
+                _FileNum= fileNum;
+
+
+        _TxtBoxL_AddCont = new TalkBoxLayerCtrl(
+                    fileName, fullPath, fileNum,
                     this,
                     _image,
                     TalkBoxStyle,
@@ -74,9 +85,11 @@ namespace XrayTEXT
         /// <param name="TalkBoxStyle">The Style applied to the TextBlock in the adorner.</param>
         /// <param name="TalkBoxEditorStyle">The Style applied to the TextBox in the adorner.</param>
         /// <returns>The new instance.</returns>
-        public static TalkBoxLayer Create(Image image, Point TalkBoxLocation, Style TalkBoxStyle, Style TalkBoxEditorStyle)
+        public static TalkBoxLayer Create(
+            string fileName, string fullPath, Int32 fileNum,
+            Image image, Point TalkBoxLocation, Style TalkBoxStyle, Style TalkBoxEditorStyle)
         {
-            return new TalkBoxLayer(TalkBoxLocation, image, TalkBoxStyle, TalkBoxEditorStyle);
+            return new TalkBoxLayer(fileName, fullPath, fileNum, TalkBoxLocation, image, TalkBoxStyle, TalkBoxEditorStyle);
         }
         
 
@@ -216,6 +229,32 @@ namespace XrayTEXT
             }
         }
         #endregion ##### AnnoteImageSize W,H #####
+
+
+        public string TalkBoxLyerFileName
+        {
+            get { return _FileName; }
+            set { _FileName = value; }
+        }
+
+        public string TalkBoxLyerFullPath
+        {
+            get { return _FullPath; }
+            set { _FullPath = value; }
+        }
+
+        public Int32 TalkBoxLyerFileNum
+        {
+            get { return _FileNum; }
+            set { _FileNum = value; }
+        }
+
+        public Image TalkBoxLyerImg
+        {
+            get { return _image; }
+            set { _image = value; }
+        }
+        
 
         #region Private Helpers
 
