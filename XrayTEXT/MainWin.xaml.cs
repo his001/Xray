@@ -261,16 +261,24 @@ namespace XrayTEXT
             try
             {
                 string _text = string.Empty;
-                //Save binary data in database
+                byte[] photo = Helpers.GetPhoto(_savePathDB);
+
                 string constr = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xray.mdf;Integrated Security=True;User Instance=True";
                 using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
                     string sql = "insert into TBL_TalkBoxLayer(filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg) values ";
-                    sql = sql + "('" + _savePathDB + "','" + TxtDocTalk.Text.ToString() + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _savePathDB + "' ),'" + _text + "','" + left + "','" + top + "','" + _img.ActualWidth + "','" + _img.ActualHeight + "',@img)";
+                    sql = sql + "('" + _savePathDB + "','" + TxtDocTalk.Text.ToString() 
+                        + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _savePathDB + "' ),'" 
+                        + _text + "','" 
+                        + left + "','" + top + "','" 
+                        + _img.ActualWidth + "','" + _img.ActualHeight 
+                        + "',@img)";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
-                        cmd.Parameters.Add(new SqlParameter("img", _img));
+                        //cmd.Parameters.Add(new SqlParameter("@img", _img));
+                        cmd.Parameters.Add("@img", SqlDbType.Image, photo.Length).Value = photo;
+
                         int result = cmd.ExecuteNonQuery();
                         if (result == 1)
                         {
@@ -286,6 +294,7 @@ namespace XrayTEXT
             return rtn;
         }
 
+        
 
         /// <summary>
         /// 저장될 파일 경로

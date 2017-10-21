@@ -227,6 +227,8 @@ namespace XrayTEXT
                 using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
+                    byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerFileName);
+
                     string sql = "insert into TBL_TalkBoxLayer(filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg) values ";
                     sql = sql + "('" + _talkBoxLayer.TalkBoxLyerFileName + "','" + _talkBoxLayer.Text.ToString() 
                         + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _talkBoxLayer.TalkBoxLyerFileName + "' ),'" 
@@ -234,7 +236,9 @@ namespace XrayTEXT
                         + "','" + _talkBoxLayer.TalkBoxLyerSizeW + "','" + _talkBoxLayer.TalkBoxLyerSizeH + "',@Fileimg)";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
-                        cmd.Parameters.Add(new SqlParameter("Fileimg", _talkBoxLayer.TalkBoxLyerImg));
+                        //cmd.Parameters.Add(new SqlParameter("Fileimg", _talkBoxLayer.TalkBoxLyerImg));
+                        cmd.Parameters.Add("@Fileimg", SqlDbType.Image, photo.Length).Value = photo;
+
                         int result = cmd.ExecuteNonQuery();
                         if (result == 1)
                         {

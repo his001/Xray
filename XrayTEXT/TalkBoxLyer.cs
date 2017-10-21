@@ -231,18 +231,27 @@ namespace XrayTEXT
         #endregion ##### AnnoteImageSize W,H #####
 
 
+        /// <summary>
+        /// 잘라낸 서브 이미지 파일 저장 경로 + 파일명
+        /// </summary>
         public string TalkBoxLyerFileName
         {
             get { return _FileName; }
             set { _FileName = value; }
         }
 
+        /// <summary>
+        /// 잘라낸 서브 이미지 파일 저장 경로
+        /// </summary>
         public string TalkBoxLyerFullPath
         {
             get { return _FullPath; }
             set { _FullPath = value; }
         }
 
+        /// <summary>
+        /// 잘라낸 서브 이미지 파일 번호
+        /// </summary>
         public Int32 TalkBoxLyerFileNum
         {
             get { return _FileNum; }
