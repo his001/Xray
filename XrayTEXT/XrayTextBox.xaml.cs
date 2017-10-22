@@ -148,7 +148,7 @@ namespace XrayTEXT
                     //MessageBox.Show(_talkBoxLayer.TalkBoxLyerFileNum + " : _talkBoxLayer.TalkBoxLyerFileNum ");
                     //mw.btnSaveDBText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));  // 엔터로 빠져나감
                     // _talkBoxLayer
-                    SelectDB();
+                    //SelectDB();
                     SaveDB();
 
                 }
@@ -192,16 +192,16 @@ namespace XrayTEXT
 
         public DataSet SelectDB() {
             DataSet ds = new DataSet();
-            string rtn = "";
 
             try
             {
                 string _text = string.Empty;
-                string constr = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
+                string constr = Helpers.dbCon;
                 using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
-                    string sql = "Select * From TBL_TalkBoxLayer";
+                    string sql = "Select filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg ";
+                    sql = sql + " From TBL_TalkBoxLayer with(nolock) where filename ='"+ _talkBoxLayer.TalkBoxLyerFileName + "' ";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
                         var adapt = new SqlDataAdapter();
@@ -223,7 +223,7 @@ namespace XrayTEXT
             try
             {
                 string _text = string.Empty;
-                string constr = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
+                string constr = Helpers.dbCon;
                 using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
@@ -236,7 +236,6 @@ namespace XrayTEXT
                         + "','" + _talkBoxLayer.TalkBoxLyerSizeW + "','" + _talkBoxLayer.TalkBoxLyerSizeH + "',@Fileimg)";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
-                        //cmd.Parameters.Add(new SqlParameter("Fileimg", _talkBoxLayer.TalkBoxLyerImg));
                         cmd.Parameters.Add("@Fileimg", SqlDbType.Image, photo.Length).Value = photo;
 
                         int result = cmd.ExecuteNonQuery();

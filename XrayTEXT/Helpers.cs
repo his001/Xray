@@ -1,24 +1,28 @@
 using System;
+using System.Collections;
 using System.Globalization;
 using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace XrayTEXT
 {
     delegate void NoArgDelegate();
-
-	public class Helpers /*DummyConverter*/ //: IValueConverter
+    public class Helpers
 	{
-		//public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-		//{
-		//	return value;
-		//}
+        public static string dbCon = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
+        public static string PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
 
-		//public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-		//{
-		//	return value;
-		//}
-
+        /// <summary>
+        /// 폴더에서 사진을 가져와 byte[]로 변환
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         public static byte[] GetPhoto(string filePath)
         {
             FileStream stream = new FileStream(
@@ -32,171 +36,273 @@ namespace XrayTEXT
 
             return photo;
         }
-
-        /*
-         /// <summary>
-    /// Converts an exposure time from a decimal (e.g. 0.0125) into a string (e.g. 1/80)
-    /// </summary>
-    public class ExposureTimeConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-
-        {
-            try
-            {
-                decimal exposure = (decimal)value;
-
-                exposure = Decimal.Round(1 / exposure);
-                return String.Format("1/{0}", exposure.ToString());
-            }
-            catch (NullReferenceException)
-            {
-                return null;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetTypes, object parameter, CultureInfo culture)
-        {
-            string exposure = ((string)value).Substring(2);
-            return (1 / Decimal.Parse(exposure));
-        }
+        
     }
 
-    /// <summary>
-    /// Converts an exposure mode from an enum into a human-readable string (e.g. AperturePriority
-    /// becomes "Aperture Priority")
-    /// </summary>
-    public class ExposureModeConverter : IValueConverter
+    public class TalkBoxLayerCtrl : Adorner
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public TalkBoxLayerControl _control;
+        private Point _location;
+        private ArrayList _logicalChildren;
+
+        #region Constructor
+
+        public TalkBoxLayerCtrl(
+            string fileName,
+            string fullPath,
+            Int32 fileNum,
+            TalkBoxLayer txtLayer,
+            Image adornedImage,
+            Style _txt_layerStyle,
+            Style TalkBoxEditorStyle,
+            Point location
+            //, double width, double height
+            )
+            : base(adornedImage)
         {
-            ExposureMode exposureMode = (ExposureMode)value;
+            _location = location;
 
-            switch (exposureMode)
+            _control = new TalkBoxLayerControl(txtLayer, _txt_layerStyle, TalkBoxEditorStyle);
+            _control.Width = adornedImage.ActualWidth;
+            _control.Height = adornedImage.ActualHeight;
+            base.AddLogicalChild(_control);
+            base.AddVisualChild(_control);
+        }
+
+        #endregion // Constructor
+
+        #region UpdateTextLocation
+
+        public void UpdateTextLocation(Point newLocation)
+        {
+            _location = newLocation;
+            _control.InvalidateArrange();
+        }
+
+        #endregion // UpdateTextLocation
+
+        #region Measure/Arrange
+
+        /// <summary>
+        /// Allows the control to determine how big it wants to be.
+        /// </summary>
+        /// <param name="constraint">A limiting size for the control.</param>
+        protected override Size MeasureOverride(Size constraint)
+        {
+            _control.Measure(constraint);
+            return _control.DesiredSize;
+        }
+
+        /// <summary>
+        /// Positions and sizes the control.
+        /// </summary>
+        /// <param name="finalSize">The actual size of the control.</param>		
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            Rect rect = new Rect(_location, finalSize);
+            _control.Arrange(rect);
+            return finalSize;
+        }
+
+        #endregion // Measure/Arrange
+
+        #region Visual Children
+
+        /// <summary>
+        /// Required for the element to be rendered.
+        /// </summary>
+        protected override int VisualChildrenCount
+        {
+            get { return 1; }
+        }
+
+        /// <summary>
+        /// Required for the element to be rendered.
+        /// </summary>
+        protected override Visual GetVisualChild(int index)
+        {
+            if (index != 0)
+                throw new ArgumentOutOfRangeException("index");
+
+            return _control;
+        }
+
+        #endregion // Visual Children
+
+        #region Logical Children
+
+        /// <summary>
+        /// Required for the displayed element to inherit property values
+        /// from the logical tree, such as FontSize.
+        /// </summary>
+        protected override IEnumerator LogicalChildren
+        {
+            get
             {
-                case ExposureMode.AperturePriority:
-                    return "Aperture Priority";
+                if (_logicalChildren == null)
+                {
+                    _logicalChildren = new ArrayList();
+                    _logicalChildren.Add(_control);
+                }
 
-                case ExposureMode.HighSpeedMode:
-                    return "High Speed Mode";
-
-                case ExposureMode.LandscapeMode:
-                    return "Landscape Mode";
-
-                case ExposureMode.LowSpeedMode:
-                    return "Low Speed Mode";
-
-                case ExposureMode.Manual:
-                    return "Manual";
-
-                case ExposureMode.NormalProgram:
-                    return "Normal";
-
-                case ExposureMode.PortraitMode:
-                    return "Portrait";
-
-                case ExposureMode.ShutterPriority:
-                    return "Shutter Priority";
-
-                default:
-                    return "Unknown";
+                return _logicalChildren.GetEnumerator();
             }
         }
 
-        public object ConvertBack(object value, Type targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
+        #endregion // Logical Children
     }
 
-    /// <summary>
-    /// Converts a lens aperture from a decimal into a human-preferred string (e.g. 1.8 becomes F1.8)
-    /// </summary>
-    public class LensApertureConverter : IValueConverter
+    public class TalkBox : Adorner
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        Thumb topLeft, topRight, bottomLeft, bottomRight;
+        VisualCollection visualChildren;
+
+        public TalkBox(UIElement adornedElement)
+            : base(adornedElement)
         {
-            if (value != null)
+            visualChildren = new VisualCollection(this);
+
+            BuildAdornerCorner(ref topLeft, Cursors.SizeNWSE);
+            BuildAdornerCorner(ref topRight, Cursors.SizeNESW);
+            BuildAdornerCorner(ref bottomLeft, Cursors.SizeNESW);
+            BuildAdornerCorner(ref bottomRight, Cursors.SizeNWSE);
+
+            // Add handlers for resizing.
+            bottomLeft.DragDelta += new DragDeltaEventHandler(HandleBottomLeft);
+            bottomRight.DragDelta += new DragDeltaEventHandler(HandleBottomRight);
+            topLeft.DragDelta += new DragDeltaEventHandler(HandleTopLeft);
+            topRight.DragDelta += new DragDeltaEventHandler(HandleTopRight);
+        }
+
+        // Handler for resizing from the bottom-right.
+        void HandleBottomRight(object sender, DragDeltaEventArgs args)
+        {
+            FrameworkElement adornedElement = this.AdornedElement as FrameworkElement;
+            Thumb hitThumb = sender as Thumb;
+
+            if (adornedElement == null || hitThumb == null) return;
+            FrameworkElement parentElement = adornedElement.Parent as FrameworkElement;
+
+            // Ensure that the Width and Height are properly initialized after the resize.
+            EnforceSize(adornedElement);
+
+            // Change the size by the amount the user drags the mouse, as long as it's larger 
+            // than the width or height of an adorner, respectively.
+            adornedElement.Width = Math.Max(adornedElement.Width + args.HorizontalChange, hitThumb.DesiredSize.Width);
+            adornedElement.Height = Math.Max(args.VerticalChange + adornedElement.Height, hitThumb.DesiredSize.Height);
+        }
+
+        // Handler for resizing from the bottom-left.
+        void HandleBottomLeft(object sender, DragDeltaEventArgs args)
+        {
+            FrameworkElement adornedElement = AdornedElement as FrameworkElement;
+            Thumb hitThumb = sender as Thumb;
+
+            if (adornedElement == null || hitThumb == null) return;
+
+            // Ensure that the Width and Height are properly initialized after the resize.
+            EnforceSize(adornedElement);
+
+            // Change the size by the amount the user drags the mouse, as long as it's larger 
+            // than the width or height of an adorner, respectively.
+            adornedElement.Width = Math.Max(adornedElement.Width - args.HorizontalChange, hitThumb.DesiredSize.Width);
+            adornedElement.Height = Math.Max(args.VerticalChange + adornedElement.Height, hitThumb.DesiredSize.Height);
+        }
+
+        // Handler for resizing from the top-right.
+        void HandleTopRight(object sender, DragDeltaEventArgs args)
+        {
+            FrameworkElement adornedElement = this.AdornedElement as FrameworkElement;
+            Thumb hitThumb = sender as Thumb;
+
+            if (adornedElement == null || hitThumb == null) return;
+            FrameworkElement parentElement = adornedElement.Parent as FrameworkElement;
+
+            // Ensure that the Width and Height are properly initialized after the resize.
+            EnforceSize(adornedElement);
+
+            // Change the size by the amount the user drags the mouse, as long as it's larger 
+            // than the width or height of an adorner, respectively.
+            adornedElement.Width = Math.Max(adornedElement.Width + args.HorizontalChange, hitThumb.DesiredSize.Width);
+            adornedElement.Height = Math.Max(adornedElement.Height - args.VerticalChange, hitThumb.DesiredSize.Height);
+        }
+
+        // Handler for resizing from the top-left.
+        void HandleTopLeft(object sender, DragDeltaEventArgs args)
+        {
+            FrameworkElement adornedElement = AdornedElement as FrameworkElement;
+            Thumb hitThumb = sender as Thumb;
+
+            if (adornedElement == null || hitThumb == null) return;
+
+            // Ensure that the Width and Height are properly initialized after the resize.
+            EnforceSize(adornedElement);
+
+            // Change the size by the amount the user drags the mouse, as long as it's larger 
+            // than the width or height of an adorner, respectively.
+            adornedElement.Width = Math.Max(adornedElement.Width - args.HorizontalChange, hitThumb.DesiredSize.Width);
+            adornedElement.Height = Math.Max(adornedElement.Height - args.VerticalChange, hitThumb.DesiredSize.Height);
+        }
+
+        // Arrange the Adorners.
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            // desiredWidth and desiredHeight are the width and height of the element that's being adorned.  
+            // These will be used to place the ResizingAdorner at the corners of the adorned element.  
+            double desiredWidth = AdornedElement.DesiredSize.Width;
+            double desiredHeight = AdornedElement.DesiredSize.Height;
+            // adornerWidth & adornerHeight are used for placement as well.
+            double adornerWidth = this.DesiredSize.Width;
+            double adornerHeight = this.DesiredSize.Height;
+
+            topLeft.Arrange(new Rect(-adornerWidth / 2, -adornerHeight / 2, adornerWidth, adornerHeight));
+            topRight.Arrange(new Rect(desiredWidth - adornerWidth / 2, -adornerHeight / 2, adornerWidth, adornerHeight));
+            bottomLeft.Arrange(new Rect(-adornerWidth / 2, desiredHeight - adornerHeight / 2, adornerWidth, adornerHeight));
+            bottomRight.Arrange(new Rect(desiredWidth - adornerWidth / 2, desiredHeight - adornerHeight / 2, adornerWidth, adornerHeight));
+
+            // Return the final size.
+            return finalSize;
+        }
+
+        // Helper method to instantiate the corner Thumbs, set the Cursor property, 
+        // set some appearance properties, and add the elements to the visual tree.
+        void BuildAdornerCorner(ref Thumb cornerThumb, Cursor customizedCursor)
+        {
+            if (cornerThumb != null) return;
+
+            cornerThumb = new Thumb();
+
+            // Set some arbitrary visual characteristics.
+            //cornerThumb.BorderBrush = System.Windows.Media.Brushes.White;
+            cornerThumb.Cursor = customizedCursor;
+            cornerThumb.Height = cornerThumb.Width = 10;
+            cornerThumb.Opacity = 0.40;
+            cornerThumb.Background = new SolidColorBrush(Colors.MediumBlue);
+
+            visualChildren.Add(cornerThumb);
+        }
+
+        // This method ensures that the Widths and Heights are initialized.  Sizing to content produces
+        // Width and Height values of Double.NaN.  Because this Adorner explicitly resizes, the Width and Height
+        // need to be set first.  It also sets the maximum size of the adorned element.
+        void EnforceSize(FrameworkElement adornedElement)
+        {
+            if (adornedElement.Width.Equals(Double.NaN))
+                adornedElement.Width = adornedElement.DesiredSize.Width;
+            if (adornedElement.Height.Equals(Double.NaN))
+                adornedElement.Height = adornedElement.DesiredSize.Height;
+
+            FrameworkElement parent = adornedElement.Parent as FrameworkElement;
+            if (parent != null)
             {
-                return String.Format("F{0:##.0}", value);
-            }
-            else
-            {
-                return String.Empty;
+                adornedElement.MaxHeight = parent.ActualHeight;
+                adornedElement.MaxWidth = parent.ActualWidth;
             }
         }
 
-        public object ConvertBack(object value, Type targetTypes, object parameter, CultureInfo culture)
-        {
-            if (!String.IsNullOrEmpty((string)value))
-            {
-                return Decimal.Parse(((string)value).Substring(1));
-            }
-            else
-            {
-                return null;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Converts a focal length from a decimal into a human-preferred string (e.g. 85 becomes 85mm)
-    /// </summary>
-    public class FocalLengthConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value != null)
-            {
-                return String.Format("{0}mm", value);
-            }
-            else
-            {
-                return String.Empty;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
-    }
-
-    /// <summary>
-    /// Converts an x,y size pair into a string value (e.g. 1600x1200)
-    /// </summary>
-    public class PhotoSizeConverter : IMultiValueConverter
-    {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        {
-            if ((values[0] == null) || (values[1] == null))
-            {
-                return String.Empty;
-            }
-            else
-            {
-                return String.Format("{0}x{1}", values[0], values[1]);
-            }
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            if ((string)value == String.Empty)
-            {
-                return new object[2];
-            }
-            else
-            {
-                string[] sSize = new string[2];
-                sSize = ((string)value).Split('x');
-
-                object[] size = new object[2];
-                size[0] = UInt32.Parse(sSize[0]);
-                size[1] = UInt32.Parse(sSize[1]);
-                return size;
-            }
-        }
-    }
-         */
+        // Override the VisualChildrenCount and GetVisualChild properties to interface with 
+        // the adorner's visual collection.
+        protected override int VisualChildrenCount { get { return visualChildren.Count; } }
+        protected override Visual GetVisualChild(int index) { return visualChildren[index]; }
     }
 }

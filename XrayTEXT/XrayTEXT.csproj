@@ -72,7 +72,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="TalkBox.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -97,7 +96,6 @@
   <ItemGroup>
     <Compile Include="BindableObject.cs" />
     <Compile Include="TalkBoxLyer.cs" />
-    <Compile Include="TalkBoxLayerCtrl.cs" />
     <Compile Include="XrayTextBox.xaml.cs">
       <SubType>Code</SubType>
       <DependentUpon>XrayTextBox.xaml</DependentUpon>

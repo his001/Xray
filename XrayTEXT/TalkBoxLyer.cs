@@ -73,8 +73,6 @@ namespace XrayTEXT
 
         #endregion // Private Constructor
 
-
-
         #region Create/Delete
 
         /// <summary>

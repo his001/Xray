@@ -22,7 +22,6 @@ namespace XrayTEXT
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
 
-        protected string _PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
         public PhotoCollection Photos;
 
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
@@ -42,7 +41,7 @@ namespace XrayTEXT
             InitializeComponent();
 
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
-            Photos.Path = _PicFolder;
+            Photos.Path = Helpers.PicFolder;
 
             this.root.MouseLeftButtonDown += new MouseButtonEventHandler(root_MouseLeftButtonDown);
             this.root.MouseLeftButtonUp += new MouseButtonEventHandler(root_MouseLeftButtonUp);
@@ -258,39 +257,38 @@ namespace XrayTEXT
         public string SaveDB(Image _img, string top, string left,string _savePathDB)
         {
             string rtn = "";
-            try
-            {
-                string _text = string.Empty;
-                byte[] photo = Helpers.GetPhoto(_savePathDB);
+            //try
+            //{
+            //    string _text = string.Empty;
+            //    byte[] photo = Helpers.GetPhoto(_savePathDB);
+            //    string constr = Helpers.dbCon;
+            //    using (SqlConnection conn = new SqlConnection(constr))
+            //    {
+            //        conn.Open();
+            //        string sql = "insert into TBL_TalkBoxLayer(filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg) values ";
+            //        sql = sql + "('" + _savePathDB + "','" + TxtDocTalk.Text.ToString() 
+            //            + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _savePathDB + "' ),'" 
+            //            + _text + "','" 
+            //            + left + "','" + top + "','" 
+            //            + _img.ActualWidth + "','" + _img.ActualHeight 
+            //            + "',@img)";
+            //        using (SqlCommand cmd = new SqlCommand(sql, conn))
+            //        {
+            //            //cmd.Parameters.Add(new SqlParameter("@img", _img));
+            //            cmd.Parameters.Add("@img", SqlDbType.Image, photo.Length).Value = photo;
 
-                string constr = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xray.mdf;Integrated Security=True;User Instance=True";
-                using (SqlConnection conn = new SqlConnection(constr))
-                {
-                    conn.Open();
-                    string sql = "insert into TBL_TalkBoxLayer(filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg) values ";
-                    sql = sql + "('" + _savePathDB + "','" + TxtDocTalk.Text.ToString() 
-                        + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _savePathDB + "' ),'" 
-                        + _text + "','" 
-                        + left + "','" + top + "','" 
-                        + _img.ActualWidth + "','" + _img.ActualHeight 
-                        + "',@img)";
-                    using (SqlCommand cmd = new SqlCommand(sql, conn))
-                    {
-                        //cmd.Parameters.Add(new SqlParameter("@img", _img));
-                        cmd.Parameters.Add("@img", SqlDbType.Image, photo.Length).Value = photo;
-
-                        int result = cmd.ExecuteNonQuery();
-                        if (result == 1)
-                        {
-                            //MessageBox.Show("Image Added");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            //            int result = cmd.ExecuteNonQuery();
+            //            if (result == 1)
+            //            {
+            //                //MessageBox.Show("Image Added");
+            //            }
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message);
+            //}
             return rtn;
         }
 
@@ -498,10 +496,7 @@ namespace XrayTEXT
             string _str = TxtDocTalk.Text;
             if (_path != "")
             {
-                //string _loadPath = getSavePath();//System.IO.Path.GetFileNameWithoutExtension(PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\")); //확장자를 제외한 전체 경로
-                //string _loadPathTxt = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
-                string _loadFileName = getSaveFile(".dat");//_loadPath + "\\" + System.IO.Path.GetFileNameWithoutExtension(_loadPathTxt) + ".dat";
-                //
+                string _loadFileName = getSaveFile(".dat");
                 if (File.Exists(_loadFileName))
                 {
                     _str = File.ReadAllText(_path);
@@ -608,7 +603,7 @@ namespace XrayTEXT
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
-            Photos.Path = _PicFolder; //Environment.CurrentDirectory + "\\images";
+            Photos.Path = Helpers.PicFolder;
         }
 
         #endregion ######################### 좌측 트리에서 사진 #########################

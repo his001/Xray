@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ViewModels="clr-namespace:XrayTEXT.ViewModels"
     xmlns:er="clr-namespace:XrayTEXT" 
-    Title="Image Annotation Demo" Width="1200" Height="650"
+    Title="Xray Marker" Width="1200" Height="650"
     FontSize="14"  WindowStartupLocation="CenterScreen"
     WindowState="Maximized" 
     Loaded="OnLoaded"
