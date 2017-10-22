@@ -76,7 +76,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="P_Thumnail.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -95,7 +94,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BindableObject.cs" />
-    <Compile Include="TalkBoxLyer.cs" />
     <Compile Include="XrayTextBox.xaml.cs">
       <SubType>Code</SubType>
       <DependentUpon>XrayTextBox.xaml</DependentUpon>
@@ -121,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\" />
+    <Folder Include="System\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

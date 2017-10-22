@@ -200,8 +200,8 @@ namespace XrayTEXT
                 using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
-                    string sql = "Select filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg ";
-                    sql = sql + " From TBL_TalkBoxLayer with(nolock) where filename ='"+ _talkBoxLayer.TalkBoxLyerFileName + "' ";
+                    string sql = "Select idx, KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg, regdate ";
+                    sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='"+ _talkBoxLayer.TalkBoxLyerkeyFilename + "' ";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
                         var adapt = new SqlDataAdapter();
@@ -227,12 +227,16 @@ namespace XrayTEXT
                 using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
-                    byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerFileName);
+                    byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerkeyFilename);
 
-                    string sql = "insert into TBL_TalkBoxLayer(filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg) values ";
-                    sql = sql + "('" + _talkBoxLayer.TalkBoxLyerFileName + "','" + _talkBoxLayer.Text.ToString() 
-                        + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _talkBoxLayer.TalkBoxLyerFileName + "' ),'" 
-                        + _talkBoxLayer.Text + "','" + _talkBoxLayer.TalkBoxLyerPointX + "','" + _talkBoxLayer.TalkBoxLyerPointY 
+                    string sql = "insert into TBL_TalkBoxLayer(KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg) values ";
+                    sql = sql + "('" + _talkBoxLayer.TalkBoxLyerkeyFilename + "','"
+                        + _talkBoxLayer.TalkBoxLyerkeyFilename + "','"
+                        + _talkBoxLayer.TalkBoxLyercutfileName + "','"
+                        + _talkBoxLayer.Text.ToString() 
+                        + "',(select count(*)+1 from TBL_TalkBoxLayer with(nolock) where KeyFilename='" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' ),'" 
+                        + _talkBoxLayer.Text + "','" 
+                        + _talkBoxLayer.TalkBoxLyerPointX + "','" + _talkBoxLayer.TalkBoxLyerPointY 
                         + "','" + _talkBoxLayer.TalkBoxLyerSizeW + "','" + _talkBoxLayer.TalkBoxLyerSizeH + "',@Fileimg)";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {

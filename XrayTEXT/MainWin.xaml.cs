@@ -203,12 +203,14 @@ namespace XrayTEXT
                     Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
 
                     Int32 fileNum = _LstTalkBoxLayer.Count() + 1;
-                    string fileName = getSaveFile("_" + fileNum.ToString() + ".png");
+                    string keyFilename = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
+                    string cutfileName = getSaveFile("_" + fileNum.ToString() + ".png");
                     string fullPath = getSavePath();
                     string info_fileTxt = getSaveFile(".dat");
 
                     TalkBoxLayer _talkBoxLayer = TalkBoxLayer.Create(
-                        fileName,
+                        keyFilename,
+                        cutfileName,
                         fullPath,
                         fileNum, 
                         image,
@@ -219,7 +221,7 @@ namespace XrayTEXT
 
                     Last_talkBoxLayer = _talkBoxLayer; //마지막 작업 레이어를 저장 하기 위해 ...
                     Last_image = image; //마지막 작업 이미지를 저장 하기 위해 ...
-                    ExportToPng(fileName, image, top, left);
+                    ExportToPng(cutfileName, image, top, left);
 
                     #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
                     root.Children.Remove(currentRect); // 그려진 네모는 삭제 - obj 삭제 했더니 재사용이 안되 히든 및 null 처리
@@ -265,9 +267,9 @@ namespace XrayTEXT
             //    using (SqlConnection conn = new SqlConnection(constr))
             //    {
             //        conn.Open();
-            //        string sql = "insert into TBL_TalkBoxLayer(filename, file_title, numb, text, PointX, PointY, SizeW, SizeH, Fileimg) values ";
+            //        string sql = "insert into TBL_TalkBoxLayer(KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg) values ";
             //        sql = sql + "('" + _savePathDB + "','" + TxtDocTalk.Text.ToString() 
-            //            + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where filename='" + _savePathDB + "' ),'" 
+            //            + "',(select count(*) from TBL_TalkBoxLayer with(nolock) where KeyFilename='" + _savePathDB + "' ),'" 
             //            + _text + "','" 
             //            + left + "','" + top + "','" 
             //            + _img.ActualWidth + "','" + _img.ActualHeight 
@@ -415,7 +417,7 @@ namespace XrayTEXT
         /// <param name="e"></param>
         void OnSaveDBButtonClick(object sender, RoutedEventArgs e)
         {
-            string _curFile = PhotosListBox.SelectedItem.ToString();
+            string _curFile = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
             if (Last_talkBoxLayer != null && Last_image != null)
             {
                 SaveDB(Last_image, Last_talkBoxLayer.TalkBoxLyerPointY, Last_talkBoxLayer.TalkBoxLyerPointX, getSavePath());
@@ -443,7 +445,7 @@ namespace XrayTEXT
                 {
                     sb.Append(
                         PhotosListBox.SelectedItem.ToString()
-                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerFileName.ToString()
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerkeyFilename.ToString()
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerFullPath.ToString()
                         + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerFileNum.ToString()
                         + "▤" + _LstTalkBoxLayer[i].Text.ToString()
@@ -485,8 +487,108 @@ namespace XrayTEXT
             }
             #endregion #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####
 
-            LoadTxtBox();
+            //LoadTxtBox();
+            LoadTxtBoxDB();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void LoadTxtBoxDB()
+        {
+            DataSet ds = new DataSet();
+            string _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
+            try
+            {
+                string _text = string.Empty;
+                string constr = Helpers.dbCon;
+                using (SqlConnection conn = new SqlConnection(constr))
+                {
+                    conn.Open();
+                    string sql = "Select KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg ";
+                    sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='" + _key + "' ";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        var adapt = new SqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }
+
+            #region ########## text 바인딩 S ##########
+            string _KeyFilename = string.Empty;    // 파일 명 추가
+            string _innerMemo = string.Empty;    // 글내용
+            string _TalkBoxLyercutfileName = "";
+            string _TalkBoxLyerCutFullPath = "";
+            string _TalkBoxLyerFileNum = "";
+            string _DocTalkShow = "";
+            StringBuilder sb2 = new StringBuilder();
+            
+            for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+            {
+                if (i == 0) {
+                    _DocTalkShow = ds.Tables[0].Rows[i]["FileTitle"].ToString();
+                }
+                //filename, FileTitle, numb, text, PointX, PointY, SizeW, SizeH, Fileimg
+                _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
+                _TalkBoxLyercutfileName = ds.Tables[0].Rows[i]["FileTitle"].ToString();
+                _TalkBoxLyerCutFullPath = ds.Tables[0].Rows[i]["FileTitle"].ToString();
+                _TalkBoxLyerFileNum = ds.Tables[0].Rows[i]["numb"].ToString();
+                _innerMemo = "";
+                _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
+                sb2.AppendLine(ds.Tables[0].Rows[i]["FileTitle"].ToString());
+
+                Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
+                Image image = new Image();
+                image = ViewedPhoto;
+                //image = ds.Tables[0].Rows[i]["Fileimg"];
+                Size _size = new Size(Convert.ToDouble(ds.Tables[0].Rows[i]["SizeW"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["SizeH"].ToString()));
+                //image.RenderSize = _size;
+                Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
+                Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
+                TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
+                    _KeyFilename,
+                    _TalkBoxLyercutfileName,
+                    _TalkBoxLyerCutFullPath,
+                    Convert.ToInt32(_TalkBoxLyerFileNum),
+                    image,
+                    talkBoxLocationXY,
+                    _cssTalkBox,
+                    _cssTalkBoxEdit
+                    );
+                this.CurTalkBox.Add(talkBoxLayer);
+                talkBoxLayer.Text = _innerMemo.ToString();
+
+            }
+            TxtDocTalkShow.Text = sb2.ToString();
+            #endregion ########## text 바인딩 E ##########
+        }
+
+        //public BitmapImage ImageFromBytearray(byte[] imageData)
+        //{
+
+        //    if (imageData == null)
+        //        return null;
+        //    MemoryStream strm = new MemoryStream();
+        //    strm.Write(imageData, 0, imageData.Length);
+        //    strm.Position = 0;
+        //    Image img = Image.FromStream(strm);
+
+        //    BitmapImage bitmapImage = new BitmapImage();
+        //    bitmapImage.BeginInit();
+        //    MemoryStream memoryStream = new MemoryStream();
+        //    img.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Bmp);
+        //    memoryStream.Seek(0, SeekOrigin.Begin);
+        //    bitmapImage.StreamSource = memoryStream;
+        //    bitmapImage.EndInit();
+
+        //    return bitmapImage;
+        //}
 
         /// <summary>
         /// 소견 data Load
@@ -502,7 +604,7 @@ namespace XrayTEXT
                     _str = File.ReadAllText(_path);
                 }
             }
-
+            #region ########## text 바인딩 S ##########
             if (_str.Trim().Length == 0)
             {
                 //MessageBox.Show("소견이 없습니다.");
@@ -510,22 +612,23 @@ namespace XrayTEXT
             }
             string[] _strArr = _str.Split('▥');
             string _filePathWithName = string.Empty;    // 파일 명 추가
-            string _innerText = string.Empty;    // 글내용
-            string _TalkBoxLyerFileName = "";
-            string _TalkBoxLyerFullPath = "";
+            string _innerMemo = string.Empty;    // 글내용
+            string _TalkBoxLyerKeyFilename = "";
+            string _TalkBoxLyercutfileName = "";
+            string _TalkBoxLyerCutFullPath = "";
             string _TalkBoxLyerFileNum = "";
             StringBuilder sb2 = new StringBuilder();
-            #region ########## text 바인딩 S ##########
+            
             for (int i = 0; i < _strArr.Length - 1; i++)
             {
                 string[] _strArr2 = _strArr[i].Split('▤');
 
                 _filePathWithName    = _strArr2[0];
-                _TalkBoxLyerFileName = _strArr2[1];
-                _TalkBoxLyerFullPath = _strArr2[2];
+                _TalkBoxLyercutfileName = _strArr2[1];
+                _TalkBoxLyerCutFullPath = _strArr2[2];
                 _TalkBoxLyerFileNum  = _strArr2[3];
-                _innerText = "";
-                _innerText = _strArr2[4];   // 글내용 (의사소견)
+                _innerMemo = "";
+                _innerMemo = _strArr2[4];   // 글내용 (의사소견)
                 sb2.AppendLine(_strArr2[4]);
                 Point talkBoxLocationXY = new Point(Convert.ToDouble(_strArr2[5]), Convert.ToDouble(_strArr2[6]));
                 Image image = new Image();
@@ -535,8 +638,9 @@ namespace XrayTEXT
                 Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
                 Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
                 TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
-                    _TalkBoxLyerFileName,
-                    _TalkBoxLyerFullPath,
+                    _TalkBoxLyerKeyFilename,
+                    _TalkBoxLyercutfileName,
+                    _TalkBoxLyerCutFullPath,
                     Convert.ToInt32(_TalkBoxLyerFileNum),
                     image,
                     talkBoxLocationXY,
@@ -544,12 +648,11 @@ namespace XrayTEXT
                     _cssTalkBoxEdit
                     );
                 this.CurTalkBox.Add(talkBoxLayer);
-                talkBoxLayer.Text = _innerText.ToString();
+                talkBoxLayer.Text = _innerMemo.ToString();
 
             }
-            #endregion ########## text 바인딩 E ##########
-
             TxtDocTalkShow.Text = sb2.ToString();
+            #endregion ########## text 바인딩 E ##########
         }
 
 
@@ -583,11 +686,13 @@ namespace XrayTEXT
             ViewedPhoto.Source = imageSource;
             this.SizeToContent = SizeToContent.WidthAndHeight;
             //Grid.SetZIndex(this.ViewedPhoto, 99999);
+
+            btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 기존 저장된 정보가 있다면 로딩
         }
 
         private void deletePhoto(object sender, RoutedEventArgs e)
         {
-            string _delFile = PhotosListBox.SelectedItem.ToString();
+            string _delFile = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("/", "\\");
             MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("삭제 하시겠습니까?", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
