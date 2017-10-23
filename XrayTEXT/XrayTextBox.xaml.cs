@@ -151,7 +151,12 @@ namespace XrayTEXT
                 {
                     this.IsInEditMode = false;
                     //MainWin.SetSaveAllTextBox();
-                    if (_talkBoxLayer.TalkBoxLyerCutFullPath != null) { SaveDB(); }
+                    if (_talkBoxLayer.TalkBoxLyerCutFullPath != null) {
+                        if (Helpers.SaveDB(_talkBoxLayer) == "success")
+                        {
+                            // 저장 성공
+                        }
+                    }
                 }
             );
         }
@@ -239,56 +244,6 @@ namespace XrayTEXT
         //    return ds;
         //}
 
-        /// <summary>
-        /// 현재 작성중인 소견 레이어 정보를 DB에저장 합니다.
-        /// </summary>
-        /// <returns></returns>
-        public string SaveDB()
-        {
-            string rtn = "";
-            try
-            {
-                string _text = string.Empty;
-                string constr = Helpers.dbCon;
-                using (SqlConnection conn = new SqlConnection(constr))
-                {
-                    conn.Open();
-                    byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerkeyFilename);
 
-                    string sql = "insert into TBL_TalkBoxLayer(KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg) values ";
-                    sql = sql + "('";
-                    sql = sql + _talkBoxLayer.TalkBoxLyerkeyFilename + "','";
-                    sql = sql + _talkBoxLayer.TalkBoxLyercutfileName + "','";
-                    sql = sql + _talkBoxLayer.TalkBoxLyerCutFullPath + "','";
-                    sql = sql + _talkBoxLayer.TalkBoxLyerFileTitle + "',";
-                    sql = sql + _talkBoxLayer.TalkBoxLyerFileNum.ToString() + ",'";
-                    sql = sql + _talkBoxLayer.Text + "','";
-                    sql = sql + _talkBoxLayer.TalkBoxLyerPointX + "','";
-                    sql = sql + _talkBoxLayer.TalkBoxLyerPointY;
-                    sql = sql + "','" + _talkBoxLayer.TalkBoxLyerSizeW;
-                    sql = sql + "','" + _talkBoxLayer.TalkBoxLyerSizeH;
-                    sql = sql + "',@Fileimg); update TBL_TalkBoxLayer set FileTitle ='"+ _talkBoxLayer.TalkBoxLyerFileTitle + "' where KeyFilename = '"+ _talkBoxLayer.TalkBoxLyerkeyFilename + "'; ";
-
-
-                    using (SqlCommand cmd = new SqlCommand(sql, conn))
-                    {
-                        cmd.Parameters.Add("@Fileimg", SqlDbType.Image, photo.Length).Value = photo;
-
-                        int result = cmd.ExecuteNonQuery();
-                        if (result == 1)
-                        {
-                            //MessageBox.Show("Image Added");
-                            //정상
-                        }
-                    }
-                    conn.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            return rtn;
-        }
     }
 }
