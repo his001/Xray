@@ -51,15 +51,16 @@ namespace XrayTEXT
 
         public TalkBoxLayerCtrl(
             string keyFilename,
+            string fileTitle,
             string cutfileName,
-            string fullPath,
+            string cutfullPath,
             Int32 fileNum,
+            string memo,
             TalkBoxLayer txtLayer,
             Image adornedImage,
             Style _txt_layerStyle,
             Style TalkBoxEditorStyle,
             Point location
-            //, double width, double height
             )
             : base(adornedImage)
         {
@@ -68,6 +69,14 @@ namespace XrayTEXT
             _control = new TalkBoxLayerControl(txtLayer, _txt_layerStyle, TalkBoxEditorStyle);
             _control.Width = adornedImage.ActualWidth;
             _control.Height = adornedImage.ActualHeight;
+            //
+            //_control.RenderSize = 
+            //keyFilename,
+            //string cutfileName,
+            //string cutfullPath,
+            //Int32 fileNum,
+            //string memo
+
             base.AddLogicalChild(_control);
             base.AddVisualChild(_control);
         }
@@ -164,23 +173,22 @@ namespace XrayTEXT
         private double _horizPercent, _vertPercent;
         private Image _image;
         private bool _isDeleted;
-        private string _text;
+        private string _memo;
         private string _pX;
         private string _pY;
         private string _pW;
         private string _pH;
         private string _KeyFilename;
+        private string _fileTitle;
         private string _cutfileName;
-        private string _FullPath;
+        private string _cutfullPath;
         private Int32 _FileNum;
-        //private Image _Talkimg;
-
         #endregion // Data
 
         #region Private Constructor 
 
         private TalkBoxLayer(
-            string keyFilename, string cutfileName, string fullPath, Int32 fileNum,
+            string keyFilename, string fileTitle, string cutfileName, string cutfullPath, Int32 fileNum, string memo,
             Point TalkBoxLocation,
             Image image,
             Style TalkBoxStyle,
@@ -196,19 +204,22 @@ namespace XrayTEXT
 
                 Size imageSize = _image.RenderSize;
                 if (imageSize.Height == 0 || imageSize.Width == 0)
-                    throw new ArgumentException("image has invalid dimensions");
+                    throw new ArgumentException("이미지의 크기가 잘못되었습니다.");
 
                 _horizPercent = TalkBoxLocation.X / imageSize.Width;
                 _vertPercent = TalkBoxLocation.Y / imageSize.Height;
 
                 _KeyFilename = keyFilename;
+                _fileTitle = fileTitle;
                 _cutfileName = cutfileName;
-                _FullPath = fullPath;
+                _cutfullPath = cutfullPath;
                 _FileNum = fileNum;
-
+                _memo = memo;
+                _pH = image.ActualHeight.ToString();
+                _pW = image.ActualWidth.ToString();
 
                 _TxtBoxL_AddCont = new TalkBoxLayerCtrl(
-                            keyFilename, cutfileName, fullPath, fileNum,
+                            keyFilename, _fileTitle, cutfileName, cutfullPath, fileNum, memo,
                             this,
                             _image,
                             TalkBoxStyle,
@@ -222,7 +233,7 @@ namespace XrayTEXT
             }
         }
 
-        #endregion // Private Constructor
+        #endregion
 
         #region Create/Delete
 
@@ -235,11 +246,11 @@ namespace XrayTEXT
         /// <param name="TalkBoxEditorStyle">The Style applied to the TextBox in the adorner.</param>
         /// <returns>The new instance.</returns>
         public static TalkBoxLayer Create(
-            string keyFilename,
-            string cutfileName, string fullPath, Int32 fileNum,
+            string keyFilename, string fileTitle,
+            string cutfileName, string cutfullPath, Int32 fileNum, string memo,
             Image image, Point TalkBoxLocation, Style TalkBoxStyle, Style TalkBoxEditorStyle)
         {
-            return new TalkBoxLayer(keyFilename, cutfileName, fullPath, fileNum, TalkBoxLocation, image, TalkBoxStyle, TalkBoxEditorStyle);
+            return new TalkBoxLayer(keyFilename, fileTitle, cutfileName, cutfullPath, fileNum, memo, TalkBoxLocation, image, TalkBoxStyle, TalkBoxEditorStyle);
         }
 
 
@@ -264,7 +275,7 @@ namespace XrayTEXT
             private set
             {
                 if (!value)
-                    throw new InvalidOperationException("Cannot set IsDeleted to false.");
+                    throw new InvalidOperationException("삭제에 실패하였습니다.");
 
                 if (_isDeleted)
                     return;
@@ -292,19 +303,22 @@ namespace XrayTEXT
         #region Text
 
         /// <summary>
-        /// Gets/sets the annotation's text.
+        /// Gets/sets the annotation's Text.
         /// </summary>
         public string Text
         {
-            get { return _text; }
+            get { return _memo; }
             set
             {
-                if (_text == value)
+                if (_memo == value)
                     return;
-
-                _text = value;
-
+                _memo = value;
                 base.RaisePropertyChanged("Text");
+
+                //if (_text == value)
+                //    return;
+                //_text = value;
+                //base.RaisePropertyChanged("Text");
             }
         }
 
@@ -315,7 +329,6 @@ namespace XrayTEXT
         {
             get
             {
-                //return _pX;
                 return (_image.RenderSize.Width * _horizPercent).ToString();
             }
             set
@@ -325,19 +338,12 @@ namespace XrayTEXT
 
                 _pX = value;
             }
-
-            //double _x = _image.RenderSize.Width * _horizPercent;
-            //return _x.ToString();
         }
 
         public string TalkBoxLyerPointY
         {
-            //double y = _image.RenderSize.Height * _vertPercent;
-            //return y.ToString();
-
             get
             {
-                //return _pY;
                 return (_image.RenderSize.Height * _vertPercent).ToString();
             }
             set
@@ -355,7 +361,8 @@ namespace XrayTEXT
         {
             get
             {
-                return (_TxtBoxL_AddCont.RenderSize.Width).ToString();
+                //return (_TxtBoxL_AddCont.RenderSize.Width).ToString();
+                return _pW;
             }
             set
             {
@@ -370,7 +377,7 @@ namespace XrayTEXT
         {
             get
             {
-                return (_TxtBoxL_AddCont.RenderSize.Height).ToString();
+                return _pH; // (_TxtBoxL_AddCont.RenderSize.Height).ToString();
             }
             set
             {
@@ -405,10 +412,16 @@ namespace XrayTEXT
         /// <summary>
         /// 잘라낸 서브 이미지 파일 저장 경로
         /// </summary>
-        public string TalkBoxLyerFullPath
+        public string TalkBoxLyerCutFullPath
         {
-            get { return _FullPath; }
-            set { _FullPath = value; }
+            get { return _cutfullPath; }
+            set { _cutfullPath = value; }
+        }
+
+        public string TalkBoxLyerFileTitle
+        {
+            get { return _fileTitle; }
+            set { _fileTitle = value; }
         }
 
         /// <summary>
@@ -459,7 +472,7 @@ namespace XrayTEXT
         //    //        Image image,
         //    //        Style TalkBoxStyle,
         //    //        Style TalkBoxEditorStyle);
-        //    string _strKV = MainWin.GetWindow.//.getTxtDocTalk();
+        //    string _strKV = MainWin.GetWindow.//.getTxtFileTitle();
         //}
 
         void TalkBoxLyer_Insert()
@@ -470,15 +483,10 @@ namespace XrayTEXT
             _TxtBoxLayer = AdornerLayer.GetAdornerLayer(_image);
             if (_TxtBoxLayer == null)
             {
-                //_TxtBoxLayer.Add(_TxtBoxL_AddCont);
-                //_TxtBoxLayer.Add(null);
-
-
-                throw new ArgumentException("image does not have have an adorner layer.");
+                throw new ArgumentException("텍스트 레이어가 없습니다.");
             }
             else
             {
-                // Add the adorner to the Image's adorner layer.
                 _TxtBoxLayer.Add(_TxtBoxL_AddCont);
             }
         }
@@ -673,9 +681,6 @@ namespace XrayTEXT
             catch (NotSupportedException)
             {
             }
-
-            //_metadata = new ExifMetadata(_source);
-            //_metadata = null;
         }
 
         public override string ToString()
@@ -699,9 +704,7 @@ namespace XrayTEXT
     public class PhotoCollection : ObservableCollection<Photo>
     {
         public PhotoCollection() { }
-
         public PhotoCollection(string path) : this(new DirectoryInfo(path)) { }
-
         public PhotoCollection(DirectoryInfo directory)
         {
             _directory = directory;
@@ -734,7 +737,6 @@ namespace XrayTEXT
             try
             {
                 foreach (FileInfo f in
-                    //_directory.GetFiles("*.jpg")
                     _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png"))
                     )
                 {
@@ -743,10 +745,9 @@ namespace XrayTEXT
             }
             catch (DirectoryNotFoundException)
             {
-                System.Windows.MessageBox.Show("No Such Directory");
+                System.Windows.MessageBox.Show("폴더가 없습니다.");
             }
         }
-
         DirectoryInfo _directory;
     }
 

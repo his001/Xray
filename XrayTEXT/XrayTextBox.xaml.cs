@@ -93,13 +93,42 @@ namespace XrayTEXT
 
         #region Event Handling Methods
 
-        // Invoked by the MenuItem in the ContextMenu.
+        // 소견 텍스트 삭제시
         void OnDeleteAnnotation(object sender, RoutedEventArgs e)
         {
+            string constr = Helpers.dbCon;
+            using (SqlConnection conn = new SqlConnection(constr))
+            {
+                conn.Open();
+                string sql = "DELETE FROM TBL_TalkBoxLayer WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' and  CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "' ;";
+                // 삭제 후 numb(index) 재 배열 
+                sql = sql + " UPDATE TBL_TalkBoxLayer SET numb = B.RowNum ";
+                sql = sql + " FROM TBL_TalkBoxLayer A JOIN ";
+                sql = sql + " ( ";
+                sql = sql + "  SELECT t.idx , ROW_NUMBER() OVER (ORDER BY t.regdate) AS RowNum ";
+                sql = sql + "  FROM TBL_TalkBoxLayer t with(nolock) ";
+                sql = sql + "  WHERE t.KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' ";
+                sql = sql + " ) AS B on A.idx = B.idx ";
+                sql = sql + " WHERE A.KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "'";
+
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    int result = cmd.ExecuteNonQuery();
+                    if (result == 1)
+                    {
+                        //MessageBox.Show("Image Added");
+                        //정상
+                    }
+                }
+                conn.Close();
+            }
             this.Delete();
+            //LoadTxtBoxDB();
+            MainWin mwin = new MainWin();
+            mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 기존 저장된 정보가 있다면 로딩
         }
 
-        // Invoked 편집 모드 시작 시
+        // 소견 텍스트 편집 모드 시작 시
         void OnTextBoxLoaded(object sender, RoutedEventArgs e)
         {
             TextBox txt = sender as TextBox;
@@ -112,7 +141,7 @@ namespace XrayTEXT
                 txt.SelectionStart = charIdx;
         }
 
-        // Invoked 편집 모드 종료 시
+        // 소견 텍스트 편집 모드 종료 시
         void OnTextBoxLostFocus(object sender, RoutedEventArgs e)
         {
             // 초점 변경이 처음 완료 될 수 있도록 잠시 지연.			
@@ -122,11 +151,12 @@ namespace XrayTEXT
                 {
                     this.IsInEditMode = false;
                     //MainWin.SetSaveAllTextBox();
+                    if (_talkBoxLayer.TalkBoxLyerCutFullPath != null) { SaveDB(); }
                 }
             );
         }
 
-        // 사용자가 주석을 편집 할 때 
+        // 소견 텍스트 편집 할 때 
         void OnTextBoxKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -141,16 +171,7 @@ namespace XrayTEXT
 				else
 				{
 					this.IsInEditMode = false;
-
-                    //MainWin mw = new MainWin();
-                    //mw.Owner = Window.GetWindow(this);
-                    //mw.btnSaveDBText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));  // 엔터로 빠져나감
-                    //MessageBox.Show(_talkBoxLayer.TalkBoxLyerFileNum + " : _talkBoxLayer.TalkBoxLyerFileNum ");
-                    //mw.btnSaveDBText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));  // 엔터로 빠져나감
-                    // _talkBoxLayer
-                    //SelectDB();
-                    SaveDB();
-
+                    //SaveDB();
                 }
             }
             else if (e.Key == Key.Escape)
@@ -159,19 +180,18 @@ namespace XrayTEXT
                 if (!this.AttemptToDelete())
                 {
                     this.IsInEditMode = false;
+                    //SaveDB();
                 }
             }
         }
 
-        // Invoked 사용자가 디스플레이 모드에서 주석을 클릭할때
+        // 사용자가 디스플레이 모드에서 주석을 클릭할때
         void OnTextBlockMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             this.IsInEditMode = true;
         }
 
         #endregion // Event Handling Methods
-
-        #region Private Helpers
 
         bool AttemptToDelete()
         {
@@ -188,35 +208,41 @@ namespace XrayTEXT
 			_talkBoxLayer.Delete();
         }
 
-        #endregion // Private Helpers
+        ///// <summary>
+        ///// 현재 작성중인 소견 레이어 정보를 DB에서 불러옵니다.
+        ///// </summary>
+        ///// <returns></returns>
+        //public DataSet SelectDB() {
+        //    DataSet ds = new DataSet();
 
-        public DataSet SelectDB() {
-            DataSet ds = new DataSet();
+        //    try
+        //    {
+        //        string _text = string.Empty;
+        //        string constr = Helpers.dbCon;
+        //        using (SqlConnection conn = new SqlConnection(constr))
+        //        {
+        //            conn.Open();
+        //            string sql = "Select idx, KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg, regdate ";
+        //            sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='"+ _talkBoxLayer.TalkBoxLyerkeyFilename + "' ";
+        //            using (SqlCommand cmd = new SqlCommand(sql, conn))
+        //            {
+        //                var adapt = new SqlDataAdapter();
+        //                adapt.SelectCommand = cmd;
+        //                adapt.Fill(ds);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //    }
+        //    return ds;
+        //}
 
-            try
-            {
-                string _text = string.Empty;
-                string constr = Helpers.dbCon;
-                using (SqlConnection conn = new SqlConnection(constr))
-                {
-                    conn.Open();
-                    string sql = "Select idx, KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg, regdate ";
-                    sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='"+ _talkBoxLayer.TalkBoxLyerkeyFilename + "' ";
-                    using (SqlCommand cmd = new SqlCommand(sql, conn))
-                    {
-                        var adapt = new SqlDataAdapter();
-                        adapt.SelectCommand = cmd;
-                        adapt.Fill(ds);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            return ds;
-        }
-
+        /// <summary>
+        /// 현재 작성중인 소견 레이어 정보를 DB에저장 합니다.
+        /// </summary>
+        /// <returns></returns>
         public string SaveDB()
         {
             string rtn = "";
@@ -230,14 +256,20 @@ namespace XrayTEXT
                     byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerkeyFilename);
 
                     string sql = "insert into TBL_TalkBoxLayer(KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg) values ";
-                    sql = sql + "('" + _talkBoxLayer.TalkBoxLyerkeyFilename + "','"
-                        + _talkBoxLayer.TalkBoxLyerkeyFilename + "','"
-                        + _talkBoxLayer.TalkBoxLyercutfileName + "','"
-                        + _talkBoxLayer.Text.ToString() 
-                        + "',(select count(*)+1 from TBL_TalkBoxLayer with(nolock) where KeyFilename='" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' ),'" 
-                        + _talkBoxLayer.Text + "','" 
-                        + _talkBoxLayer.TalkBoxLyerPointX + "','" + _talkBoxLayer.TalkBoxLyerPointY 
-                        + "','" + _talkBoxLayer.TalkBoxLyerSizeW + "','" + _talkBoxLayer.TalkBoxLyerSizeH + "',@Fileimg)";
+                    sql = sql + "('";
+                    sql = sql + _talkBoxLayer.TalkBoxLyerkeyFilename + "','";
+                    sql = sql + _talkBoxLayer.TalkBoxLyercutfileName + "','";
+                    sql = sql + _talkBoxLayer.TalkBoxLyerCutFullPath + "','";
+                    sql = sql + _talkBoxLayer.TalkBoxLyerFileTitle + "',";
+                    sql = sql + _talkBoxLayer.TalkBoxLyerFileNum.ToString() + ",'";
+                    sql = sql + _talkBoxLayer.Text + "','";
+                    sql = sql + _talkBoxLayer.TalkBoxLyerPointX + "','";
+                    sql = sql + _talkBoxLayer.TalkBoxLyerPointY;
+                    sql = sql + "','" + _talkBoxLayer.TalkBoxLyerSizeW;
+                    sql = sql + "','" + _talkBoxLayer.TalkBoxLyerSizeH;
+                    sql = sql + "',@Fileimg); update TBL_TalkBoxLayer set FileTitle ='"+ _talkBoxLayer.TalkBoxLyerFileTitle + "' where KeyFilename = '"+ _talkBoxLayer.TalkBoxLyerkeyFilename + "'; ";
+
+
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
                         cmd.Parameters.Add("@Fileimg", SqlDbType.Image, photo.Length).Value = photo;
@@ -249,6 +281,7 @@ namespace XrayTEXT
                             //정상
                         }
                     }
+                    conn.Close();
                 }
             }
             catch (Exception ex)
