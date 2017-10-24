@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using XrayTEXT.ViewModels;
 
 namespace XrayTEXT
 {
@@ -35,6 +36,8 @@ namespace XrayTEXT
         public MainWin()
         {
             InitializeComponent();
+            this.DataContext = new XrayTEXT.ViewModels.MainViewModel(); // 좌측 상단 하단의 TEXT 변경 용
+            
 
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
             Photos.Path = Helpers.PicFolder;
@@ -59,7 +62,6 @@ namespace XrayTEXT
             //helper.ReturnToText += new Helpers.deleg_TxtcutMemo(TxtcutMemo_set);//이벤트 핸들러 연결
             //helper.SetTextChange();//이벤트 호출 값을 지닌 함수 호출
 
-            //DataContext = new ViewModel.MainWindowViewModel();
         }
         //private void TxtcutMemo_set(string upLabelText)
         //{
@@ -74,6 +76,8 @@ namespace XrayTEXT
         /// <param name="e"></param>
         public void UpTextSetBind(object sender, RoutedEventArgs e)//(string changeText="")
         {
+            //string info_fileTxt = getSaveFile(".dat");
+            //SetSaveAllTextBox(info_fileTxt);
             getTextFromDB();
         }
 
@@ -122,6 +126,10 @@ namespace XrayTEXT
             }
             TxtcutMemo.Text = sb2.ToString();  // 우상단
             TxtFileTitle.Text = _FileTitle;
+
+            XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
+            mainViewModel.UserCutMemo = "test";//.ToString();
+            mainViewModel.UserFileMemo = _FileTitle;
             #endregion ########## text 바인딩 E ##########
         }
 
@@ -316,7 +324,7 @@ namespace XrayTEXT
                         currentRect.Visibility = Visibility.Hidden;
                         currentRect = null;
                         GC.Collect();
-                        //SetSaveAllTextBox(info_fileTxt);
+                        SetSaveAllTextBox(info_fileTxt);
                     }
                 }
                 catch (Exception ex) {
@@ -471,31 +479,32 @@ namespace XrayTEXT
 
         public void SetSaveAllTextBox(string _path = "")
         {
-            //string str_text = string.Empty;
-            //StringBuilder sb = new StringBuilder(); // 저장용(파일, 위치,크기 정보)
-            //StringBuilder sb2 = new StringBuilder(); // 시각용(위치,크기 정보 X)
-
-            //for (int i = 0; i < _LstTalkBoxLayer.Count; i++)
-            //{
-            //    if (_LstTalkBoxLayer[i].TalkBoxLyerMemo != null)
-            //    {
-            //        sb.Append(
-            //            PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/")
-            //            + "▤" + _LstTalkBoxLayer[i].TalkBoxLyercutfileName.ToString()
-            //            + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerCutFullPath.ToString()
-            //            + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerFileNum.ToString()
-            //            + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerMemo.ToString()
-            //            + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerPointX
-            //            + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerPointY
-            //            + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerSizeW
-            //            + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerSizeH
-            //            + "▥\r\n");
-            //        sb2.AppendLine(_LstTalkBoxLayer[i].TalkBoxLyerMemo.ToString());
-            //    }
-            //}
-            ////TxtFileTitle.Text = sb.ToString();
-            ////TxtcutMemo.Text = sb2.ToString();
-            //if (_path != "") { File.WriteAllText(_path, sb.ToString()); }
+            string str_text = string.Empty;
+            StringBuilder sb = new StringBuilder(); // 저장용(파일, 위치,크기 정보)
+            StringBuilder sb2 = new StringBuilder(); // 시각용(위치,크기 정보 X)
+            string FileTitle = "";
+            for (int i = 0; i < _LstTalkBoxLayer.Count; i++)
+            {
+                if (_LstTalkBoxLayer[i].Text != null)
+                {
+                    if (FileTitle == "" ) { FileTitle = _LstTalkBoxLayer[i].TalkBoxLyerFileTitle; }
+                    sb.Append(
+                        _LstTalkBoxLayer[i].TalkBoxLyerkeyFilename.ToString() //PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/")
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyercutfileName.ToString()
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerCutFullPath.ToString()
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerFileNum.ToString()
+                        + "▤" + _LstTalkBoxLayer[i].Text.ToString()
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerPointX
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerPointY
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerSizeW
+                        + "▤" + _LstTalkBoxLayer[i].TalkBoxLyerSizeH
+                        + "▥\r\n");
+                    sb2.AppendLine(_LstTalkBoxLayer[i].Text.ToString());
+                }
+            }
+            TxtFileTitle.Text = FileTitle;
+            TxtcutMemo.Text = sb2.ToString();
+            if (_path != "") { File.WriteAllText(_path, sb.ToString()); }
 
         }
 
@@ -780,51 +789,7 @@ namespace XrayTEXT
 
         #endregion ##################### 기타 차후 사요앟수있어서 일단 주석 처리 #####################
 
-        #region #### PropertyChangedEventHandler ####
-        public string _userFileMemo;
-        public string _userCutMemo;
-
-        public string UserCutMemo
-        {
-            get { return _userCutMemo; }
-            set
-            {
-                if (!string.Equals(this._userCutMemo, value))
-                {
-                    this._userCutMemo = value;
-                    NotifyPropertyChanged("UserCutMemo");
-                }
-            }
-        }
-
-        public string UserFileMemo
-        {
-            get { return _userFileMemo; }
-            set
-            {
-                if (!string.Equals(this._userFileMemo, value))
-                {
-                    this._userFileMemo = value;
-                    NotifyPropertyChanged("UserFileMemo");
-                }
-            }
-        }
-        private void NotifyPropertyChanged(String info)
-        {
-            var listeners = PropertyChanged;
-            if (listeners != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(info));
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        void OnPropertyChanged(string prop)
-        {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
-        }
-        #endregion #### PropertyChangedEventHandler ####
+        
 
     }
 

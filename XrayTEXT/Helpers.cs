@@ -13,6 +13,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+//using XrayTEXT.ViewModels.MainViewModel;
 
 namespace XrayTEXT
 {
@@ -90,10 +91,11 @@ namespace XrayTEXT
             {
                 string _text = string.Empty;
                 string constr = Helpers.dbCon;
+                byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerCutFullPath + "/" + _talkBoxLayer.TalkBoxLyercutfileName);
+
                 using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
-                    byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerCutFullPath +"/"+_talkBoxLayer.TalkBoxLyercutfileName);
 
                     string sql = "";
                     sql = sql + "IF((SELECT COUNT(*) FROM TBL_TalkBoxLayer WITH(NOLOCK) WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' AND CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "') > 0)";
@@ -103,10 +105,10 @@ namespace XrayTEXT
                     sql = sql + " FileTitle = '"+ _talkBoxLayer.TalkBoxLyerFileTitle + "', ";
                     sql = sql + " numb = '"+ _talkBoxLayer.TalkBoxLyerFileNum.ToString() + "', ";
                     sql = sql + " memo = '"+ _talkBoxLayer.Text + "', ";
-                    //sql = sql + " PointX = '"+ _talkBoxLayer.TalkBoxLyerPointX + "', ";
-                    //sql = sql + " PointY = '"+ _talkBoxLayer.TalkBoxLyerPointY + "', ";
-                    //sql = sql + " SizeW = '"+ _talkBoxLayer.TalkBoxLyerSizeW + "', ";
-                    //sql = sql + " SizeH = '"+ _talkBoxLayer.TalkBoxLyerSizeH + "', ";
+                    sql = sql + " PointX = '" + _talkBoxLayer.TalkBoxLyerPointX + "', ";
+                    sql = sql + " PointY = '" + _talkBoxLayer.TalkBoxLyerPointY + "', ";
+                    sql = sql + " SizeW = '" + _talkBoxLayer.TalkBoxLyerSizeW + "', ";
+                    sql = sql + " SizeH = '" + _talkBoxLayer.TalkBoxLyerSizeH + "', ";
                     sql = sql + " Fileimg = @Fileimg ";
                     sql = sql + " WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' and CutFilename = '"+ _talkBoxLayer.TalkBoxLyercutfileName + "'";
 
@@ -143,10 +145,10 @@ namespace XrayTEXT
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show(ex.Message);
             }
+            //(Application.Current.MainWindow as MainWin).btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
             mwin.btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
-            
             return rtn;
         }
 
