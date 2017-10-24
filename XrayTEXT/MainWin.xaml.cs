@@ -21,15 +21,11 @@ namespace XrayTEXT
         #region ######################### 선언 #########################
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
-
         public PhotoCollection Photos;
-
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
-
         double scaleX = 1;
         double scaleY = 1;
         TranslateTransform translate = new TranslateTransform();
-        //DataSet ds;
 
         public TalkBoxLayer Last_talkBoxLayer = null; // 마지막 선택/작업 되었던 레이어
         public Image Last_image = null; // 마지막 선택/작업 되었던 이미지
@@ -57,8 +53,94 @@ namespace XrayTEXT
             //회전은 Angle 만 돌리면 되나 일단 보류
 
             //DataContext = new ModelTextbox() { TxWidth = 100, TxHeight=100 };
+
+            //우측 상단 주석들
+            //Helpers helper = new Helpers(); //class1을 동적할당
+            //helper.ReturnToText += new Helpers.deleg_TxtcutMemo(TxtcutMemo_set);//이벤트 핸들러 연결
+            //helper.SetTextChange();//이벤트 호출 값을 지닌 함수 호출
+
+            //DataContext = new ViewModel.MainWindowViewModel();
         }
+        //private void TxtcutMemo_set(string upLabelText)
+        //{
+        //    TxtcutMemo.Text = upLabelText;//라벨의 텍스트 값 변경
+        //}
+
+
+        /// <summary>
+        /// 우측소견로드 버튼 클릭시
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void UpTextSetBind(object sender, RoutedEventArgs e)//(string changeText="")
+        {
+            getTextFromDB();
+        }
+
+        /// <summary>
+        /// DB 에서 소견과 파일내용을 받아와 바인딩 한다.
+        /// </summary>
+        private void getTextFromDB() {
+            #region ########## text 바인딩 S ##########
+
+            DataSet ds = new DataSet();
+            try
+            {
+                string _text = string.Empty;
+                string constr = Helpers.dbCon;
+                using (SqlConnection conn = new SqlConnection(constr))
+                {
+                    conn.Open();
+                    string sql = "Select KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg ";
+                    sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='" + getKeyFileNameOnly() + "' Order by  numb ";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        var adapt = new SqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }
+            string _FileTitle = string.Empty;
+            string _innerMemo = string.Empty;    // 글내용
+
+            StringBuilder sb2 = new StringBuilder();
+            if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+            {
+                _FileTitle = ds.Tables[0].Rows[0]["FileTitle"].ToString();
+                for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+                {
+                    _innerMemo = "";
+                    _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
+                    sb2.AppendLine(_innerMemo);
+                }
+            }
+            TxtcutMemo.Text = sb2.ToString();  // 우상단
+            TxtFileTitle.Text = _FileTitle;
+            #endregion ########## text 바인딩 E ##########
+        }
+
+
         #endregion ######################### MainWin #########################
+
+        #region ######## DB 키 생성 ########
+        public string getKeyWithPath()
+        {
+            string _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
+            return _key;
+        }
+        public string getKeyFileNameOnly()
+        {
+            string _key = getKeyWithPath();
+            string FileNameOnly = _key.Substring(_key.LastIndexOf("/") + 1);
+            return FileNameOnly;
+        }
+        #endregion ######## DB 키 생성 ########
 
         #region ######## 마우스 관련 ################
 
@@ -104,7 +186,7 @@ namespace XrayTEXT
                 if (currentRect == null)
                 {
                     //사각형을 생성한다.
-                    CreteRectangle();
+                    CreateRectangle();
                 }
             }
         }
@@ -205,8 +287,9 @@ namespace XrayTEXT
                         Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
 
                         Int32 fileNum = _LstTalkBoxLayer.Count() + 1;
-                        string keyFilename = Helpers.keyFilename; //PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
-                        string cutfileName = getSaveFile("_" + fileNum.ToString() + ".png");
+                        string keyFilename = getKeyFileNameOnly(); //Helpers.keyFilename; //PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
+                        //string cutfileName = getSaveFile("_" + fileNum.ToString() + ".png");
+                        string cutfileName = getSaveFileNoPath("_" + fileNum.ToString() + ".png"); // cutfileName 도 순수 이름만으로 변경
                         string fullPath = getSavePath();
                         string info_fileTxt = getSaveFile(".dat");
                         string fileTitle = TxtFileTitle.Text.ToString(); // 우하단
@@ -226,7 +309,7 @@ namespace XrayTEXT
 
                         Last_talkBoxLayer = _talkBoxLayer; //마지막 작업 레이어를 저장 하기 위해 ...
                         Last_image = image; //마지막 작업 이미지를 저장 하기 위해 ...
-                        Helpers.ExportToPng(cutfileName, image, top, left);
+                        Helpers.ExportToPng(fullPath +"/"+ cutfileName, image, top, left);
 
                         #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
                         root.Children.Remove(currentRect); // 그려진 네모는 삭제 - obj 삭제 했더니 재사용이 안되 히든 및 null 처리
@@ -250,7 +333,7 @@ namespace XrayTEXT
         /// <returns></returns>
         public string getSavePath() {
             //string _savePath = System.IO.Path.GetFileNameWithoutExtension(PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/"));
-            string _savePath = Helpers.keyFilename;//PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
+            string _savePath = getKeyWithPath();//PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
             if (_savePath.Length > 10) {
                 _savePath = _savePath.Substring(0, _savePath.Length - 4);
             }
@@ -266,8 +349,14 @@ namespace XrayTEXT
         public string getSaveFile(string _extension=".dat")
         {
             string _saveFileName = getSavePath() + "\\" + System.IO.Path.GetFileNameWithoutExtension(
-                Helpers.keyFilename//PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/")
+                getKeyWithPath() //PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/")
                 ) + _extension;
+            return _saveFileName;
+        }
+
+        public string getSaveFileNoPath(string _extension = ".dat")
+        {
+            string _saveFileName = System.IO.Path.GetFileNameWithoutExtension( getKeyWithPath() ) + _extension;
             return _saveFileName;
         }
 
@@ -287,7 +376,7 @@ namespace XrayTEXT
             catch (Exception e) { }
         }
 
-        private void CreteRectangle()
+        private void CreateRectangle()
         {
 
             currentRect = new Rectangle();
@@ -336,6 +425,7 @@ namespace XrayTEXT
                 this.CurTalkBox.Clear();
             }
             TxtcutMemo.Text = string.Empty;
+            TxtFileTitle.Text = string.Empty;
             return _rtn;
         }
         #endregion ######### 소견삭제 #########
@@ -378,14 +468,6 @@ namespace XrayTEXT
             }
         }
 
-        #region #### PropertyChangedEventHandler ####
-        public event PropertyChangedEventHandler PropertyChanged;
-        void OnPropertyChanged(string prop)
-        {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
-        }
-        #endregion #### PropertyChangedEventHandler ####
 
         public void SetSaveAllTextBox(string _path = "")
         {
@@ -427,50 +509,21 @@ namespace XrayTEXT
 
         #region ######### 소견로드 #########
         /// <summary>
-        /// 소견을 로드한다
+        /// 소견을 DB에서 로드한다
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         void OnLoadButtonClick(object sender, RoutedEventArgs e)
         {
-            #region #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####
-            if (this.CurTalkBox.Count > 0)
-            {
-                this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) { _txt_layer.Delete(); });
-                this.CurTalkBox.Clear();
-            }
-            #endregion #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####
-
             //LoadTxtBox();
             //string keyFilename = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
-            Helpers.LoadTxtBoxDB();
+            LoadMemeFromDB();
         }
 
         /// <summary>
         /// 
         /// </summary>
         
-
-        //public BitmapImage ImageFromBytearray(byte[] imageData)
-        //{
-
-        //    if (imageData == null)
-        //        return null;
-        //    MemoryStream strm = new MemoryStream();
-        //    strm.Write(imageData, 0, imageData.Length);
-        //    strm.Position = 0;
-        //    Image img = Image.FromStream(strm);
-
-        //    BitmapImage bitmapImage = new BitmapImage();
-        //    bitmapImage.BeginInit();
-        //    MemoryStream memoryStream = new MemoryStream();
-        //    img.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Bmp);
-        //    memoryStream.Seek(0, SeekOrigin.Begin);
-        //    bitmapImage.StreamSource = memoryStream;
-        //    bitmapImage.EndInit();
-
-        //    return bitmapImage;
-        //}
 
         /// <summary>
         /// 소견 data Load
@@ -555,6 +608,109 @@ namespace XrayTEXT
 
         #endregion ######################### 메인 사진 #########################
 
+        /// <summary>
+        /// DB에서 Data 를 조회 후 화면에 바인딩 
+        /// </summary>
+        public void LoadMemeFromDB()
+        {
+            TxtcutMemo.Text = "";  // 우상단
+            TxtFileTitle.Text = "";
+            #region #### 로딩 전 기존 소견을 지우고 현재 소견을 불러 온다 ####
+            if (this.CurTalkBox.Count > 0)
+            {
+                this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) { _txt_layer.Delete(); });
+                this.CurTalkBox.Clear();
+            }
+            #endregion #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####
+
+            DataSet ds = new DataSet();
+            //string _key = Helpers.keyFilename;//_talkBoxLayer.TalkBoxLyerkeyFilename;
+            try
+            {
+                string _text = string.Empty;
+                string constr = Helpers.dbCon;
+                using (SqlConnection conn = new SqlConnection(constr))
+                {
+                    conn.Open();
+                    string sql = "Select KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg ";
+                    sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='" + getKeyFileNameOnly() + "' Order by  numb ";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        var adapt = new SqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }
+
+            #region ########## text 바인딩 S ##########
+            string _KeyFilename = string.Empty;    // 파일 명 추가
+            string _FileTitle = string.Empty;
+            string _innerMemo = string.Empty;    // 글내용
+            string _TalkBoxLyercutfileName = "";
+            string _TalkBoxLyerCutFullPath = "";
+            string _TalkBoxLyerFileNum = "";
+
+            //byte[] photo_aray; //DB에서 이미지를 불러온다
+            StringBuilder sb2 = new StringBuilder();
+            if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+            {
+                _FileTitle = ds.Tables[0].Rows[0]["FileTitle"].ToString();
+                for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+                {
+                    _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
+                    _TalkBoxLyercutfileName = ds.Tables[0].Rows[i]["CutFilename"].ToString();
+                    _TalkBoxLyerCutFullPath = ds.Tables[0].Rows[i]["CutFullPath"].ToString();
+                    _TalkBoxLyerFileNum = ds.Tables[0].Rows[i]["numb"].ToString();
+                    _innerMemo = "";
+                    _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
+                    sb2.AppendLine(_innerMemo);
+
+                    Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
+                    Image image = new Image(); 
+                    //
+                    image = ViewedPhoto;
+
+                    //DB에서 이미지를 불러온다
+                    //if (ds.Tables[0].Rows[i]["Fileimg"] != System.DBNull.Value)
+                    //{
+                    //    photo_aray = (byte[])ds.Tables[0].Rows[i]["Fileimg"];
+                    //    BitmapImage bi3 = new BitmapImage();
+                    //    bi3.BeginInit();
+                    //    bi3.UriSource = new Uri(_TalkBoxLyercutfileName, UriKind.Relative);
+                    //    bi3.EndInit();
+                    //    image.Source = bi3;
+                    //}
+
+                    Size _size = new Size(Convert.ToDouble(ds.Tables[0].Rows[i]["SizeW"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["SizeH"].ToString()));
+                    image.RenderSize = _size;
+                    Style _cssTalkBox = this.FindResource("cssTalkBox") as Style;
+                    Style _cssTalkBoxEdit = this.FindResource("cssTalkBoxEdit") as Style;
+                    TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
+                        _KeyFilename,
+                        _FileTitle,
+                        _TalkBoxLyercutfileName,
+                        _TalkBoxLyerCutFullPath,
+                        Convert.ToInt32(_TalkBoxLyerFileNum),
+                        _innerMemo,
+                        image,
+                        talkBoxLocationXY,
+                        _cssTalkBox,
+                        _cssTalkBoxEdit
+                        );
+                   this.CurTalkBox.Add(talkBoxLayer);
+                }
+            }
+            TxtcutMemo.Text = sb2.ToString();  // 우상단
+            TxtFileTitle.Text = _FileTitle;
+            #endregion ########## text 바인딩 E ##########
+        }
+
         #region ######################### 좌측 트리에서 사진 #########################
         /// <summary>
         /// 좌측 트리에서 사진을 더블 클릭했을때
@@ -563,8 +719,8 @@ namespace XrayTEXT
         /// <param name="e"></param>
         private void OnPhotoClick(object sender, RoutedEventArgs e)
         {
-            btnSaveText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); //btnSaveText.PerformClick() in wpf
-            btnDelText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            //btnSaveText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); //btnSaveText.PerformClick() in wpf
+            //btnDelText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             TxtFileTitle.Text = string.Empty; // 소견 data 삭제
             TxtcutMemo.Text = string.Empty;  // 우상단
 
@@ -582,7 +738,7 @@ namespace XrayTEXT
             MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("삭제 하시겠습니까?", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
-                MessageBox.Show(Helpers.keyFilename + " 가 삭제 되었습니다.");
+                MessageBox.Show(getKeyWithPath() + " 가 삭제 되었습니다.");
             }
         }
 
@@ -599,5 +755,77 @@ namespace XrayTEXT
 
         #endregion ######################### 좌측 트리에서 사진 #########################
 
+        #region ##################### 기타 차후 사요앟수있어서 일단 주석 처리 #####################
+
+        //public BitmapImage ImageFromBytearray(byte[] imageData)
+        //{
+
+        //    if (imageData == null)
+        //        return null;
+        //    MemoryStream strm = new MemoryStream();
+        //    strm.Write(imageData, 0, imageData.Length);
+        //    strm.Position = 0;
+        //    Image img = Image.FromStream(strm);
+
+        //    BitmapImage bitmapImage = new BitmapImage();
+        //    bitmapImage.BeginInit();
+        //    MemoryStream memoryStream = new MemoryStream();
+        //    img.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Bmp);
+        //    memoryStream.Seek(0, SeekOrigin.Begin);
+        //    bitmapImage.StreamSource = memoryStream;
+        //    bitmapImage.EndInit();
+
+        //    return bitmapImage;
+        //}
+
+        #endregion ##################### 기타 차후 사요앟수있어서 일단 주석 처리 #####################
+
+        #region #### PropertyChangedEventHandler ####
+        public string _userFileMemo;
+        public string _userCutMemo;
+
+        public string UserCutMemo
+        {
+            get { return _userCutMemo; }
+            set
+            {
+                if (!string.Equals(this._userCutMemo, value))
+                {
+                    this._userCutMemo = value;
+                    NotifyPropertyChanged("UserCutMemo");
+                }
+            }
+        }
+
+        public string UserFileMemo
+        {
+            get { return _userFileMemo; }
+            set
+            {
+                if (!string.Equals(this._userFileMemo, value))
+                {
+                    this._userFileMemo = value;
+                    NotifyPropertyChanged("UserFileMemo");
+                }
+            }
+        }
+        private void NotifyPropertyChanged(String info)
+        {
+            var listeners = PropertyChanged;
+            if (listeners != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(info));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        void OnPropertyChanged(string prop)
+        {
+            if (this.PropertyChanged != null)
+                this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
+        #endregion #### PropertyChangedEventHandler ####
+
     }
+
 }

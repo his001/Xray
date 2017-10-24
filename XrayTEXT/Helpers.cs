@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -18,12 +18,23 @@ namespace XrayTEXT
 {
     delegate void NoArgDelegate();
 
-    public class Helpers : MainWin
+    public class Helpers
     {
+
         public static string dbCon = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
         public static string PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
         public static MainWin mwin = new MainWin();
-        public static string keyFilename = mwin.PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");  // Key 파일
+        //public static string keyFilename = mwin.PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");  // Key 파일
+        //public static string keyFilename = mwin.getKeyFileNameOnly();
+
+        //MainWin 폼에 있는 텍스트라벨을 갱신하기 위해 델리게이트 사용
+        //public delegate void deleg_TxtcutMemo(string upLabelText); //델리게이트 선언
+        //public event deleg_TxtcutMemo ReturnToText; //델리게이트 이벤트 선언
+
+        //public void SetTextChange()
+        //{
+        //    ReturnToText("이벤트 호출 SetTextChange");//이벤트 호출
+        //}
 
 
         /// <summary>
@@ -82,10 +93,29 @@ namespace XrayTEXT
                 using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
-                    byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyercutfileName);
+                    byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerCutFullPath +"/"+_talkBoxLayer.TalkBoxLyercutfileName);
 
-                    string sql = "insert into TBL_TalkBoxLayer(KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg) values ";
-                    sql = sql + "('";
+                    string sql = "";
+                    sql = sql + "IF((SELECT COUNT(*) FROM TBL_TalkBoxLayer WITH(NOLOCK) WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' AND CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "') > 0)";
+                    sql = sql + " BEGIN";
+                    sql = sql + " update TBL_TalkBoxLayer set ";
+                    sql = sql + " CutFullPath = '"+ _talkBoxLayer.TalkBoxLyerCutFullPath + "', ";
+                    sql = sql + " FileTitle = '"+ _talkBoxLayer.TalkBoxLyerFileTitle + "', ";
+                    sql = sql + " numb = '"+ _talkBoxLayer.TalkBoxLyerFileNum.ToString() + "', ";
+                    sql = sql + " memo = '"+ _talkBoxLayer.Text + "', ";
+                    //sql = sql + " PointX = '"+ _talkBoxLayer.TalkBoxLyerPointX + "', ";
+                    //sql = sql + " PointY = '"+ _talkBoxLayer.TalkBoxLyerPointY + "', ";
+                    //sql = sql + " SizeW = '"+ _talkBoxLayer.TalkBoxLyerSizeW + "', ";
+                    //sql = sql + " SizeH = '"+ _talkBoxLayer.TalkBoxLyerSizeH + "', ";
+                    sql = sql + " Fileimg = @Fileimg ";
+                    sql = sql + " WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' and CutFilename = '"+ _talkBoxLayer.TalkBoxLyercutfileName + "'";
+
+                    sql = sql + " END";
+                    sql = sql + " ELSE";
+                    sql = sql + " BEGIN";
+                    //print 'insert'
+                    sql = sql + " insert into TBL_TalkBoxLayer(KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg) values ";
+                    sql = sql + " ('";
                     sql = sql + _talkBoxLayer.TalkBoxLyerkeyFilename + "','";
                     sql = sql + _talkBoxLayer.TalkBoxLyercutfileName + "','";
                     sql = sql + _talkBoxLayer.TalkBoxLyerCutFullPath + "','";
@@ -97,6 +127,7 @@ namespace XrayTEXT
                     sql = sql + "','" + _talkBoxLayer.TalkBoxLyerSizeW;
                     sql = sql + "','" + _talkBoxLayer.TalkBoxLyerSizeH;
                     sql = sql + "',@Fileimg); update TBL_TalkBoxLayer set FileTitle ='" + _talkBoxLayer.TalkBoxLyerFileTitle + "' where KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "'; ";
+                    sql = sql + "END";
 
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
@@ -114,108 +145,110 @@ namespace XrayTEXT
             {
                 MessageBox.Show(ex.Message);
             }
+            mwin.btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
+            
             return rtn;
         }
 
 
-        /// <summary>
-        /// DB에서 Data 를 조회 후 화면에 바인딩 
-        /// </summary>
-        public static void LoadTxtBoxDB()
-        {
-            DataSet ds = new DataSet();
-            //string _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
-            string _key = keyFilename;//_talkBoxLayer.TalkBoxLyerkeyFilename;
-            try
-            {
-                string _text = string.Empty;
-                string constr = Helpers.dbCon;
-                using (SqlConnection conn = new SqlConnection(constr))
-                {
-                    conn.Open();
-                    string sql = "Select KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg ";
-                    sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='" + _key + "' Order by  numb ";
-                    using (SqlCommand cmd = new SqlCommand(sql, conn))
-                    {
-                        var adapt = new SqlDataAdapter();
-                        adapt.SelectCommand = cmd;
-                        adapt.Fill(ds);
-                    }
-                    conn.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.Message);
-            }
+        ///// <summary>
+        ///// DB에서 Data 를 조회 후 화면에 바인딩 
+        ///// </summary>
+        //public static void LoadTxtBoxDB()
+        //{
+        //    DataSet ds = new DataSet();
+        //    //string _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
+        //    string _key = keyFilename;//_talkBoxLayer.TalkBoxLyerkeyFilename;
+        //    try
+        //    {
+        //        string _text = string.Empty;
+        //        string constr = Helpers.dbCon;
+        //        using (SqlConnection conn = new SqlConnection(constr))
+        //        {
+        //            conn.Open();
+        //            string sql = "Select KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg ";
+        //            sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='" + _key + "' Order by  numb ";
+        //            using (SqlCommand cmd = new SqlCommand(sql, conn))
+        //            {
+        //                var adapt = new SqlDataAdapter();
+        //                adapt.SelectCommand = cmd;
+        //                adapt.Fill(ds);
+        //            }
+        //            conn.Close();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //MessageBox.Show(ex.Message);
+        //    }
 
-            #region ########## text 바인딩 S ##########
-            string _KeyFilename = string.Empty;    // 파일 명 추가
-            string _FileTitle = string.Empty;
-            string _innerMemo = string.Empty;    // 글내용
-            string _TalkBoxLyercutfileName = "";
-            string _TalkBoxLyerCutFullPath = "";
-            string _TalkBoxLyerFileNum = "";
+        //    #region ########## text 바인딩 S ##########
+        //    string _KeyFilename = string.Empty;    // 파일 명 추가
+        //    string _FileTitle = string.Empty;
+        //    string _innerMemo = string.Empty;    // 글내용
+        //    string _TalkBoxLyercutfileName = "";
+        //    string _TalkBoxLyerCutFullPath = "";
+        //    string _TalkBoxLyerFileNum = "";
 
-            byte[] photo_aray;
-            StringBuilder sb2 = new StringBuilder();
-            if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
-            {
-                _FileTitle = ds.Tables[0].Rows[0]["FileTitle"].ToString();
-                for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
-                {
-                    _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
-                    //_FileTitle                  = ds.Tables[0].Rows[i]["FileTitle"].ToString();
-                    _TalkBoxLyercutfileName = ds.Tables[0].Rows[i]["CutFilename"].ToString();
-                    _TalkBoxLyerCutFullPath = ds.Tables[0].Rows[i]["CutFullPath"].ToString();
-                    _TalkBoxLyerFileNum = ds.Tables[0].Rows[i]["numb"].ToString();
-                    _innerMemo = "";
-                    _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
-                    sb2.AppendLine(_innerMemo);
+        //    byte[] photo_aray;
+        //    StringBuilder sb2 = new StringBuilder();
+        //    if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+        //    {
+        //        _FileTitle = ds.Tables[0].Rows[0]["FileTitle"].ToString();
+        //        for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+        //        {
+        //            _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
+        //            //_FileTitle                  = ds.Tables[0].Rows[i]["FileTitle"].ToString();
+        //            _TalkBoxLyercutfileName = ds.Tables[0].Rows[i]["CutFilename"].ToString();
+        //            _TalkBoxLyerCutFullPath = ds.Tables[0].Rows[i]["CutFullPath"].ToString();
+        //            _TalkBoxLyerFileNum = ds.Tables[0].Rows[i]["numb"].ToString();
+        //            _innerMemo = "";
+        //            _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
+        //            sb2.AppendLine(_innerMemo);
 
-                    Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
-                    Image image = new Image(); //image = ViewedPhoto;
+        //            Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
+        //            Image image = new Image(); //image = ViewedPhoto;
 
-                    if (ds.Tables[0].Rows[i]["Fileimg"] != System.DBNull.Value)
-                    {
-                        photo_aray = (byte[])ds.Tables[0].Rows[i]["Fileimg"];
-                        BitmapImage bi3 = new BitmapImage();
-                        bi3.BeginInit();
-                        bi3.UriSource = new Uri(_TalkBoxLyercutfileName, UriKind.Relative);
-                        bi3.EndInit();
-                        image.Source = bi3;
-                    }
+        //            if (ds.Tables[0].Rows[i]["Fileimg"] != System.DBNull.Value)
+        //            {
+        //                photo_aray = (byte[])ds.Tables[0].Rows[i]["Fileimg"];
+        //                BitmapImage bi3 = new BitmapImage();
+        //                bi3.BeginInit();
+        //                bi3.UriSource = new Uri(_TalkBoxLyercutfileName, UriKind.Relative);
+        //                bi3.EndInit();
+        //                image.Source = bi3;
+        //            }
                     
-                    Size _size = new Size(Convert.ToDouble(ds.Tables[0].Rows[i]["SizeW"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["SizeH"].ToString()));
-                    image.RenderSize = _size;
-                    Style _cssTalkBox = mwin.FindResource("cssTalkBox") as Style;
-                    Style _cssTalkBoxEdit = mwin.FindResource("cssTalkBoxEdit") as Style;
-                    TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
-                        _KeyFilename,
-                        _FileTitle,
-                        _TalkBoxLyercutfileName,
-                        _TalkBoxLyerCutFullPath,
-                        Convert.ToInt32(_TalkBoxLyerFileNum),
-                        _innerMemo,
-                        image,
-                        talkBoxLocationXY,
-                        _cssTalkBox,
-                        _cssTalkBoxEdit
-                        );
-                    mwin.CurTalkBox.Add(talkBoxLayer);
-                    //talkBoxLayer.Text = _innerMemo.ToString();
-                }
-            }
-            //TextBox _TextBox1 = mwin.FindResource("TxtcutMemo") as TextBox;
-            //TextBox _TextBox2 = mwin.FindResource("TxtFileTitle") as TextBox;
+        //            Size _size = new Size(Convert.ToDouble(ds.Tables[0].Rows[i]["SizeW"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["SizeH"].ToString()));
+        //            image.RenderSize = _size;
+        //            Style _cssTalkBox = mwin.FindResource("cssTalkBox") as Style;
+        //            Style _cssTalkBoxEdit = mwin.FindResource("cssTalkBoxEdit") as Style;
+        //            TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
+        //                _KeyFilename,
+        //                _FileTitle,
+        //                _TalkBoxLyercutfileName,
+        //                _TalkBoxLyerCutFullPath,
+        //                Convert.ToInt32(_TalkBoxLyerFileNum),
+        //                _innerMemo,
+        //                image,
+        //                talkBoxLocationXY,
+        //                _cssTalkBox,
+        //                _cssTalkBoxEdit
+        //                );
+        //            mwin.CurTalkBox.Add(talkBoxLayer);
+        //            //talkBoxLayer.Text = _innerMemo.ToString();
+        //        }
+        //    }
+        //    //TextBox _TextBox1 = mwin.FindResource("TxtcutMemo") as TextBox;
+        //    //TextBox _TextBox2 = mwin.FindResource("TxtFileTitle") as TextBox;
 
-            mwin.TxtcutMemo.Text = sb2.ToString();  // 우상단
-            mwin.TxtFileTitle.Text = _FileTitle;
+        //    mwin.TxtcutMemo.Text = sb2.ToString();  // 우상단
+        //    mwin.TxtFileTitle.Text = _FileTitle;
 
-            //base.RaisePropertyChanged("TxtcutMemo");
-            //BindableObject.RaisePropertyChanged("TxtcutMemo");
-            #endregion ########## text 바인딩 E ##########
-        }
+        //    //base.RaisePropertyChanged("TxtcutMemo");
+        //    //BindableObject.RaisePropertyChanged("TxtcutMemo");
+        //    #endregion ########## text 바인딩 E ##########
+        //}
     }
 
     public class TalkBoxLayerCtrl : Adorner
@@ -918,6 +951,54 @@ namespace XrayTEXT
             }
         }
         DirectoryInfo _directory;
+
+        #region #### PropertyChangedEventHandler ####
+        //public event PropertyChangedEventHandler PropertyChanged;
+        //void OnPropertyChanged(string prop)
+        //{
+        //    if (this.PropertyChanged != null)
+        //        this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        //}
+
+        //private void NotifyPropertyChanged(String info)
+        //{
+        //    var listeners = PropertyChanged;
+        //    if (listeners != null)
+        //    {
+        //        PropertyChanged(this, new PropertyChangedEventArgs(info));
+        //    }
+        //}
+
+        //private string _userFileMemo;
+        //private string _userCutMemo;
+
+        //public string UserCutMemo
+        //{
+        //    get { return _userCutMemo; }
+        //    set
+        //    {
+        //        if (!string.Equals(this._userCutMemo, value))
+        //        {
+        //            this._userCutMemo = value;
+        //            NotifyPropertyChanged("UserCutMemo");
+        //        }
+        //    }
+        //}
+
+        //public string UserFileMemo
+        //{
+        //    get { return _userFileMemo; }
+        //    set
+        //    {
+        //        if (!string.Equals(this._userFileMemo, value))
+        //        {
+        //            this._userFileMemo = value;
+        //            NotifyPropertyChanged("UserFileMemo");
+        //        }
+        //    }
+        //}
+        #endregion #### PropertyChangedEventHandler ####
+
     }
 
 }

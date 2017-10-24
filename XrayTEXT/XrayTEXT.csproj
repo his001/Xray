@@ -86,7 +86,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\TreeViewFile.cs" />
     <Compile Include="MainWin.xaml.cs">
       <DependentUpon>MainWin.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -94,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BindableObject.cs" />
+    <Compile Include="ViewModels\TreeViewFile.cs" />
     <Compile Include="XrayTextBox.xaml.cs">
       <SubType>Code</SubType>
       <DependentUpon>XrayTextBox.xaml</DependentUpon>
@@ -119,7 +119,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\" />
-    <Folder Include="System\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

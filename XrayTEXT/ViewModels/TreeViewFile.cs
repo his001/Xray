@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Windows.Media.Imaging;
 
 namespace XrayTEXT.ViewModels
 {
+
     public class TreeViewFile
     {
+        #region ###############################################
         private readonly string _path;
 
         public TreeViewFile(string path)
@@ -78,5 +79,8 @@ namespace XrayTEXT.ViewModels
                 }
             }
         }
+
+        #endregion ###############################################
+
     }
 }
