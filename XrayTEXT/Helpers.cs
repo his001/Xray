@@ -382,6 +382,7 @@ namespace XrayTEXT
         private double _horizPercent, _vertPercent;
         private Image _image;
         private bool _isDeleted;
+        private bool _isHidden;
         private string _memo;
         private string _pX;
         private string _pY;
@@ -426,6 +427,8 @@ namespace XrayTEXT
                 _memo = memo;
                 _pH = image.ActualHeight.ToString();
                 _pW = image.ActualWidth.ToString();
+                _pX = TalkBoxLocation.X.ToString();
+                _pY = TalkBoxLocation.Y.ToString();
 
                 _TxtBoxL_AddCont = new TalkBoxLayerCtrl(
                             keyFilename, _fileTitle, cutfileName, cutfullPath, fileNum, memo,
@@ -470,6 +473,10 @@ namespace XrayTEXT
         {
             this.IsDeleted = true;
         }
+        public void SetHidden()
+        {
+            this._isHidden = true;
+        }
 
         #endregion // Create/Delete
 
@@ -510,12 +517,12 @@ namespace XrayTEXT
         #endregion // IsDeleted
 
         #region #################### TalkBoxLyer ####################
-
         public string TalkBoxLyerPointX
         {
             get
             {
-                return (_image.RenderSize.Width * _horizPercent).ToString();
+                return _pX.ToString();
+                //return (_image.RenderSize.Width * _horizPercent).ToString();
             }
             set
             {
@@ -529,7 +536,8 @@ namespace XrayTEXT
         {
             get
             {
-                return (_image.RenderSize.Height * _vertPercent).ToString();
+                return _pY.ToString();
+                //return (_image.RenderSize.Height * _vertPercent).ToString();
             }
             set
             {
@@ -623,6 +631,36 @@ namespace XrayTEXT
             set { _fileTitle = value; }
         }
 
+        public bool TalkBoxLyerisHidden
+        {
+            get { return _isHidden; }
+            private set
+            {
+                if (!value)
+                    throw new InvalidOperationException("숨기기에 실패하였습니다.");
+
+                if (_isHidden)
+                    return;
+
+                _isHidden = true;
+
+                this.HookImageEvents(false);
+
+                if (_TxtBoxL_AddCont != null)
+                {
+                    try
+                    {
+                        _TxtBoxLayer.Visibility = Visibility.Hidden;
+                        //_TxtBoxLayer = null;
+                        //_TxtBoxL_AddCont = null;
+                    }
+                    catch (Exception ex) { }
+                }
+                base.RaisePropertyChanged("IsHidden");
+            }
+        }
+        
+
         /// <summary>
         /// 잘라낸 서브 이미지 파일 번호
         /// </summary>
@@ -677,9 +715,7 @@ namespace XrayTEXT
 
         void TalkBoxLyer_Insert()
         {
-            if (_isDeleted)
-                return;
-
+            if (_isDeleted) { return; }
             _TxtBoxLayer = AdornerLayer.GetAdornerLayer(_image);
             if (_TxtBoxLayer == null)
             {
@@ -703,7 +739,13 @@ namespace XrayTEXT
         void OnImageSizeChanged(object sender, SizeChangedEventArgs e)
         {
             Point newLocation = this.CalculateEquivalentTextLocation();
-            _TxtBoxL_AddCont.UpdateTextLocation(newLocation);
+            try
+            {
+                _TxtBoxL_AddCont.UpdateTextLocation(newLocation);
+            }
+            catch (Exception ex) {
+                //MessageBox.Show("OnImageSizeChanged : " + ex.ToString());
+            }
         }
 
         #endregion // Private Helpers

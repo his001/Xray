@@ -94,7 +94,6 @@
   <ItemGroup>
     <Compile Include="BindableObject.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\TreeViewFile.cs" />
     <Compile Include="XrayTextBox.xaml.cs">
       <SubType>Code</SubType>
       <DependentUpon>XrayTextBox.xaml</DependentUpon>

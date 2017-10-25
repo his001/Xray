@@ -129,7 +129,7 @@
                     SelectionMode="Extended" 
                     ItemsSource="{Binding}" 
                     SelectedIndex="0" 
-                    MouseDoubleClick="OnPhotoClick" Width="180" >
+                    MouseDoubleClick="OnPhotoDblClick" Width="180" >
                     <ListBox.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="삭제" Click="deletePhoto"/>

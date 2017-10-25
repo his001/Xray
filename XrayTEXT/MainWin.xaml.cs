@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,13 +7,17 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using XrayTEXT.ViewModels;
 
 namespace XrayTEXT
@@ -23,7 +28,7 @@ namespace XrayTEXT
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
         public PhotoCollection Photos;
-        readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
+        public List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
         double scaleX = 1;
         double scaleY = 1;
         TranslateTransform translate = new TranslateTransform();
@@ -153,6 +158,13 @@ namespace XrayTEXT
             return FileNameOnly;
         }
         #endregion ######## DB 키 생성 ########
+
+        private void reinit() {
+            //_LstTalkBoxLayer.Clear();
+            //_LstTalkBoxLayer = new List<TalkBoxLayer>();
+            scaleX = 1;
+            scaleY = 1;
+        }
 
         #region ######## 마우스 관련 ################
 
@@ -431,13 +443,9 @@ namespace XrayTEXT
         private string SetDeleteAllTextBox()
         {
             string _rtn = "";
-            if (this.CurTalkBox.Count > 0)
-            {
-                this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) { _txt_layer.Delete(); });
-                this.CurTalkBox.Clear();
-            }
             TxtcutMemo.Text = string.Empty;
             TxtFileTitle.Text = string.Empty;
+            SetClearTalkBoxLayer();
             return _rtn;
         }
         #endregion ######### 소견삭제 #########
@@ -531,6 +539,7 @@ namespace XrayTEXT
             //LoadTxtBox();
             //string keyFilename = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
             LoadMemeFromDB();
+            //LoadTxtBox();
         }
 
 
@@ -603,7 +612,6 @@ namespace XrayTEXT
             //#endregion ########## text 바인딩 E ##########
         }
 
-
         public List<TalkBoxLayer> CurTalkBox
         {
             get
@@ -617,6 +625,20 @@ namespace XrayTEXT
 
         #endregion ######################### 메인 사진 #########################
 
+        public void SetClearTalkBoxLayer() {
+            #region #### 로딩 전 기존 소견을 지우고 현재 소견을 불러 온다 ####
+            if (this.CurTalkBox.Count > 0)
+            {
+                this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) {
+                    //_txt_layer.Delete();
+                    _txt_layer.SetHidden();
+                });
+                this.CurTalkBox.Clear();
+            }
+            #endregion #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####
+
+        }
+
         /// <summary>
         /// DB에서 Data 를 조회 후 화면에 바인딩 
         /// </summary>
@@ -624,21 +646,16 @@ namespace XrayTEXT
         {
             TxtcutMemo.Text = "";  // 우상단
             TxtFileTitle.Text = "";
-            #region #### 로딩 전 기존 소견을 지우고 현재 소견을 불러 온다 ####
-            if (this.CurTalkBox.Count > 0)
-            {
-                this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) { _txt_layer.Delete(); });
-                this.CurTalkBox.Clear();
-            }
-            #endregion #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####
+            //SetClearTalkBoxLayer();
 
-            DataSet ds = new DataSet();
             //string _key = Helpers.keyFilename;//_talkBoxLayer.TalkBoxLyerkeyFilename;
+
+            #region ########## text 바인딩 S ##########
+            DataSet ds = new DataSet();
             try
             {
                 string _text = string.Empty;
-                string constr = Helpers.dbCon;
-                using (SqlConnection conn = new SqlConnection(constr))
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
                 {
                     conn.Open();
                     string sql = "Select KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg ";
@@ -657,7 +674,6 @@ namespace XrayTEXT
                 //MessageBox.Show(ex.Message);
             }
 
-            #region ########## text 바인딩 S ##########
             string _KeyFilename = string.Empty;    // 파일 명 추가
             string _FileTitle = string.Empty;
             string _innerMemo = string.Empty;    // 글내용
@@ -682,7 +698,6 @@ namespace XrayTEXT
 
                     Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
                     Image image = new Image(); 
-                    //
                     image = ViewedPhoto;
 
                     //DB에서 이미지를 불러온다
@@ -727,7 +742,7 @@ namespace XrayTEXT
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnPhotoClick(object sender, RoutedEventArgs e)
+        private void OnPhotoDblClick(object sender, RoutedEventArgs e)
         {
             //btnSaveText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); //btnSaveText.PerformClick() in wpf
             //btnDelText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
@@ -736,10 +751,17 @@ namespace XrayTEXT
 
             ImageSource imageSource = new BitmapImage(new Uri(PhotosListBox.SelectedItem.ToString()));
             ViewedPhoto.Source = imageSource;
-            this.SizeToContent = SizeToContent.WidthAndHeight;
+            //this.SizeToContent = SizeToContent.WidthAndHeight;
             //Grid.SetZIndex(this.ViewedPhoto, 99999);
 
-            btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 기존 저장된 정보가 있다면 로딩
+            //reinit();   // 화면이 전환 되면 초기 값들 새로 시작!!!!
+            //btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 기존 저장된 정보가 있다면 로딩
+
+            //RoutedEventArgs routedEventArgs = new RoutedEventArgs(ButtonBase.ClickEvent, btnLoadText);
+            //btnLoadText.RaiseEvent(routedEventArgs);
+            //new Action(() => btnLoadText.RaiseEvent(routedEventArgs)).SetTimeout(500);
+
+            new Action(() => btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))).SetTimeout(500);
         }
 
         private void deletePhoto(object sender, RoutedEventArgs e)
@@ -765,7 +787,7 @@ namespace XrayTEXT
 
         #endregion ######################### 좌측 트리에서 사진 #########################
 
-        #region ##################### 기타 차후 사요앟수있어서 일단 주석 처리 #####################
+        #region ##################### 기타 차후 사용할수 있어서 일단 주석 처리 #####################
 
         //public BitmapImage ImageFromBytearray(byte[] imageData)
         //{
@@ -788,10 +810,53 @@ namespace XrayTEXT
         //    return bitmapImage;
         //}
 
-        #endregion ##################### 기타 차후 사요앟수있어서 일단 주석 처리 #####################
+        #endregion ##################### 기타 차후 사용할수 있어서 일단 주석 처리 #####################
 
-        
+
 
     }
 
+
+    public static class SettimeoutDelegateExtension
+    {
+        /// <summary> 
+        /// Inspired by HTML DOM, executes a delegate via a DispatcherTimer once. 
+        /// </summary> 
+        /// <example>new Action(() => someObject.DoSomethingCool()).SetTimeout(100); 
+        /// </example> 
+        /// <remarks>Frequently things need to be executed in a timeout, but constructing a Timer is a pain especially for 
+        /// one-off calls. Combined with Lambda expressions this makes the whole process relativey painless. 
+        /// </remarks> 
+        /// <param name="action">Any delegate to execute</param> 
+        /// <param name="timeout">How long to wait to execute</param> 
+        /// <param name="args">Any arguments to pass to the delegate</param> 
+        public static void SetTimeout(this Delegate action, TimeSpan timeout, params object[] args)
+        {
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = timeout;
+            timer.Tick += new EventHandler(delegate (object sender, EventArgs e)
+            {
+                timer.Stop();
+                timer = null;
+                action.DynamicInvoke(args);
+            });
+            timer.Start();
+        }
+
+        /// <summary> 
+        /// Inspired by HTML DOM, executes a delegate via a DispatcherTimer once. 
+        /// </summary> 
+        /// <example>new Action(() => someObject.DoSomethingCool()).SetTimeout(100); 
+        /// </example> 
+        /// <remarks>Frequently things need to be executed in a timeout, but constructing a Timer is a pain especially for 
+        /// one-off calls. Combined with Lambda expressions this makes the whole process relativey painless. 
+        /// </remarks> 
+        /// <param name="action">Any delegate to execute</param> 
+        /// <param name="timeout">How long to wait to execute in milliseconds</param> 
+        /// <param name="args">Any arguments to pass to the delegate</param> 
+        public static void SetTimeout(this Delegate action, int timeout, params object[] args)
+        {
+            SetTimeout(action, TimeSpan.FromMilliseconds(timeout), args);
+        }
+    }
 }
