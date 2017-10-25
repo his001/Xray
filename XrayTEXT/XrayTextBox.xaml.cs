@@ -128,7 +128,8 @@ namespace XrayTEXT
             this.Delete();
             //LoadTxtBoxDB();
             MainWin mwin = new MainWin();
-            mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 기존 저장된 정보가 있다면 로딩
+            //mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 기존 저장된 정보가 있다면 로딩
+            new Action(() => mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))).SetTimeout(500);
         }
 
         // 소견 텍스트 편집 모드 시작 시

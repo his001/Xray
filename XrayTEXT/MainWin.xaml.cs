@@ -28,7 +28,7 @@ namespace XrayTEXT
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
         public PhotoCollection Photos;
-        public List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
+        readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
         double scaleX = 1;
         double scaleY = 1;
         TranslateTransform translate = new TranslateTransform();
@@ -647,9 +647,7 @@ namespace XrayTEXT
             TxtcutMemo.Text = "";  // 우상단
             TxtFileTitle.Text = "";
             //SetClearTalkBoxLayer();
-
             //string _key = Helpers.keyFilename;//_talkBoxLayer.TalkBoxLyerkeyFilename;
-
             #region ########## text 바인딩 S ##########
             DataSet ds = new DataSet();
             try
@@ -688,34 +686,55 @@ namespace XrayTEXT
                 _FileTitle = ds.Tables[0].Rows[0]["FileTitle"].ToString();
                 for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                 {
-                    _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
-                    _TalkBoxLyercutfileName = ds.Tables[0].Rows[i]["CutFilename"].ToString();
-                    _TalkBoxLyerCutFullPath = ds.Tables[0].Rows[i]["CutFullPath"].ToString();
-                    _TalkBoxLyerFileNum = ds.Tables[0].Rows[i]["numb"].ToString();
-                    _innerMemo = "";
-                    _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
-                    sb2.AppendLine(_innerMemo);
+                    bool chk_existLayer = false;
 
-                    Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
-                    Image image = new Image(); 
-                    image = ViewedPhoto;
+                    //var dataLayer = from CutFilename in _LstTalkBoxLayer
+                    //  where (_KeyFilename == getKeyFileNameOnly()) && (CutFilename == ds.Tables[0].Rows[i]["CutFullPath"].ToString())
+                    //  orderby CutFilename
+                    //select CutFilename;
 
-                    //DB에서 이미지를 불러온다
-                    //if (ds.Tables[0].Rows[i]["Fileimg"] != System.DBNull.Value)
-                    //{
-                    //    photo_aray = (byte[])ds.Tables[0].Rows[i]["Fileimg"];
-                    //    BitmapImage bi3 = new BitmapImage();
-                    //    bi3.BeginInit();
-                    //    bi3.UriSource = new Uri(_TalkBoxLyercutfileName, UriKind.Relative);
-                    //    bi3.EndInit();
-                    //    image.Source = bi3;
-                    //}
+                    for (int j = 0; j < _LstTalkBoxLayer.Count; j++)
+                    {
+                        if (getKeyFileNameOnly() == _LstTalkBoxLayer[j].TalkBoxLyerkeyFilename 
+                            && ds.Tables[0].Rows[i]["CutFullPath"].ToString() == _LstTalkBoxLayer[j].TalkBoxLyercutfileName)
+                        {
+                            chk_existLayer = true;
+                            break;
+                        }
+                    }
 
-                    Size _size = new Size(Convert.ToDouble(ds.Tables[0].Rows[i]["SizeW"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["SizeH"].ToString()));
-                    image.RenderSize = _size;
-                    Style _cssTalkBox = this.FindResource("cssTalkBox") as Style;
-                    Style _cssTalkBoxEdit = this.FindResource("cssTalkBoxEdit") as Style;
-                    TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
+                    #region ################ 동일한 키 _TalkBoxLyercutfileName 이있을 경우 추가 하지 않음 ####################
+                    if (!chk_existLayer)  
+                    {
+                        _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
+                        _TalkBoxLyercutfileName = ds.Tables[0].Rows[i]["CutFilename"].ToString();
+                        _TalkBoxLyerCutFullPath = ds.Tables[0].Rows[i]["CutFullPath"].ToString();
+                        _TalkBoxLyerFileNum = ds.Tables[0].Rows[i]["numb"].ToString();
+                        _innerMemo = "";
+                        _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
+                        sb2.AppendLine(_innerMemo);
+
+                        Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
+                        Image image = new Image();
+                        image = ViewedPhoto;
+
+                        //DB에서 이미지를 불러온다
+                        //if (ds.Tables[0].Rows[i]["Fileimg"] != System.DBNull.Value)
+                        //{
+                        //    photo_aray = (byte[])ds.Tables[0].Rows[i]["Fileimg"];
+                        //    BitmapImage bi3 = new BitmapImage();
+                        //    bi3.BeginInit();
+                        //    bi3.UriSource = new Uri(_TalkBoxLyercutfileName, UriKind.Relative);
+                        //    bi3.EndInit();
+                        //    image.Source = bi3;
+                        //}
+
+                        Size _size = new Size(Convert.ToDouble(ds.Tables[0].Rows[i]["SizeW"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["SizeH"].ToString()));
+                        image.RenderSize = _size;
+                        Style _cssTalkBox = this.FindResource("cssTalkBox") as Style;
+                        Style _cssTalkBoxEdit = this.FindResource("cssTalkBoxEdit") as Style;
+
+                        TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
                         _KeyFilename,
                         _FileTitle,
                         _TalkBoxLyercutfileName,
@@ -727,7 +746,10 @@ namespace XrayTEXT
                         _cssTalkBox,
                         _cssTalkBoxEdit
                         );
-                   this.CurTalkBox.Add(talkBoxLayer);
+
+                        this.CurTalkBox.Add(talkBoxLayer);
+                    }
+                    #endregion ################ 동일한 키 _TalkBoxLyercutfileName 이있을 경우 추가 하지 않음 ####################
                 }
             }
             TxtcutMemo.Text = sb2.ToString();  // 우상단
