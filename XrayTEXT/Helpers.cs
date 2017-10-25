@@ -149,6 +149,11 @@ namespace XrayTEXT
             }
             //(Application.Current.MainWindow as MainWin).btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
             mwin.btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
+
+            //XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
+            //mainViewModel.UserCutMemo = _talkBoxLayer.Text;//.ToString();
+            //mainViewModel.UserFileMemo = _talkBoxLayer.TalkBoxLyerFileTitle;
+
             return rtn;
         }
 
@@ -504,7 +509,84 @@ namespace XrayTEXT
 
         #endregion // IsDeleted
 
-        #region Text
+        #region #################### TalkBoxLyer ####################
+
+        public string TalkBoxLyerPointX
+        {
+            get
+            {
+                return (_image.RenderSize.Width * _horizPercent).ToString();
+            }
+            set
+            {
+                if (_pX == value)
+                    return;
+
+                _pX = value;
+            }
+        }
+        public string TalkBoxLyerPointY
+        {
+            get
+            {
+                return (_image.RenderSize.Height * _vertPercent).ToString();
+            }
+            set
+            {
+                if (_pY == value)
+                    return;
+
+                _pY = value;
+            }
+        }
+
+        public string TalkBoxLyerSizeW
+        {
+            get
+            {
+                //return (_TxtBoxL_AddCont.RenderSize.Width).ToString();
+                return _pW;
+            }
+            set
+            {
+                if (_pW == value)
+                    return;
+
+                _pW = value;
+            }
+        }
+        public string TalkBoxLyerSizeH
+        {
+            get
+            {
+                return _pH; // (_TxtBoxL_AddCont.RenderSize.Height).ToString();
+            }
+            set
+            {
+                if (_pH == value)
+                    return;
+
+                _pH = value;
+            }
+        }
+
+        /// <summary>
+        /// 키파일네임 
+        /// </summary>
+        public string TalkBoxLyerkeyFilename
+        {
+            get { return _KeyFilename; }
+            set { _KeyFilename = value; }
+        }
+
+        /// <summary>
+        /// 잘라낸 서브 이미지 파일 저장 경로 + 파일명
+        /// </summary>
+        public string TalkBoxLyercutfileName
+        {
+            get { return _cutfileName; }
+            set { _cutfileName = value; }
+        }
 
         /// <summary>
         /// Gets/sets the annotation's Text.
@@ -524,93 +606,6 @@ namespace XrayTEXT
                 //_text = value;
                 //base.RaisePropertyChanged("Text");
             }
-        }
-
-        #endregion // Text
-
-        #region ##### AnnotePoint X,Y #####
-        public string TalkBoxLyerPointX
-        {
-            get
-            {
-                return (_image.RenderSize.Width * _horizPercent).ToString();
-            }
-            set
-            {
-                if (_pX == value)
-                    return;
-
-                _pX = value;
-            }
-        }
-
-        public string TalkBoxLyerPointY
-        {
-            get
-            {
-                return (_image.RenderSize.Height * _vertPercent).ToString();
-            }
-            set
-            {
-                if (_pY == value)
-                    return;
-
-                _pY = value;
-            }
-        }
-        #endregion ##### AnnotePoint X,Y #####
-
-        #region ##### AnnoteImageSize W,H #####
-        public string TalkBoxLyerSizeW
-        {
-            get
-            {
-                //return (_TxtBoxL_AddCont.RenderSize.Width).ToString();
-                return _pW;
-            }
-            set
-            {
-                if (_pW == value)
-                    return;
-
-                _pW = value;
-            }
-        }
-
-        public string TalkBoxLyerSizeH
-        {
-            get
-            {
-                return _pH; // (_TxtBoxL_AddCont.RenderSize.Height).ToString();
-            }
-            set
-            {
-                if (_pH == value)
-                    return;
-
-                _pH = value;
-            }
-        }
-        #endregion ##### AnnoteImageSize W,H #####
-
-
-
-        /// <summary>
-        /// 키파일네임 
-        /// </summary>
-        public string TalkBoxLyerkeyFilename
-        {
-            get { return _KeyFilename; }
-            set { _KeyFilename = value; }
-        }
-
-        /// <summary>
-        /// 잘라낸 서브 이미지 파일 저장 경로 + 파일명
-        /// </summary>
-        public string TalkBoxLyercutfileName
-        {
-            get { return _cutfileName; }
-            set { _cutfileName = value; }
         }
 
         /// <summary>
@@ -642,6 +637,7 @@ namespace XrayTEXT
             get { return _image; }
             set { _image = value; }
         }
+        #endregion #################### TalkBoxLyer ####################
 
 
         #region Private Helpers

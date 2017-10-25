@@ -36,9 +36,6 @@ namespace XrayTEXT
         public MainWin()
         {
             InitializeComponent();
-            this.DataContext = new XrayTEXT.ViewModels.MainViewModel(); // 좌측 상단 하단의 TEXT 변경 용
-            
-
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
             Photos.Path = Helpers.PicFolder;
 
@@ -62,13 +59,13 @@ namespace XrayTEXT
             //helper.ReturnToText += new Helpers.deleg_TxtcutMemo(TxtcutMemo_set);//이벤트 핸들러 연결
             //helper.SetTextChange();//이벤트 호출 값을 지닌 함수 호출
 
+            DataContext = new MainViewModel(); // 좌측 상단 하단의 TEXT 변경 용
         }
         //private void TxtcutMemo_set(string upLabelText)
         //{
         //    TxtcutMemo.Text = upLabelText;//라벨의 텍스트 값 변경
         //}
-
-
+        
         /// <summary>
         /// 우측소견로드 버튼 클릭시
         /// </summary>
@@ -78,7 +75,18 @@ namespace XrayTEXT
         {
             //string info_fileTxt = getSaveFile(".dat");
             //SetSaveAllTextBox(info_fileTxt);
+
             getTextFromDB();
+
+            //XrayTEXT.ViewModels.MainViewModel mainViewModel = new MainViewModel();
+            //mainViewModel.UserCutMemo = "UserCutMemo test";
+            //mainViewModel.UserFileMemo = "UserFileMemo test";
+            //MessageBox.Show(
+            //    mainViewModel.UserCutMemo + " : mainViewModel.UserCutMemo\r\n" 
+            //    + mainViewModel.UserFileMemo + " : mainViewModel.UserFileMemo\r\n"
+            //    + TxtcutMemo.Text + " : TxtcutMemo.Text\r\n"
+            //    + TxtFileTitle.Text + " : TxtFileTitle.Text\r\n"
+            //    );
         }
 
         /// <summary>
@@ -126,10 +134,6 @@ namespace XrayTEXT
             }
             TxtcutMemo.Text = sb2.ToString();  // 우상단
             TxtFileTitle.Text = _FileTitle;
-
-            XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
-            mainViewModel.UserCutMemo = "test";//.ToString();
-            mainViewModel.UserFileMemo = _FileTitle;
             #endregion ########## text 바인딩 E ##########
         }
 
@@ -529,78 +533,74 @@ namespace XrayTEXT
             LoadMemeFromDB();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        
 
         /// <summary>
         /// 소견 data Load
         /// </summary>
         void LoadTxtBox(string _path = "")
         {
-            string _str = TxtFileTitle.Text;
-            if (_path != "")
-            {
-                string _loadFileName = getSaveFile(".dat");
-                if (File.Exists(_loadFileName))
-                {
-                    _str = File.ReadAllText(_path);
-                }
-            }
-            #region ########## text 바인딩 S ##########
-            if (_str.Trim().Length == 0)
-            {
-                //MessageBox.Show("소견이 없습니다.");
-                return;
-            }
-            string[] _strArr = _str.Split('▥');
-            string _filePathWithName = string.Empty;    // 파일 명 추가
-            string _innerMemo = string.Empty;    // 글내용
-            string _TalkBoxLyerKeyFilename = "";
-            string _TalkBoxLyerFileTitle = "";
-            string _TalkBoxLyercutfileName = "";
-            string _TalkBoxLyerCutFullPath = "";
-            string _TalkBoxLyerFileNum = "";
-            StringBuilder sb2 = new StringBuilder();
+            //string _str = TxtFileTitle.Text;
+            //if (_path != "")
+            //{
+            //    string _loadFileName = getSaveFile(".dat");
+            //    if (File.Exists(_loadFileName))
+            //    {
+            //        _str = File.ReadAllText(_path);
+            //    }
+            //}
+            //#region ########## text 바인딩 S ##########
+            //if (_str.Trim().Length == 0)
+            //{
+            //    //MessageBox.Show("소견이 없습니다.");
+            //    return;
+            //}
+            //string[] _strArr = _str.Split('▥');
+            //string _filePathWithName = string.Empty;    // 파일 명 추가
+            //string _innerMemo = string.Empty;    // 글내용
+            //string _TalkBoxLyerKeyFilename = "";
+            //string _TalkBoxLyerFileTitle = "";
+            //string _TalkBoxLyercutfileName = "";
+            //string _TalkBoxLyerCutFullPath = "";
+            //string _TalkBoxLyerFileNum = "";
+            //StringBuilder sb2 = new StringBuilder();
             
-            for (int i = 0; i < _strArr.Length - 1; i++)
-            {
-                string[] _strArr2 = _strArr[i].Split('▤');
+            //for (int i = 0; i < _strArr.Length - 1; i++)
+            //{
+            //    string[] _strArr2 = _strArr[i].Split('▤');
 
-                _filePathWithName    = _strArr2[0];
-                _TalkBoxLyerFileTitle = _strArr2[1];
-                _TalkBoxLyercutfileName = _strArr2[2];
-                _TalkBoxLyerCutFullPath = _strArr2[3];
-                _TalkBoxLyerFileNum  = _strArr2[4];
-                _innerMemo = "";
-                _innerMemo = _strArr2[5];   // 글내용 (의사소견)
-                sb2.AppendLine(_strArr2[6]);
-                Point talkBoxLocationXY = new Point(Convert.ToDouble(_strArr2[7]), Convert.ToDouble(_strArr2[8]));
-                Image image = new Image();
-                image = ViewedPhoto;
-                Size _size = new Size(Convert.ToDouble(_strArr2[9]), Convert.ToDouble(_strArr2[10]));
-                image.RenderSize = _size;
-                Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
-                Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
-                TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
-                    _TalkBoxLyerKeyFilename,
-                    _TalkBoxLyerFileTitle,
-                    _TalkBoxLyercutfileName,
-                    _TalkBoxLyerCutFullPath,
-                    Convert.ToInt32(_TalkBoxLyerFileNum),
-                    _innerMemo,
-                    image,
-                    talkBoxLocationXY,
-                    _cssTalkBox,
-                    _cssTalkBoxEdit
-                    );
-                this.CurTalkBox.Add(talkBoxLayer);
-                talkBoxLayer.Text = _innerMemo.ToString();
+            //    _filePathWithName    = _strArr2[0];
+            //    _TalkBoxLyerFileTitle = _strArr2[1];
+            //    _TalkBoxLyercutfileName = _strArr2[2];
+            //    _TalkBoxLyerCutFullPath = _strArr2[3];
+            //    _TalkBoxLyerFileNum  = _strArr2[4];
+            //    _innerMemo = "";
+            //    _innerMemo = _strArr2[5];   // 글내용 (의사소견)
+            //    sb2.AppendLine(_strArr2[6]);
+            //    Point talkBoxLocationXY = new Point(Convert.ToDouble(_strArr2[7]), Convert.ToDouble(_strArr2[8]));
+            //    Image image = new Image();
+            //    image = ViewedPhoto;
+            //    Size _size = new Size(Convert.ToDouble(_strArr2[9]), Convert.ToDouble(_strArr2[10]));
+            //    image.RenderSize = _size;
+            //    Style _cssTalkBox = base.FindResource("cssTalkBox") as Style;
+            //    Style _cssTalkBoxEdit = base.FindResource("cssTalkBoxEdit") as Style;
+            //    TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
+            //        _TalkBoxLyerKeyFilename,
+            //        _TalkBoxLyerFileTitle,
+            //        _TalkBoxLyercutfileName,
+            //        _TalkBoxLyerCutFullPath,
+            //        Convert.ToInt32(_TalkBoxLyerFileNum),
+            //        _innerMemo,
+            //        image,
+            //        talkBoxLocationXY,
+            //        _cssTalkBox,
+            //        _cssTalkBoxEdit
+            //        );
+            //    this.CurTalkBox.Add(talkBoxLayer);
+            //    talkBoxLayer.Text = _innerMemo.ToString();
 
-            }
-            TxtcutMemo.Text = sb2.ToString();
-            #endregion ########## text 바인딩 E ##########
+            //}
+            //TxtcutMemo.Text = sb2.ToString();
+            //#endregion ########## text 바인딩 E ##########
         }
 
 
@@ -718,6 +718,7 @@ namespace XrayTEXT
             TxtcutMemo.Text = sb2.ToString();  // 우상단
             TxtFileTitle.Text = _FileTitle;
             #endregion ########## text 바인딩 E ##########
+            
         }
 
         #region ######################### 좌측 트리에서 사진 #########################

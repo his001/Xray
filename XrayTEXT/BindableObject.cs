@@ -79,6 +79,7 @@ namespace XrayTEXT
 		/// </param>
 		protected virtual void AfterPropertyChanged(string propertyName)
 		{
+
 		}
 
 		/// <summary>
