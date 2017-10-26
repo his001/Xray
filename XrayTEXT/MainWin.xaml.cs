@@ -1,25 +1,19 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using XrayTEXT.ViewModels;
 
 namespace XrayTEXT
 {
@@ -28,25 +22,22 @@ namespace XrayTEXT
         #region ######################### 선언 #########################
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
-        public PhotoCollection Photos;
+        public PhotoCollection Photos = new PhotoCollection(Helpers.PicFolder);
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
         double scaleX = 1;
         double scaleY = 1;
         TranslateTransform translate = new TranslateTransform();
 
         public TalkBoxLayer Last_talkBoxLayer = null; // 마지막 선택/작업 되었던 레이어
-        public Image Last_image = null; // 마지막 선택/작업 되었던 이미지
-
-
-  
+        public Image Last_image = null; // 마지막 선택/작업 되었던 이미지  
         #endregion ######################### 선언 #########################
 
         #region ######################### MainWin #########################
         public MainWin()
         {
             InitializeComponent();
-            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
-            Photos.Path = Helpers.PicFolder;
+            //Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
+            //Photos.Path = Helpers.PicFolder;
 
             this.root.MouseLeftButtonDown += new MouseButtonEventHandler(root_MouseLeftButtonDown);
             this.root.MouseLeftButtonUp += new MouseButtonEventHandler(root_MouseLeftButtonUp);
@@ -68,13 +59,50 @@ namespace XrayTEXT
             //helper.ReturnToText += new Helpers.deleg_TxtcutMemo(TxtcutMemo_set);//이벤트 핸들러 연결
             //helper.SetTextChange();//이벤트 호출 값을 지닌 함수 호출
 
-            DataContext = new MainViewModel(); // 좌측 상단 하단의 TEXT 변경 용
+            //DataContext = new MainViewModel(); // 좌측 상단 하단의 TEXT 변경 용
+
+            //TreeViewFile treeView = new TreeViewFile(Helpers.PicFolder);
+            //LeftTree.Items.Add(treeView);
+            LoadDirectories();
+            new Action(() => setLeftTreeBind()).SetTimeout(500);
         }
+
+        private void setLeftTreeBind() {
+            //DirectoryInfo _directory = new DirectoryInfo(Helpers.PicFolder);
+            //item.Items.Add(this.GetItem(directory));
+            //ExploreDirectories(TreeViewItem item)
+
+            //Helpers.PicFolder
+            foreach (string s in Directory.EnumerateDirectories(Helpers.PicFolder))
+            {
+                TreeViewItem item = new TreeViewItem();
+                item.Header = s.Substring(s.LastIndexOf('\\') + 1);
+                item.Tag = s;
+                item.FontWeight = FontWeights.Normal;
+
+                FillTreeView(item, s);
+                LeftTree.Items.Add(item);
+            }
+        }
+
+        private void FillTreeView(TreeViewItem parentItem, string path)
+        {
+            foreach (string str in Directory.EnumerateDirectories(path))
+            {
+                TreeViewItem item = new TreeViewItem();
+                item.Header = str.Substring(str.LastIndexOf('\\') + 1);
+                item.Tag = str;
+                item.FontWeight = FontWeights.Normal;
+                parentItem.Items.Add(item);
+                FillTreeView(item, str);
+            }
+        }
+
         //private void TxtcutMemo_set(string upLabelText)
         //{
         //    TxtcutMemo.Text = upLabelText;//라벨의 텍스트 값 변경
         //}
-        
+
         /// <summary>
         /// 우측소견로드 버튼 클릭시
         /// </summary>
@@ -148,9 +176,7 @@ namespace XrayTEXT
 
 
         #endregion ######################### MainWin #########################
-
         
-
         #region ######## DB 키 생성 ########
         public string getKeyWithPath()
         {
@@ -164,13 +190,6 @@ namespace XrayTEXT
             return FileNameOnly;
         }
         #endregion ######## DB 키 생성 ########
-
-        private void reinit() {
-            //_LstTalkBoxLayer.Clear();
-            //_LstTalkBoxLayer = new List<TalkBoxLayer>();
-            scaleX = 1;
-            scaleY = 1;
-        }
 
         #region ######## 마우스 관련 ################
 
@@ -356,7 +375,6 @@ namespace XrayTEXT
             }
         }
         
-
         /// <summary>
         /// 저장될 파일 경로
         /// </summary>
@@ -829,6 +847,164 @@ namespace XrayTEXT
 
         #endregion ######################### 좌측 트리에서 사진 #########################
 
+
+        #region ######### tree #########
+        //private void ListDirectory(TreeView treeView, string path)
+        //{
+        //    //treeView.Items.Clear();
+        //    var rootDirectoryInfo = new DirectoryInfo(path);
+        //    treeView.Items.Add(CreateDirectoryNode(rootDirectoryInfo));
+        //}
+
+        //private static TreeViewItem CreateDirectoryNode(DirectoryInfo directoryInfo)
+        //{
+        //    var directoryNode = new TreeViewItem { Header = directoryInfo.Name };
+        //    foreach (var directory in directoryInfo.GetDirectories())
+        //        directoryNode.Items.Add(CreateDirectoryNode(directory));
+
+        //    foreach (var file in directoryInfo.GetFiles())
+        //        directoryNode.Items.Add(new TreeViewItem { Header = file.Name });
+
+        //    return directoryNode;
+        //}
+
+        public void LoadDirectories()
+        {
+            var drives = DriveInfo.GetDrives();
+            foreach (var drive in drives)
+            {
+                this.LeftTree.Items.Add(this.GetItem(drive));
+                //if (Helpers.PicFolder.IndexOf(drive.RootDirectory.Name.ToString()) >-1) {
+                //    //MessageBox.Show(drive.RootDirectory.Name.ToString());
+                //    GetItem(drive);
+                //}
+            }
+        }
+        private TreeViewItem GetItem(DriveInfo drive)
+        {
+            var item = new TreeViewItem
+            {
+                Header = drive.Name,
+                DataContext = drive,
+                Tag = drive
+            };
+            this.AddDummy(item);
+            item.Expanded += new RoutedEventHandler(item_Expanded);
+            return item;
+        }
+        private TreeViewItem GetItem(DirectoryInfo directory)
+        {
+            var item = new TreeViewItem
+            {
+                Header = directory.Name,
+                DataContext = directory,
+                Tag = directory
+            };
+            this.AddDummy(item);
+            item.Expanded += new RoutedEventHandler(item_Expanded);
+            return item;
+        }
+
+        private TreeViewItem GetItem(FileInfo file)
+        {
+            var item = new TreeViewItem
+            {
+                Header = file.Name,
+                DataContext = file,
+                Tag = file
+            };
+            return item;
+        }
+        private void AddDummy(TreeViewItem item)
+        {
+            item.Items.Add(new DummyTreeViewItem());
+        }
+
+        private bool HasDummy(TreeViewItem item)
+        {
+            return item.HasItems && (item.Items.OfType<TreeViewItem>().ToList().FindAll(tvi => tvi is DummyTreeViewItem).Count > 0);
+        }
+
+        private void RemoveDummy(TreeViewItem item)
+        {
+            var dummies = item.Items.OfType<TreeViewItem>().ToList().FindAll(tvi => tvi is DummyTreeViewItem);
+            foreach (var dummy in dummies)
+            {
+                item.Items.Remove(dummy);
+            }
+        }
+        private void ExploreDirectories(TreeViewItem item)
+        {
+            var directoryInfo = (DirectoryInfo)null;
+            if (item.Tag is DriveInfo)
+            {
+                directoryInfo = ((DriveInfo)item.Tag).RootDirectory;
+            }
+            else if (item.Tag is DirectoryInfo)
+            {
+                directoryInfo = (DirectoryInfo)item.Tag;
+            }
+            else if (item.Tag is FileInfo)
+            {
+                directoryInfo = ((FileInfo)item.Tag).Directory;
+            }
+            if (object.ReferenceEquals(directoryInfo, null)) return;
+            foreach (var directory in directoryInfo.GetDirectories())
+            {
+                var isHidden = (directory.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
+                var isSystem = (directory.Attributes & FileAttributes.System) == FileAttributes.System;
+                if (!isHidden && !isSystem)
+                {
+                    item.Items.Add(this.GetItem(directory));
+                }
+            }
+        }
+
+        private void ExploreFiles(TreeViewItem item)
+        {
+            var directoryInfo = (DirectoryInfo)null;
+            if (item.Tag is DriveInfo)
+            {
+                directoryInfo = ((DriveInfo)item.Tag).RootDirectory;
+            }
+            else if (item.Tag is DirectoryInfo)
+            {
+                directoryInfo = (DirectoryInfo)item.Tag;
+                ImagesDir.Text = directoryInfo.FullName.ToString();  //
+            }
+            else if (item.Tag is FileInfo)
+            {
+                directoryInfo = ((FileInfo)item.Tag).Directory;
+            }
+            if (object.ReferenceEquals(directoryInfo, null)) return;
+            foreach (var file in directoryInfo.GetFiles())
+            {
+                var isHidden = (file.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
+                var isSystem = (file.Attributes & FileAttributes.System) == FileAttributes.System;
+                if (!isHidden && !isSystem)
+                {
+                    item.Items.Add(this.GetItem(file));
+                }
+            }
+        }
+
+        void item_Expanded(object sender, RoutedEventArgs e)
+        {
+            var item = (TreeViewItem)sender;
+            if (this.HasDummy(item))
+            {
+                this.Cursor = Cursors.Wait;
+                this.RemoveDummy(item);
+                this.ExploreDirectories(item);
+                this.ExploreFiles(item);
+                this.Cursor = Cursors.Arrow;
+            }
+        }
+
+        #endregion  ######### tree #########
+
+
+
         #region ##################### 기타 차후 사용할수 있어서 일단 주석 처리 #####################
 
         //public BitmapImage ImageFromBytearray(byte[] imageData)
@@ -853,12 +1029,137 @@ namespace XrayTEXT
         //}
 
         #endregion ##################### 기타 차후 사용할수 있어서 일단 주석 처리 #####################
-        
+
     }
 
 
     #region ######### menu
     #endregion  ######### menu
+
+
+    /// <summary>
+    /// 트리뷰 용
+    /// </summary>
+    public class DummyTreeViewItem : TreeViewItem
+    {
+        public DummyTreeViewItem()
+            : base()
+        {
+            base.Header = "Dummy";
+            base.Tag = "Dummy";
+        }
+    }
+
+
+    #region ########### 썸네일용 
+
+    /// <summary>
+    /// This class describes a single photo - its location, the image and 
+    /// the metadata extracted from the image.
+    /// </summary>
+    public class Photo
+    {
+
+        public Photo(string path)
+        {
+            _path = path;
+            _source = new Uri(path);
+            try
+            {
+                // 기존
+                _image = BitmapFrame.Create(_source);
+                //_image.Metadata as BitmapMetadata;
+                //_image = BitmapFrame.Create(_source, BitmapCreateOptions.None, BitmapCacheOption.None);
+
+                //// 신규
+                //BitmapImage image = new BitmapImage();
+                //using (FileStream stream = File.OpenRead(path))
+                //{
+                //    image.BeginInit();
+                //    image.StreamSource = stream;
+                //    image.CacheOption = BitmapCacheOption.OnLoad;
+                //    image.EndInit(); // load the image from the stream
+                //    _image = BitmapFrame.Create(_source, stream);
+                //} 
+                //_image = image;
+                MessageBox.Show(_image.Metadata.ToString());
+            }
+            catch (NotSupportedException)
+            {
+                //MessageBox.Show("NotSupportedException");
+            }
+        }
+
+        public override string ToString()
+        {
+            return _source.ToString();
+        }
+
+        private string _path;
+
+        private Uri _source;
+        public string Source { get { return _path; } }
+
+        private BitmapFrame _image;
+        public BitmapFrame Image { get { return _image; } set { _image = value; } }
+
+    }
+
+    /// <summary>
+    /// This class represents a collection of photos in a directory.
+    /// </summary>
+    public class PhotoCollection : ObservableCollection<Photo>
+    {
+        DirectoryInfo _directory;
+
+        public PhotoCollection() { }
+        public PhotoCollection(string path) : this(new DirectoryInfo(path)) { }
+        public PhotoCollection(DirectoryInfo directory)
+        {
+            _directory = directory;
+            GetImageRead();
+        }
+
+        public string Path
+        {
+            set
+            {
+                _directory = new DirectoryInfo(value);
+                GetImageRead();
+            }
+            get { return _directory.FullName; }
+        }
+
+        public DirectoryInfo Directory
+        {
+            set
+            {
+                _directory = value;
+                GetImageRead();
+            }
+            get { return _directory; }
+        }
+
+        private void GetImageRead()
+        {
+            this.Clear();
+            try
+            {
+                foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")))
+                {
+                    Add(new Photo(f.FullName));
+                }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                System.Windows.MessageBox.Show("폴더가 없습니다.");
+            }
+        }
+
+        
+
+    }
+    #endregion ########### 썸네일용
 
     public static class SettimeoutDelegateExtension
     {

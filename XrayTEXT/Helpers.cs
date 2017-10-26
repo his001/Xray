@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -13,7 +12,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-//using XrayTEXT.ViewModels.MainViewModel;
 
 namespace XrayTEXT
 {
@@ -45,8 +43,7 @@ namespace XrayTEXT
         /// <returns></returns>
         public static byte[] GetPhoto(string filePath)
         {
-            FileStream stream = new FileStream(
-                filePath, FileMode.Open, FileAccess.Read);
+            FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             BinaryReader reader = new BinaryReader(stream);
 
             byte[] photo = reader.ReadBytes((int)stream.Length);
@@ -57,6 +54,13 @@ namespace XrayTEXT
             return photo;
         }
 
+        /// <summary>
+        /// png 파일로 부분 조각 후 저장
+        /// </summary>
+        /// <param name="_path"></param>
+        /// <param name="_img">이미지에 사이즈가 들어가있다</param>
+        /// <param name="top"></param>
+        /// <param name="left"></param>
         public static void ExportToPng(string _path, Image _img, double top, double left)
         {
             try
@@ -101,16 +105,16 @@ namespace XrayTEXT
                     sql = sql + "IF((SELECT COUNT(*) FROM TBL_TalkBoxLayer WITH(NOLOCK) WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' AND CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "') > 0)";
                     sql = sql + " BEGIN";
                     sql = sql + " update TBL_TalkBoxLayer set ";
-                    sql = sql + " CutFullPath = '"+ _talkBoxLayer.TalkBoxLyerCutFullPath + "', ";
-                    sql = sql + " FileTitle = '"+ _talkBoxLayer.TalkBoxLyerFileTitle + "', ";
-                    sql = sql + " numb = '"+ _talkBoxLayer.TalkBoxLyerFileNum.ToString() + "', ";
-                    sql = sql + " memo = '"+ _talkBoxLayer.Text + "', ";
+                    sql = sql + " CutFullPath = '" + _talkBoxLayer.TalkBoxLyerCutFullPath + "', ";
+                    sql = sql + " FileTitle = '" + _talkBoxLayer.TalkBoxLyerFileTitle + "', ";
+                    sql = sql + " numb = '" + _talkBoxLayer.TalkBoxLyerFileNum.ToString() + "', ";
+                    sql = sql + " memo = '" + _talkBoxLayer.Text + "', ";
                     sql = sql + " PointX = '" + _talkBoxLayer.TalkBoxLyerPointX + "', ";
                     sql = sql + " PointY = '" + _talkBoxLayer.TalkBoxLyerPointY + "', ";
                     sql = sql + " SizeW = '" + _talkBoxLayer.TalkBoxLyerSizeW + "', ";
                     sql = sql + " SizeH = '" + _talkBoxLayer.TalkBoxLyerSizeH + "', ";
                     sql = sql + " Fileimg = @Fileimg ";
-                    sql = sql + " WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' and CutFilename = '"+ _talkBoxLayer.TalkBoxLyercutfileName + "'";
+                    sql = sql + " WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' and CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "'";
 
                     sql = sql + " END";
                     sql = sql + " ELSE";
@@ -156,106 +160,6 @@ namespace XrayTEXT
 
             return rtn;
         }
-
-
-        ///// <summary>
-        ///// DB에서 Data 를 조회 후 화면에 바인딩 
-        ///// </summary>
-        //public static void LoadTxtBoxDB()
-        //{
-        //    DataSet ds = new DataSet();
-        //    //string _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
-        //    string _key = keyFilename;//_talkBoxLayer.TalkBoxLyerkeyFilename;
-        //    try
-        //    {
-        //        string _text = string.Empty;
-        //        string constr = Helpers.dbCon;
-        //        using (SqlConnection conn = new SqlConnection(constr))
-        //        {
-        //            conn.Open();
-        //            string sql = "Select KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg ";
-        //            sql = sql + " From TBL_TalkBoxLayer with(nolock) where KeyFilename ='" + _key + "' Order by  numb ";
-        //            using (SqlCommand cmd = new SqlCommand(sql, conn))
-        //            {
-        //                var adapt = new SqlDataAdapter();
-        //                adapt.SelectCommand = cmd;
-        //                adapt.Fill(ds);
-        //            }
-        //            conn.Close();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        //MessageBox.Show(ex.Message);
-        //    }
-
-        //    #region ########## text 바인딩 S ##########
-        //    string _KeyFilename = string.Empty;    // 파일 명 추가
-        //    string _FileTitle = string.Empty;
-        //    string _innerMemo = string.Empty;    // 글내용
-        //    string _TalkBoxLyercutfileName = "";
-        //    string _TalkBoxLyerCutFullPath = "";
-        //    string _TalkBoxLyerFileNum = "";
-
-        //    byte[] photo_aray;
-        //    StringBuilder sb2 = new StringBuilder();
-        //    if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
-        //    {
-        //        _FileTitle = ds.Tables[0].Rows[0]["FileTitle"].ToString();
-        //        for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
-        //        {
-        //            _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
-        //            //_FileTitle                  = ds.Tables[0].Rows[i]["FileTitle"].ToString();
-        //            _TalkBoxLyercutfileName = ds.Tables[0].Rows[i]["CutFilename"].ToString();
-        //            _TalkBoxLyerCutFullPath = ds.Tables[0].Rows[i]["CutFullPath"].ToString();
-        //            _TalkBoxLyerFileNum = ds.Tables[0].Rows[i]["numb"].ToString();
-        //            _innerMemo = "";
-        //            _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
-        //            sb2.AppendLine(_innerMemo);
-
-        //            Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
-        //            Image image = new Image(); //image = ViewedPhoto;
-
-        //            if (ds.Tables[0].Rows[i]["Fileimg"] != System.DBNull.Value)
-        //            {
-        //                photo_aray = (byte[])ds.Tables[0].Rows[i]["Fileimg"];
-        //                BitmapImage bi3 = new BitmapImage();
-        //                bi3.BeginInit();
-        //                bi3.UriSource = new Uri(_TalkBoxLyercutfileName, UriKind.Relative);
-        //                bi3.EndInit();
-        //                image.Source = bi3;
-        //            }
-                    
-        //            Size _size = new Size(Convert.ToDouble(ds.Tables[0].Rows[i]["SizeW"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["SizeH"].ToString()));
-        //            image.RenderSize = _size;
-        //            Style _cssTalkBox = mwin.FindResource("cssTalkBox") as Style;
-        //            Style _cssTalkBoxEdit = mwin.FindResource("cssTalkBoxEdit") as Style;
-        //            TalkBoxLayer talkBoxLayer = TalkBoxLayer.Create(
-        //                _KeyFilename,
-        //                _FileTitle,
-        //                _TalkBoxLyercutfileName,
-        //                _TalkBoxLyerCutFullPath,
-        //                Convert.ToInt32(_TalkBoxLyerFileNum),
-        //                _innerMemo,
-        //                image,
-        //                talkBoxLocationXY,
-        //                _cssTalkBox,
-        //                _cssTalkBoxEdit
-        //                );
-        //            mwin.CurTalkBox.Add(talkBoxLayer);
-        //            //talkBoxLayer.Text = _innerMemo.ToString();
-        //        }
-        //    }
-        //    //TextBox _TextBox1 = mwin.FindResource("TxtcutMemo") as TextBox;
-        //    //TextBox _TextBox2 = mwin.FindResource("TxtFileTitle") as TextBox;
-
-        //    mwin.TxtcutMemo.Text = sb2.ToString();  // 우상단
-        //    mwin.TxtFileTitle.Text = _FileTitle;
-
-        //    //base.RaisePropertyChanged("TxtcutMemo");
-        //    //BindableObject.RaisePropertyChanged("TxtcutMemo");
-        //    #endregion ########## text 바인딩 E ##########
-        //}
     }
 
     public class TalkBoxLayerCtrl : Adorner
@@ -659,7 +563,7 @@ namespace XrayTEXT
                 base.RaisePropertyChanged("IsHidden");
             }
         }
-        
+
 
         /// <summary>
         /// 잘라낸 서브 이미지 파일 번호
@@ -743,7 +647,8 @@ namespace XrayTEXT
             {
                 _TxtBoxL_AddCont.UpdateTextLocation(newLocation);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 //MessageBox.Show("OnImageSizeChanged : " + ex.ToString());
             }
         }
@@ -906,139 +811,55 @@ namespace XrayTEXT
         protected override Visual GetVisualChild(int index) { return visualChildren[index]; }
     }
 
-    /// <summary>
-    /// This class describes a single photo - its location, the image and 
-    /// the metadata extracted from the image.
-    /// </summary>
-    public class Photo
-    {
-        public Photo(string path)
-        {
-            _path = path;
-            _source = new Uri(path);
-            try
-            {
-                _image = BitmapFrame.Create(_source);
-            }
-            catch (NotSupportedException)
-            {
-            }
-        }
 
-        public override string ToString()
-        {
-            return _source.ToString();
-        }
 
-        private string _path;
 
-        private Uri _source;
-        public string Source { get { return _path; } }
+    #region #### PropertyChangedEventHandler ####
+    //public event PropertyChangedEventHandler PropertyChanged;
+    //void OnPropertyChanged(string prop)
+    //{
+    //    if (this.PropertyChanged != null)
+    //        this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
+    //}
 
-        private BitmapFrame _image;
-        public BitmapFrame Image { get { return _image; } set { _image = value; } }
+    //private void NotifyPropertyChanged(String info)
+    //{
+    //    var listeners = PropertyChanged;
+    //    if (listeners != null)
+    //    {
+    //        PropertyChanged(this, new PropertyChangedEventArgs(info));
+    //    }
+    //}
 
-    }
+    //private string _userFileMemo;
+    //private string _userCutMemo;
 
-    /// <summary>
-    /// This class represents a collection of photos in a directory.
-    /// </summary>
-    public class PhotoCollection : ObservableCollection<Photo>
-    {
-        public PhotoCollection() { }
-        public PhotoCollection(string path) : this(new DirectoryInfo(path)) { }
-        public PhotoCollection(DirectoryInfo directory)
-        {
-            _directory = directory;
-            GetImageRead();
-        }
+    //public string UserCutMemo
+    //{
+    //    get { return _userCutMemo; }
+    //    set
+    //    {
+    //        if (!string.Equals(this._userCutMemo, value))
+    //        {
+    //            this._userCutMemo = value;
+    //            NotifyPropertyChanged("UserCutMemo");
+    //        }
+    //    }
+    //}
 
-        public string Path
-        {
-            set
-            {
-                _directory = new DirectoryInfo(value);
-                GetImageRead();
-            }
-            get { return _directory.FullName; }
-        }
+    //public string UserFileMemo
+    //{
+    //    get { return _userFileMemo; }
+    //    set
+    //    {
+    //        if (!string.Equals(this._userFileMemo, value))
+    //        {
+    //            this._userFileMemo = value;
+    //            NotifyPropertyChanged("UserFileMemo");
+    //        }
+    //    }
+    //}
+    #endregion #### PropertyChangedEventHandler ####
 
-        public DirectoryInfo Directory
-        {
-            set
-            {
-                _directory = value;
-                GetImageRead();
-            }
-            get { return _directory; }
-        }
-
-        private void GetImageRead()
-        {
-            this.Clear();
-            try
-            {
-                foreach (FileInfo f in
-                    _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png"))
-                    )
-                {
-                    Add(new Photo(f.FullName));
-                }
-            }
-            catch (DirectoryNotFoundException)
-            {
-                System.Windows.MessageBox.Show("폴더가 없습니다.");
-            }
-        }
-        DirectoryInfo _directory;
-
-        #region #### PropertyChangedEventHandler ####
-        //public event PropertyChangedEventHandler PropertyChanged;
-        //void OnPropertyChanged(string prop)
-        //{
-        //    if (this.PropertyChanged != null)
-        //        this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
-        //}
-
-        //private void NotifyPropertyChanged(String info)
-        //{
-        //    var listeners = PropertyChanged;
-        //    if (listeners != null)
-        //    {
-        //        PropertyChanged(this, new PropertyChangedEventArgs(info));
-        //    }
-        //}
-
-        //private string _userFileMemo;
-        //private string _userCutMemo;
-
-        //public string UserCutMemo
-        //{
-        //    get { return _userCutMemo; }
-        //    set
-        //    {
-        //        if (!string.Equals(this._userCutMemo, value))
-        //        {
-        //            this._userCutMemo = value;
-        //            NotifyPropertyChanged("UserCutMemo");
-        //        }
-        //    }
-        //}
-
-        //public string UserFileMemo
-        //{
-        //    get { return _userFileMemo; }
-        //    set
-        //    {
-        //        if (!string.Equals(this._userFileMemo, value))
-        //        {
-        //            this._userFileMemo = value;
-        //            NotifyPropertyChanged("UserFileMemo");
-        //        }
-        //    }
-        //}
-        #endregion #### PropertyChangedEventHandler ####
-
-    }
 
 }

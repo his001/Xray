@@ -137,7 +137,7 @@
             </MenuItem>
         </Menu>
 
-            <Grid Margin="0" Grid.Row="1">
+        <Grid Margin="0" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="5" />
                 <RowDefinition Height="*" />
@@ -150,27 +150,29 @@
             </Grid.ColumnDefinitions>
 
             <!--썸네일-->
-            <GroupBox Grid.Column="0" Grid.Row="1" Width="200">
-
-                <TabControl x:Name="tabLeft" Grid.Row="1" Grid.Column="0">
-                    <TabItem Header="탐색기">
-                        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Top">
-
-
-                        </Border>
-                    </TabItem>
-                    <TabItem Header="썸네일">
-                            <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Top">
-
+                <GroupBox Grid.Column="0" Grid.Row="1" Width="200">
+                    <TabControl x:Name="tabLeft" Grid.Row="1" Grid.Column="0">
+                        <TabItem Header="탐색기">
+                            <TreeView x:Name="LeftTree" Margin="8,0,8,16" Foreground="#FFFFFFFF" ItemsSource="{Binding MyThingyCollection}">
+                                <TreeView.Background>
+                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                        <!--<GradientStop Color="#FFFFFFFF" Offset="1"/>
+                                    <GradientStop Color="#FF630404" Offset="0"/>-->
+                                    </LinearGradientBrush>
+                                </TreeView.Background>
+                            </TreeView>
+                        </TabItem>
+                        
+                        <TabItem Header="썸네일">
                             <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" Width="200">
                                 <ListBox DataContext="{Binding Source={StaticResource Photos}}"
-                                IsSynchronizedWithCurrentItem="True"
-                                Name="PhotosListBox" 
-                                Style="{StaticResource PhotoListBoxStyle}" 
-                                SelectionMode="Extended" 
-                                ItemsSource="{Binding}" 
-                                SelectedIndex="0" 
-                                MouseDoubleClick="OnPhotoDblClick" Width="180" >
+                                    IsSynchronizedWithCurrentItem="True"
+                                    Name="PhotosListBox" 
+                                    Style="{StaticResource PhotoListBoxStyle}" 
+                                    SelectionMode="Extended" 
+                                    ItemsSource="{Binding}" 
+                                    SelectedIndex="0" 
+                                    MouseDoubleClick="OnPhotoDblClick" Width="180" >    
                                     <ListBox.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="삭제" Click="deletePhoto"/>
@@ -178,14 +180,11 @@
                                     </ListBox.ContextMenu>
                                 </ListBox>
                             </ScrollViewer>
+                        </TabItem>
+                    </TabControl>
+                </GroupBox>
 
-                        </Border>
-                    </TabItem>
-                </TabControl>
-
-            </GroupBox>
-
-            <!-- Zoom Control -->
+                <!-- Zoom Control -->
             <DockPanel DockPanel.Dock="Bottom" Margin="5" Grid.Column="0" Grid.Row="2">
                 <Label DockPanel.Dock="Left" FontSize="12">Zoom:</Label>
                 <Slider Name="ZoomSlider" 
@@ -203,23 +202,20 @@
             <!--X-ray-->
             <TabControl x:Name="tabControl" Grid.Row="1" Grid.Column="1">
                 <TabItem Header="X-Ray">
-                    <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border BorderBrush="Black" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center">
 
                         <ScrollViewer Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                      x:Name="ImageViewer">
-                            <Grid x:Name="root" Background="White">
-                                <Canvas Name="Xcanvas" Width="1500" Height="960">
-                                    <Image Name="ViewedPhoto" Width="1223" Height="1005" Margin="1" Stretch="UniformToFill" 
-                                       
->
-                                        <Image.RenderTransform>
-                                            <ScaleTransform x:Name="Zoom" ScaleX="1" ScaleY="1">
-                                            </ScaleTransform>
-                                        </Image.RenderTransform>
-                                    </Image>
-
-                                </Canvas>
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                            x:Name="ImageViewer">
+                                <Grid x:Name="root" Background="White" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <Canvas Name="Xcanvas" Width="1500" Height="960" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                        <Image Name="ViewedPhoto" Width="1223" Height="1005" Margin="1" Stretch="UniformToFill"  HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Image.RenderTransform>
+                                                <ScaleTransform x:Name="Zoom" ScaleX="1" ScaleY="1">
+                                                </ScaleTransform>
+                                            </Image.RenderTransform>
+                                        </Image>
+                                    </Canvas>
                                 <!--<TextBlock x:Name="tbPosition" Text="마우스 좌표 : [0.0]" Margin="10" />-->
                             </Grid>
                         </ScrollViewer>
@@ -233,7 +229,7 @@
                 <!-- 컷팅 메모 -->
                 <TextBox Name="TxtcutMemo" x:FieldModifier="public"
                      Text="{Binding MainViewModel.UserCutMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Width="190" MinHeight="400" Margin="1,0" 
+                     Width="200" MinHeight="600" Margin="1,0" 
                      VerticalAlignment="Top"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
