@@ -7,7 +7,7 @@
     FontSize="14"  WindowStartupLocation="CenterScreen"
     WindowState="Maximized" 
     Loaded="OnLoaded"
-        Icon="x-ray.ico"
+    Icon="x-ray.ico"
     >
     <!--WindowStyle="ToolWindow" ResizeMode="NoResize"
     DataContext="{Binding ElementName = CodeBehind}"
@@ -70,7 +70,6 @@
             </Grid>
         </DataTemplate>
 
-
         <!-- Main photo catalog view -->
         <Style TargetType="{x:Type ListBox}" x:Key="PhotoListBoxStyle">
             <Setter Property="Foreground" Value="White" />
@@ -108,42 +107,88 @@
         <ObjectDataProvider x:Key="Photos" ObjectType="{x:Type er:PhotoCollection}" />
     </Window.Resources>
 
-    <Grid Margin="1" >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="40" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition Width="200"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
+    <DockPanel>
+        <Grid Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
-        <!--썸네일-->
-        <GroupBox Grid.Column="0" Grid.Row="1" Width="200" >
-            <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" Width="200">
-                <ListBox DataContext="{Binding Source={StaticResource Photos}}"
-                    IsSynchronizedWithCurrentItem="True"
-                    Name="PhotosListBox" 
-                    Style="{StaticResource PhotoListBoxStyle}" 
-                    SelectionMode="Extended" 
-                    ItemsSource="{Binding}" 
-                    SelectedIndex="0" 
-                    MouseDoubleClick="OnPhotoDblClick" Width="180" >
-                    <ListBox.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="삭제" Click="deletePhoto"/>
-                        </ContextMenu>
-                    </ListBox.ContextMenu>
-                </ListBox>
-            </ScrollViewer>
-        </GroupBox>
 
-        <!-- Zoom Control -->
-        <DockPanel DockPanel.Dock="Bottom" Margin="5" Grid.Column="0" Grid.Row="2">
-            <Label DockPanel.Dock="Left" FontSize="12">Zoom:</Label>
-            <Slider Name="ZoomSlider" 
+            <Menu IsMainMenu="True" VerticalAlignment="Top" Grid.Row="0">
+            <!--ItemsSource="{Binding TopMenuItems}"-->
+            <!--<Menu.ItemContainerStyle>
+                <Style TargetType="{x:Type MenuItem}">
+                    <Setter Property="Header" Value="{Binding Title}"/>
+                    <Setter Property="ItemsSource" Value="{Binding Path=ChildMenuItems}"/>
+                </Style>
+            </Menu.ItemContainerStyle>-->
+            <MenuItem Header="File">
+                <MenuItem Header="New">
+                    <MenuItem Header="File1"/>
+                    <MenuItem Header="File2"/>
+                    <MenuItem Header="File3"/>
+                </MenuItem>
+                <MenuItem Header="Open"/>
+                <MenuItem Header="Save"/>
+            </MenuItem>
+        </Menu>
+
+            <Grid Margin="0" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="40" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition Width="200"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <!--썸네일-->
+            <GroupBox Grid.Column="0" Grid.Row="1" Width="200">
+
+                <TabControl x:Name="tabLeft" Grid.Row="1" Grid.Column="0">
+                    <TabItem Header="탐색기">
+                        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Top">
+
+
+                        </Border>
+                    </TabItem>
+                    <TabItem Header="썸네일">
+                            <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Top">
+
+                            <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" Width="200">
+                                <ListBox DataContext="{Binding Source={StaticResource Photos}}"
+                                IsSynchronizedWithCurrentItem="True"
+                                Name="PhotosListBox" 
+                                Style="{StaticResource PhotoListBoxStyle}" 
+                                SelectionMode="Extended" 
+                                ItemsSource="{Binding}" 
+                                SelectedIndex="0" 
+                                MouseDoubleClick="OnPhotoDblClick" Width="180" >
+                                    <ListBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="삭제" Click="deletePhoto"/>
+                                        </ContextMenu>
+                                    </ListBox.ContextMenu>
+                                </ListBox>
+                            </ScrollViewer>
+
+                        </Border>
+                    </TabItem>
+                </TabControl>
+
+            </GroupBox>
+
+            <!-- Zoom Control -->
+            <DockPanel DockPanel.Dock="Bottom" Margin="5" Grid.Column="0" Grid.Row="2">
+                <Label DockPanel.Dock="Left" FontSize="12">Zoom:</Label>
+                <Slider Name="ZoomSlider" 
                 Margin="10,0,0,0" 
           Orientation="Horizontal" 
           Minimum="80" 
@@ -153,48 +198,50 @@
           TickPlacement="BottomRight" 
           SmallChange="5"
           LargeChange="20" Width="110" FontSize="12" />
-        </DockPanel>
+            </DockPanel>
 
-        <!--X-ray-->
-        <TabControl x:Name="tabControl" Grid.Row="1" Grid.Column="1">
-            <TabItem Header="X-Ray">
-                <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <!--X-ray-->
+            <TabControl x:Name="tabControl" Grid.Row="1" Grid.Column="1">
+                <TabItem Header="X-Ray">
+                    <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
 
-                    <ScrollViewer Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        <ScrollViewer Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
                       x:Name="ImageViewer">
-                        <Grid x:Name="root" Background="White">
-                            <Canvas Name="Xcanvas" Width="1500" Height="960">
-                                <Image Name="ViewedPhoto" Width="1223" Height="1005" Margin="1" Stretch="UniformToFill" 
+                            <Grid x:Name="root" Background="White">
+                                <Canvas Name="Xcanvas" Width="1500" Height="960">
+                                    <Image Name="ViewedPhoto" Width="1223" Height="1005" Margin="1" Stretch="UniformToFill" 
                                        
->                                    <Image.RenderTransform>
-                                        <ScaleTransform x:Name="Zoom" ScaleX="1" ScaleY="1">
-                                        </ScaleTransform>
-                                    </Image.RenderTransform>
-                                </Image>
+>
+                                        <Image.RenderTransform>
+                                            <ScaleTransform x:Name="Zoom" ScaleX="1" ScaleY="1">
+                                            </ScaleTransform>
+                                        </Image.RenderTransform>
+                                    </Image>
 
-                            </Canvas>
-                            <!--<TextBlock x:Name="tbPosition" Text="마우스 좌표 : [0.0]" Margin="10" />-->
-                        </Grid>
-                    </ScrollViewer>
-                </Border>
-            </TabItem>
-        </TabControl>
+                                </Canvas>
+                                <!--<TextBlock x:Name="tbPosition" Text="마우스 좌표 : [0.0]" Margin="10" />-->
+                            </Grid>
+                        </ScrollViewer>
 
-        <!-- 의사 소견 -->
-        <DockPanel DockPanel.Dock="Bottom" Margin="5" Grid.Column="2" Grid.Row="1">
-            <!-- 컷팅 메모 -->
-            <TextBox Name="TxtcutMemo" x:FieldModifier="public"
+                    </Border>
+                </TabItem>
+            </TabControl>
+
+            <!-- 의사 소견 -->
+            <DockPanel DockPanel.Dock="Bottom" Margin="5" Grid.Column="2" Grid.Row="1">
+                <!-- 컷팅 메모 -->
+                <TextBox Name="TxtcutMemo" x:FieldModifier="public"
                      Text="{Binding MainViewModel.UserCutMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Width="190" MinHeight="400" Margin="1,0" 
                      VerticalAlignment="Top"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      >
-            </TextBox>
-            <!---->
+                </TextBox>
+                <!---->
             <!-- 사진 파일 설명 -->
-            <TextBox Name="TxtFileTitle" x:FieldModifier="public"
+                <TextBox Name="TxtFileTitle" x:FieldModifier="public"
                     Text="{Binding MainViewModel.UserFileMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Width="190" Height="120" Margin="-190,0" 
                     VerticalAlignment="Bottom"
@@ -202,56 +249,60 @@
                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                     >
-            </TextBox>
-            <!--Text="{Binding UserFileMemo, UpdateSourceTrigger=PropertyChanged}"-->
-        </DockPanel>
+                </TextBox>
+                <!--Text="{Binding UserFileMemo, UpdateSourceTrigger=PropertyChanged}"-->
+            </DockPanel>
 
-        <!-- 소견저장 버튼 -->
-        <Button Name="btnSaveText"
+            <!-- 소견저장 버튼 -->
+            <Button Name="btnSaveText"
           Grid.Row="2" Grid.Column="1"
           Click="OnSaveButtonClick"
           HorizontalAlignment="Left"
           Margin="65,0,0,0" 
           x:FieldModifier="public">소견저장
-        </Button>
+            </Button>
 
-        <!-- 소견삭제 버튼 -->
-        <Button Name="btnDelText"
+            <!-- 소견삭제 버튼 -->
+            <Button Name="btnDelText"
           Grid.Row="2" Grid.Column="1"
           Click="OnDeleteButtonClick"
           HorizontalAlignment="Left"
           Margin="0,0,60,0"
           >소견삭제
-        </Button>
+            </Button>
 
-        <!-- 소견로드 버튼 -->
-        <Button Name="btnLoadText"
+            <!-- 소견로드 버튼 -->
+            <Button Name="btnLoadText"
           Grid.Row="2" Grid.Column="1"
           Click="OnLoadButtonClick"
           HorizontalAlignment="Left"
           Margin="130,0,0,0"
           >소견로드
-        </Button>
-        <!-- 소견DB저장 버튼 -->
-        <Button Name="btnSaveDBText"
+            </Button>
+            <!-- 소견DB저장 버튼 -->
+            <Button Name="btnSaveDBText"
           Grid.Row="2" Grid.Column="1"
           Click="OnSaveDBButtonClick"
           HorizontalAlignment="Left"
           Margin="195,0,0,0"
           >소견DB저장
-        </Button>
+            </Button>
 
-        <Button Name="btnUpText"
+            <Button Name="btnUpText"
           Grid.Row="2" Grid.Column="1"
           Click="UpTextSetBind"
           HorizontalAlignment="Left"
           Margin="285,0,0,0"
           >txt저장후소견로드
-        </Button>
+            </Button>
 
-        <!-- 이미지경로 -->
-        <TextBox Name="ImagesDir" Margin="0,0.333,120.333,-0.333" Width="290" Grid.Row="2" Grid.Column="1" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images"  HorizontalAlignment="Right" />
-        <!-- 이미지경로 변경 버튼 -->
-        <Button Grid.Row="2" Grid.Column="1"  Margin="20,0,0,0" Width="80" Click="OnImagesDirChangeClick" HorizontalAlignment="Right">폴더변경</Button>
-    </Grid>
+            <!-- 이미지경로 -->
+            <TextBox Name="ImagesDir" Margin="0,0.333,120.333,-0.333" Width="290" Grid.Row="2" Grid.Column="1" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images"  HorizontalAlignment="Right" />
+            <!-- 이미지경로 변경 버튼 -->
+            <Button Grid.Row="2" Grid.Column="1"  Margin="20,0,0,0" Width="80" Click="OnImagesDirChangeClick" HorizontalAlignment="Right">폴더변경</Button>
+        </Grid>
+        </Grid>
+    </DockPanel>
+
+    
 </Window>

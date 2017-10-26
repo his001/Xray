@@ -148,11 +148,11 @@ namespace XrayTEXT
                 //MessageBox.Show(ex.Message);
             }
             //(Application.Current.MainWindow as MainWin).btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
-            mwin.btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
-
+            //mwin.btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
             //XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
             //mainViewModel.UserCutMemo = _talkBoxLayer.Text;//.ToString();
             //mainViewModel.UserFileMemo = _talkBoxLayer.TalkBoxLyerFileTitle;
+            new Action(() => mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))).SetTimeout(500);
 
             return rtn;
         }

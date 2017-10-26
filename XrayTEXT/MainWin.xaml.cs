@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
@@ -35,6 +36,9 @@ namespace XrayTEXT
 
         public TalkBoxLayer Last_talkBoxLayer = null; // 마지막 선택/작업 되었던 레이어
         public Image Last_image = null; // 마지막 선택/작업 되었던 이미지
+
+
+  
         #endregion ######################### 선언 #########################
 
         #region ######################### MainWin #########################
@@ -144,6 +148,8 @@ namespace XrayTEXT
 
 
         #endregion ######################### MainWin #########################
+
+        
 
         #region ######## DB 키 생성 ########
         public string getKeyWithPath()
@@ -630,8 +636,8 @@ namespace XrayTEXT
             if (this.CurTalkBox.Count > 0)
             {
                 this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) {
-                    //_txt_layer.Delete();
-                    _txt_layer.SetHidden();
+                    _txt_layer.Delete();
+                    //_txt_layer.SetHidden();
                 });
                 this.CurTalkBox.Clear();
             }
@@ -679,39 +685,42 @@ namespace XrayTEXT
             string _TalkBoxLyerCutFullPath = "";
             string _TalkBoxLyerFileNum = "";
 
+            TalkBoxLayer talkBoxLayer_Last_Add =  null;
+
             //byte[] photo_aray; //DB에서 이미지를 불러온다
             StringBuilder sb2 = new StringBuilder();
             if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
             {
                 _FileTitle = ds.Tables[0].Rows[0]["FileTitle"].ToString();
+                
                 for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                 {
+                    #region ################ 동일한 키 _TalkBoxLyercutfileName 가 있는지 확인 ####################
                     bool chk_existLayer = false;
-
-                    //var dataLayer = from CutFilename in _LstTalkBoxLayer
-                    //  where (_KeyFilename == getKeyFileNameOnly()) && (CutFilename == ds.Tables[0].Rows[i]["CutFullPath"].ToString())
-                    //  orderby CutFilename
-                    //select CutFilename;
-
                     for (int j = 0; j < _LstTalkBoxLayer.Count; j++)
                     {
-                        if (getKeyFileNameOnly() == _LstTalkBoxLayer[j].TalkBoxLyerkeyFilename 
-                            && ds.Tables[0].Rows[i]["CutFullPath"].ToString() == _LstTalkBoxLayer[j].TalkBoxLyercutfileName)
+                        if ( (getKeyFileNameOnly() == _LstTalkBoxLayer[j].TalkBoxLyerkeyFilename) 
+                            && (ds.Tables[0].Rows[i]["CutFullPath"].ToString() == _LstTalkBoxLayer[j].TalkBoxLyercutfileName))
                         {
                             chk_existLayer = true;
                             break;
                         }
                     }
+                    //var dataLayer = from CutFilename in _LstTalkBoxLayer
+                    //  where (_KeyFilename == getKeyFileNameOnly()) && (CutFilename == ds.Tables[0].Rows[i]["CutFullPath"].ToString())
+                    //  orderby CutFilename
+                    //select CutFilename;
+                    #endregion ################ 동일한 키 _TalkBoxLyercutfileName 가 있는지 확인 ####################
 
                     #region ################ 동일한 키 _TalkBoxLyercutfileName 이있을 경우 추가 하지 않음 ####################
                     if (!chk_existLayer)  
                     {
-                        _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
+                        _KeyFilename            = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
                         _TalkBoxLyercutfileName = ds.Tables[0].Rows[i]["CutFilename"].ToString();
                         _TalkBoxLyerCutFullPath = ds.Tables[0].Rows[i]["CutFullPath"].ToString();
-                        _TalkBoxLyerFileNum = ds.Tables[0].Rows[i]["numb"].ToString();
+                        _TalkBoxLyerFileNum     = ds.Tables[0].Rows[i]["numb"].ToString();
                         _innerMemo = "";
-                        _innerMemo = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
+                        _innerMemo              = ds.Tables[0].Rows[i]["memo"].ToString();   // 글내용 (의사소견)
                         sb2.AppendLine(_innerMemo);
 
                         Point talkBoxLocationXY = new Point(Convert.ToDouble(ds.Tables[0].Rows[i]["PointX"].ToString()), Convert.ToDouble(ds.Tables[0].Rows[i]["PointY"].ToString()));
@@ -748,14 +757,25 @@ namespace XrayTEXT
                         );
 
                         this.CurTalkBox.Add(talkBoxLayer);
+                        talkBoxLayer_Last_Add = talkBoxLayer;
                     }
                     #endregion ################ 동일한 키 _TalkBoxLyercutfileName 이있을 경우 추가 하지 않음 ####################
                 }
+                #region ##### 마지막에 추가된 레이어를 편집 모드에서 해제 #####
+                if (talkBoxLayer_Last_Add != null)  
+                {
+                    TalkBoxLayerControl _control;
+                    Style _cssTalkBox = this.FindResource("cssTalkBox") as Style;
+                    Style _cssTalkBoxEdit = this.FindResource("cssTalkBoxEdit") as Style;
+                    _control = new TalkBoxLayerControl(talkBoxLayer_Last_Add, _cssTalkBox, _cssTalkBoxEdit);
+                    _control.IsEnabled = false;
+                }
+                #endregion ##### 마지막에 추가된 레이어를 편집 모드에서 해제 #####
             }
             TxtcutMemo.Text = sb2.ToString();  // 우상단
             TxtFileTitle.Text = _FileTitle;
             #endregion ########## text 바인딩 E ##########
-            
+            GC.Collect();
         }
 
         #region ######################### 좌측 트리에서 사진 #########################
@@ -766,8 +786,8 @@ namespace XrayTEXT
         /// <param name="e"></param>
         private void OnPhotoDblClick(object sender, RoutedEventArgs e)
         {
-            //btnSaveText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); //btnSaveText.PerformClick() in wpf
-            //btnDelText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            btnSaveText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); //btnSaveText.PerformClick() in wpf
+            btnDelText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             TxtFileTitle.Text = string.Empty; // 소견 data 삭제
             TxtcutMemo.Text = string.Empty;  // 우상단
 
@@ -833,11 +853,12 @@ namespace XrayTEXT
         //}
 
         #endregion ##################### 기타 차후 사용할수 있어서 일단 주석 처리 #####################
-
-
-
+        
     }
 
+
+    #region ######### menu
+    #endregion  ######### menu
 
     public static class SettimeoutDelegateExtension
     {
