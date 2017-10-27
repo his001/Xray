@@ -25,7 +25,7 @@ namespace XrayTEXT
         Rectangle currentRect; //현재 그려지는 네모
         public PhotoCollection Photos = new PhotoCollection(Helpers.PicFolder);
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
-        List<TalkBoxLayerControl> _LstTalkBoxLayerControl = new List<TalkBoxLayerControl>();  // 소견의 컨트롤
+        //List<TalkBoxLayerControl> _LstTalkBoxLayerControl = new List<TalkBoxLayerControl>();  // 소견의 컨트롤
         double scaleX = 1;
         double scaleY = 1;
         TranslateTransform translate = new TranslateTransform();
@@ -34,7 +34,7 @@ namespace XrayTEXT
         public Image Last_image = null; // 마지막 선택/작업 되었던 이미지  
         public string _key = string.Empty;      //key 파일 이미지(좌측 썸네일중 선택된 파일 경로 및 이름 )
 
-        public event EventHandler<EventArgs> eventMainNeedChange;
+        //public event EventHandler<EventArgs> eventMainNeedChange;
         public int curUIMemoCnt = 0;  // 화면 상의 메모 레이어 갯수
         XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
         #endregion ######################### 선언 #########################
@@ -395,7 +395,7 @@ namespace XrayTEXT
         {
             if (PhotosListBox.SelectedItem != null)
             {
-                this.root.ReleaseMouseCapture(); //마우스 캡춰를 제거한다.
+                this.root.ReleaseMouseCapture(); //마우스 캡처를 제거한다.
                 SetRectangleProperty();
                 #region ############
                 try
@@ -449,8 +449,8 @@ namespace XrayTEXT
                         this.CurTalkBox.Add(_talkBoxLayer);
 
                         ///////////////////
-                        TalkBoxLayerControl _LstTalkBoxLayerControl = new TalkBoxLayerControl(_talkBoxLayer, _cssTalkBox, _cssTalkBoxEdit);
-                        this.CurTalkBoxControl.Add(_LstTalkBoxLayerControl);
+                        //TalkBoxLayerControl _LstTalkBoxLayerControl = new TalkBoxLayerControl(_talkBoxLayer, _cssTalkBox, _cssTalkBoxEdit);
+                        //this.CurTalkBoxControl.Add(_LstTalkBoxLayerControl);
                         ///////////////////
 
                         Last_talkBoxLayer = _talkBoxLayer; //마지막 작업 레이어를 저장 하기 위해 ...
@@ -561,13 +561,54 @@ namespace XrayTEXT
         /// 소견삭제
         /// </summary>
         /// <returns></returns>
-        private string SetDeleteAllTextBox()
+        private void SetDeleteAllTextBox()
         {
-            string _rtn = "";
+            if (_key == "") {
+                //MessageBox.Show("좌측 이미지를 선택하신 후 삭제 가능 합니다.");
+                return;
+            }
             TxtcutMemo.Text = string.Empty;
             TxtFileTitle.Text = string.Empty;
             SetClearTalkBoxLayer();
-            return _rtn;
+            TxtLayUICnt.Text = "0"; curUIMemoCnt = 0;
+            TxtLayDBCnt.Text = "0";
+                       
+        }
+
+        /// <summary>
+        /// 소견 DB삭제
+        /// </summary>
+        /// <returns></returns>
+        private void SetDeleteDB()
+        {
+            if (_key == "")
+            {
+                MessageBox.Show("좌측 이미지를 선택하신 후 삭제 가능 합니다.");
+                return;
+            }
+            TxtcutMemo.Text = string.Empty;
+            TxtFileTitle.Text = string.Empty;
+            SetClearTalkBoxLayer();
+            try
+            {
+                string constr = Helpers.dbCon;
+                using (SqlConnection conn = new SqlConnection(constr))
+                {
+                    conn.Open();
+                    string sql = "DELETE FROM TBL_TalkBoxLayer WHERE KeyFilename = '" + _key + "';";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        int result = cmd.ExecuteNonQuery();
+                        if (result == 1)
+                        {
+                            TxtLayUICnt.Text = "0"; curUIMemoCnt = 0;
+                            TxtLayDBCnt.Text = "0";
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex) { }
         }
         #endregion ######### 소견삭제 #########
 
@@ -731,8 +772,8 @@ namespace XrayTEXT
                         this.CurTalkBox.Add(talkBoxLayer);
                         talkBoxLayer_Last_Add = talkBoxLayer;
 
-                        TalkBoxLayerControl _LstTalkBoxLayerControl = new TalkBoxLayerControl(talkBoxLayer, _cssTalkBox, _cssTalkBoxEdit);
-                        this.CurTalkBoxControl.Add(_LstTalkBoxLayerControl);
+                        //TalkBoxLayerControl _LstTalkBoxLayerControl = new TalkBoxLayerControl(talkBoxLayer, _cssTalkBox, _cssTalkBoxEdit);
+                        //this.CurTalkBoxControl.Add(_LstTalkBoxLayerControl);
 
                     }
                     curUIMemoCnt = insCnt;
@@ -772,15 +813,15 @@ namespace XrayTEXT
             }
         }
 
-        public List<TalkBoxLayerControl> CurTalkBoxControl
-        {
-            get
-            {
-                //if (this.tabControl.SelectedIndex == 0)
-                return _LstTalkBoxLayerControl;
-                //return _habitatAnnotations;
-            }
-        }
+        //public List<TalkBoxLayerControl> CurTalkBoxControl
+        //{
+        //    get
+        //    {
+        //        //if (this.tabControl.SelectedIndex == 0)
+        //        return _LstTalkBoxLayerControl;
+        //        //return _habitatAnnotations;
+        //    }
+        //}
         
 
         #endregion ######### 소견로드 #########
@@ -798,7 +839,7 @@ namespace XrayTEXT
                 this.CurTalkBox.Clear();
             }
 
-            this.CurTalkBoxControl.Clear();
+            //this.CurTalkBoxControl.Clear();
 
 
             #endregion #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####

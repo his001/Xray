@@ -37,6 +37,15 @@ namespace XrayTEXT
         //    ReturnToText("이벤트 호출 SetTextChange");//이벤트 호출
         //}
 
+        public static string rtnSQLInj(string strValue)
+        {
+            string tmp = strValue;
+            tmp = tmp.Replace("--", "");
+            tmp = tmp.Replace("'", "`");
+            tmp = tmp.Replace("1=1", "");
+            tmp = tmp.Replace(";", "");
+            return tmp;
+        }
 
         /// <summary>
         /// 폴더에서 사진을 가져와 byte[]로 변환
@@ -108,9 +117,9 @@ namespace XrayTEXT
                     sql = sql + " BEGIN";
                     sql = sql + " update TBL_TalkBoxLayer set ";
                     sql = sql + " CutFullPath = '" + _talkBoxLayer.TalkBoxLyerCutFullPath + "', ";
-                    sql = sql + " FileTitle = '" + _talkBoxLayer.TalkBoxLyerFileTitle + "', ";
+                    sql = sql + " FileTitle = '" + rtnSQLInj(_talkBoxLayer.TalkBoxLyerFileTitle) + "', ";
                     sql = sql + " numb = '" + _talkBoxLayer.TalkBoxLyerFileNum.ToString() + "', ";
-                    sql = sql + " memo = '" + _talkBoxLayer.Text + "', ";
+                    sql = sql + " memo = '" + rtnSQLInj(_talkBoxLayer.Text) + "', ";
                     sql = sql + " PointX = '" + _talkBoxLayer.TalkBoxLyerPointX + "', ";
                     sql = sql + " PointY = '" + _talkBoxLayer.TalkBoxLyerPointY + "', ";
                     sql = sql + " SizeW = '" + _talkBoxLayer.TalkBoxLyerSizeW + "', ";
@@ -127,14 +136,14 @@ namespace XrayTEXT
                     sql = sql + _talkBoxLayer.TalkBoxLyerkeyFilename + "','";
                     sql = sql + _talkBoxLayer.TalkBoxLyercutfileName + "','";
                     sql = sql + _talkBoxLayer.TalkBoxLyerCutFullPath + "','";
-                    sql = sql + _talkBoxLayer.TalkBoxLyerFileTitle + "',";
+                    sql = sql + rtnSQLInj(_talkBoxLayer.TalkBoxLyerFileTitle) + "',";
                     sql = sql + _talkBoxLayer.TalkBoxLyerFileNum.ToString() + ",'";
-                    sql = sql + _talkBoxLayer.Text + "','";
+                    sql = sql + rtnSQLInj(_talkBoxLayer.Text) + "','";
                     sql = sql + _talkBoxLayer.TalkBoxLyerPointX + "','";
                     sql = sql + _talkBoxLayer.TalkBoxLyerPointY;
                     sql = sql + "','" + _talkBoxLayer.TalkBoxLyerSizeW;
                     sql = sql + "','" + _talkBoxLayer.TalkBoxLyerSizeH;
-                    sql = sql + "',@Fileimg); update TBL_TalkBoxLayer set FileTitle ='" + _talkBoxLayer.TalkBoxLyerFileTitle + "' where KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "'; ";
+                    sql = sql + "',@Fileimg); update TBL_TalkBoxLayer set FileTitle ='" + rtnSQLInj(_talkBoxLayer.TalkBoxLyerFileTitle) + "' where KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "'; ";
                     sql = sql + "END";
 
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -816,52 +825,7 @@ namespace XrayTEXT
         protected override Visual GetVisualChild(int index) { return visualChildren[index]; }
     }
 
-    #region #### PropertyChangedEventHandler ####
-    //public event PropertyChangedEventHandler PropertyChanged;
-    //void OnPropertyChanged(string prop)
-    //{
-    //    if (this.PropertyChanged != null)
-    //        this.PropertyChanged(this, new PropertyChangedEventArgs(prop));
-    //}
-
-    //private void NotifyPropertyChanged(String info)
-    //{
-    //    var listeners = PropertyChanged;
-    //    if (listeners != null)
-    //    {
-    //        PropertyChanged(this, new PropertyChangedEventArgs(info));
-    //    }
-    //}
-
-    //private string _userFileMemo;
-    //private string _userCutMemo;
-
-    //public string UserCutMemo
-    //{
-    //    get { return _userCutMemo; }
-    //    set
-    //    {
-    //        if (!string.Equals(this._userCutMemo, value))
-    //        {
-    //            this._userCutMemo = value;
-    //            NotifyPropertyChanged("UserCutMemo");
-    //        }
-    //    }
-    //}
-
-    //public string UserFileMemo
-    //{
-    //    get { return _userFileMemo; }
-    //    set
-    //    {
-    //        if (!string.Equals(this._userFileMemo, value))
-    //        {
-    //            this._userFileMemo = value;
-    //            NotifyPropertyChanged("UserFileMemo");
-    //        }
-    //    }
-    //}
-    #endregion #### PropertyChangedEventHandler ####
+    
 
 
 }
