@@ -251,14 +251,22 @@
                 <!--Text="{Binding UserFileMemo, UpdateSourceTrigger=PropertyChanged}"-->
 
                     <TextBox Name="TxtServerTime" x:FieldModifier="public"
-	                    Width="100" Height="20" Margin="-190,-30" 
+	                    Width="80" Height="20" Margin="-190,-30" 
 	                    VerticalAlignment="Bottom"
 	                    HorizontalAlignment="Left"
 	                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
 	                    ScrollViewer.VerticalScrollBarVisibility="Auto"
 	                    ></TextBox>
-                    <TextBox Name="TxtLayCnt" x:FieldModifier="public"
-	                    Width="80" Height="20" Margin="-80,-30" 
+                    <TextBox Name="TxtLayUICnt" x:FieldModifier="public"
+	                    Width="40" Height="20" Margin="-100,-30" 
+	                    VerticalAlignment="Bottom"
+	                    HorizontalAlignment="Left"
+	                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+	                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+	                    ></TextBox>
+
+                    <TextBox Name="TxtLayDBCnt" x:FieldModifier="public"
+	                    Width="40" Height="20" Margin="-50,-30" 
 	                    VerticalAlignment="Bottom"
 	                    HorizontalAlignment="Left"
 	                    ScrollViewer.HorizontalScrollBarVisibility="Auto"

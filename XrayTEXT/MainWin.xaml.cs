@@ -94,13 +94,14 @@ namespace XrayTEXT
             //}
 
             // 화면의 ui 수와 db 의 ui 수가 다르면 같게 맞춘다.
-            if (curUIMemoCnt>0 || chkDBCnt>0 && (curUIMemoCnt != chkDBCnt) ) {
+            if ((curUIMemoCnt>0 || chkDBCnt>0) && (curUIMemoCnt != chkDBCnt) ) {
                 Reload_Right_Text();
             }
 
             //mainViewModel.UserCutMemo = curUIMemoCnt.ToString();
             //MessageBox.Show("UserCutMemo");
-            TxtLayCnt.Text = curUIMemoCnt.ToString();
+            TxtLayUICnt.Text = curUIMemoCnt.ToString();
+            TxtLayDBCnt.Text = chkDBCnt.ToString();
 
             //TxtcutMemo.Text = mainViewModel.UserCutMemo;
             //TxtFileTitle.Text = mainViewModel.UserFileMemo;
@@ -751,12 +752,9 @@ namespace XrayTEXT
 
             mainViewModel.UserCutMemo = sb2.ToString();
             mainViewModel.UserFileMemo = _FileTitle;
-            //TxtFileTitle.PrintNew();
-            //TxtcutMemo.PrintNew();
+
             TxtcutMemo.Text = sb2.ToString();  // 우상단
             TxtFileTitle.Text = _FileTitle;
-            //TxtLayCnt.Text = curUIMemoCnt.ToString();
-            //TxtLayCnt.PrintNew();
             #endregion ########## text 바인딩 E ##########
             GC.Collect();
         }
