@@ -22,7 +22,9 @@ namespace XrayTEXT
 
         public static string dbCon = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
         public static string PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
-        public static MainWin mwin = new MainWin();
+        //public static MainWin mwin = new MainWin();
+        //XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
+
         //public static string keyFilename = mwin.PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");  // Key 파일
         //public static string keyFilename = mwin.getKeyFileNameOnly();
 
@@ -151,13 +153,16 @@ namespace XrayTEXT
             {
                 //MessageBox.Show(ex.Message);
             }
-            //(Application.Current.MainWindow as MainWin).btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
-            //mwin.btnUpText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
-            //XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
+            //(Application.Current.MainWindow as MainWin).btnUpText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
+            //mwin.btnUpText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
+
             //mainViewModel.UserCutMemo = _talkBoxLayer.Text;//.ToString();
             //mainViewModel.UserFileMemo = _talkBoxLayer.TalkBoxLyerFileTitle;
-            new Action(() => mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))).SetTimeout(500);
+            //SetDeleteAllTextBox();
+            //mwin.TxtcutMemo.Text = _talkBoxLayer.Text;
+            //mwin.TxtFileTitle.Text = _talkBoxLayer.TalkBoxLyerFileTitle;
 
+            //new Action(() => mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))).SetTimeout(500);
             return rtn;
         }
     }
@@ -810,9 +815,6 @@ namespace XrayTEXT
         protected override int VisualChildrenCount { get { return visualChildren.Count; } }
         protected override Visual GetVisualChild(int index) { return visualChildren[index]; }
     }
-
-
-
 
     #region #### PropertyChangedEventHandler ####
     //public event PropertyChangedEventHandler PropertyChanged;

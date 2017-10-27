@@ -126,16 +126,18 @@
                     <Setter Property="ItemsSource" Value="{Binding Path=ChildMenuItems}"/>
                 </Style>
             </Menu.ItemContainerStyle>-->
-            <MenuItem Header="File">
-                <MenuItem Header="New">
-                    <MenuItem Header="File1"/>
-                    <MenuItem Header="File2"/>
-                    <MenuItem Header="File3"/>
+                <MenuItem Header="소견">
+                    <MenuItem Header="불러오기" Name="btnLoadText" Click="btnLoadText_Click"/>
+                    <MenuItem Header="저장" Name="btnSaveDBText" Click="btnSaveDBText_Click"/>
+                    <MenuItem Header="삭제" Name="btnDelText" Click="btnDelText_Click"/>
                 </MenuItem>
-                <MenuItem Header="Open"/>
-                <MenuItem Header="Save"/>
-            </MenuItem>
-        </Menu>
+                <MenuItem Header="전송">
+                    <MenuItem Header="Data전송">
+                        <!--<MenuItem Header="File1"/>-->
+                    </MenuItem>
+                </MenuItem>
+
+            </Menu>
 
         <Grid Margin="0" Grid.Row="1">
             <Grid.RowDefinitions>
@@ -228,7 +230,7 @@
             <DockPanel DockPanel.Dock="Bottom" Margin="5" Grid.Column="2" Grid.Row="1">
                 <!-- 컷팅 메모 -->
                 <TextBox Name="TxtcutMemo" x:FieldModifier="public"
-                     Text="{Binding MainViewModel.UserCutMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserCutMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Width="200" MinHeight="600" Margin="1,0" 
                      VerticalAlignment="Top"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -238,7 +240,7 @@
                 <!---->
             <!-- 사진 파일 설명 -->
                 <TextBox Name="TxtFileTitle" x:FieldModifier="public"
-                    Text="{Binding MainViewModel.UserFileMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserFileMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Width="190" Height="120" Margin="-190,0" 
                     VerticalAlignment="Bottom"
                     HorizontalAlignment="Left"
@@ -247,53 +249,33 @@
                     >
                 </TextBox>
                 <!--Text="{Binding UserFileMemo, UpdateSourceTrigger=PropertyChanged}"-->
-            </DockPanel>
 
-            <!-- 소견저장 버튼 -->
-            <Button Name="btnSaveText"
-          Grid.Row="2" Grid.Column="1"
-          Click="OnSaveButtonClick"
-          HorizontalAlignment="Left"
-          Margin="65,0,0,0" 
-          x:FieldModifier="public">소견저장
-            </Button>
+                    <TextBox Name="TxtServerTime" x:FieldModifier="public"
+	                    Width="100" Height="20" Margin="-190,-30" 
+	                    VerticalAlignment="Bottom"
+	                    HorizontalAlignment="Left"
+	                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+	                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+	                    ></TextBox>
+                    <TextBox Name="TxtLayCnt" x:FieldModifier="public"
+	                    Width="80" Height="20" Margin="-80,-30" 
+	                    VerticalAlignment="Bottom"
+	                    HorizontalAlignment="Left"
+	                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+	                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+	                    ></TextBox>
 
-            <!-- 소견삭제 버튼 -->
-            <Button Name="btnDelText"
-          Grid.Row="2" Grid.Column="1"
-          Click="OnDeleteButtonClick"
-          HorizontalAlignment="Left"
-          Margin="0,0,60,0"
-          >소견삭제
-            </Button>
+                </DockPanel>
 
-            <!-- 소견로드 버튼 -->
-            <Button Name="btnLoadText"
-          Grid.Row="2" Grid.Column="1"
-          Click="OnLoadButtonClick"
-          HorizontalAlignment="Left"
-          Margin="130,0,0,0"
-          >소견로드
-            </Button>
-            <!-- 소견DB저장 버튼 -->
-            <Button Name="btnSaveDBText"
-          Grid.Row="2" Grid.Column="1"
-          Click="OnSaveDBButtonClick"
-          HorizontalAlignment="Left"
-          Margin="195,0,0,0"
-          >소견DB저장
-            </Button>
-
-            <Button Name="btnUpText"
-          Grid.Row="2" Grid.Column="1"
-          Click="UpTextSetBind"
-          HorizontalAlignment="Left"
-          Margin="285,0,0,0"
-          >txt저장후소견로드
-            </Button>
-
-            <!-- 이미지경로 -->
-            <TextBox Name="ImagesDir" Margin="0,0.333,120.333,-0.333" Width="290" Grid.Row="2" Grid.Column="1" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images"  HorizontalAlignment="Right" />
+                <!--<Button Name="btnCheEnable"
+Grid.Row="2" Grid.Column="1"
+Click="GetTalkBoxEnable"
+HorizontalAlignment="Left"
+Margin="285,0,0,0"
+>체크
+                </Button>-->
+                <!-- 이미지경로 -->
+            <TextBox Name="ImagesDir" Margin="0,0,120,10" Width="290" Grid.Row="2" Grid.Column="1" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images"  HorizontalAlignment="Right" />
             <!-- 이미지경로 변경 버튼 -->
             <Button Grid.Row="2" Grid.Column="1"  Margin="20,0,0,0" Width="80" Click="OnImagesDirChangeClick" HorizontalAlignment="Right">폴더변경</Button>
         </Grid>

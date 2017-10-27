@@ -126,10 +126,10 @@ namespace XrayTEXT
                 conn.Close();
             }
             this.Delete();
-            //LoadTxtBoxDB();
-            MainWin mwin = new MainWin();
-            //mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); // 기존 저장된 정보가 있다면 로딩
-            new Action(() => mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))).SetTimeout(500);
+            //MainWin mwin = new MainWin();
+            ////new Action(() => mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent))).SetTimeout(500);
+            //mwin.TxtFileTitle.PrintNew();
+            //mwin.TxtcutMemo.PrintNew();
         }
 
         // 소견 텍스트 편집 모드 시작 시
@@ -159,6 +159,9 @@ namespace XrayTEXT
                         if (Helpers.SaveDB(_talkBoxLayer) == "success")
                         {
                             // 저장 성공
+                            //MainWin mwin = new MainWin();
+                            //new Action(() => mwin.btnDelText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent))).SetTimeout(300);
+                            //new Action(() => mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent))).SetTimeout(500);
                         }
                     }
                 }

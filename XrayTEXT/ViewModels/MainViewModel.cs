@@ -3,22 +3,39 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Windows.Controls;
 
 namespace XrayTEXT.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        #region #### PropertyChangedEventHandler ####
+
+        public MainViewModel()
+        {
+
+        }
+
         private string _userFileMemo;
         private string _userCutMemo;
+
+        public string ServerTime
+        {
+            get { return (DateTime.Now.ToString("HH:mm:ss")); }
+            
+        }
+
 
         public string UserCutMemo
         {
             get { return _userCutMemo; }
             set
             {
-                _userCutMemo = value;
-                OnPropertyChanged("UserCutMemo");
+                if(_userCutMemo!="")
+                { 
+                    _userCutMemo = value;
+                    OnPropertyChanged("UserCutMemo");
+                }
             }
         }
 
@@ -27,10 +44,14 @@ namespace XrayTEXT.ViewModels
             get { return _userFileMemo; }
             set
             {
-                _userFileMemo = value;
-                OnPropertyChanged("UserFileMemo");
+                if (_userFileMemo != "")
+                {
+                    _userFileMemo = value;
+                    OnPropertyChanged("UserFileMemo");
+                }
             }
         }
+
         private void NotifyPropertyChanged(String info)
         {
             var listeners = PropertyChanged;
@@ -40,6 +61,7 @@ namespace XrayTEXT.ViewModels
             }
         }
 
+        #region #### PropertyChangedEventHandler ####
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
@@ -127,4 +149,9 @@ namespace XrayTEXT.ViewModels
         #endregion ###############################################
 
     }
+
+    #region #######
+
+    #endregion ########
+
 }
