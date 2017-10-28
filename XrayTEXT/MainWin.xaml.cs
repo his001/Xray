@@ -87,14 +87,28 @@ namespace XrayTEXT
         private void timer_Tick(object sender, EventArgs e)
         {
             TxtServerTime.Text = mainViewModel.ServerTime;
-            int chkDBCnt = GetMemoDBCnt();
-            
+            DataSet ds = GetMemoDBCnt();
+            int chkDBCnt = 0;
+            int chkDBYNCnt = 0;
+            if (ds != null) {
+                try
+                {
+                    chkDBCnt = Convert.ToInt32(ds.Tables[0].Rows[0][0].ToString());
+                    chkDBYNCnt = Convert.ToInt32(ds.Tables[0].Rows[0][1].ToString());
+                }
+                catch (Exception ex) { }
+            }
+
             //if (eventMainNeedChange != null) { 
             //    eventMainNeedChange(this, new EventArgs());
             //}
 
             // 화면의 ui 수와 db 의 ui 수가 다르면 같게 맞춘다.
-            if ((curUIMemoCnt>0 || chkDBCnt>0) && (curUIMemoCnt != chkDBCnt) ) {
+            if ((curUIMemoCnt>0 || chkDBCnt>0) && (curUIMemoCnt != chkDBCnt) || (chkDBCnt!= chkDBYNCnt)) {
+                if (chkDBCnt != chkDBYNCnt)
+                {
+                    SetDBupdYNMakeN();
+                }  // memo 가 수정된 행 N 으로 변경 
                 Reload_Right_Text();
             }
 
@@ -106,34 +120,61 @@ namespace XrayTEXT
             //TxtcutMemo.Text = mainViewModel.UserCutMemo;
             //TxtFileTitle.Text = mainViewModel.UserFileMemo;
         }
-        private int GetMemoDBCnt()
+        private DataSet GetMemoDBCnt()
         {
-            int rtn = 0;
-            string _KeyFilename = getKeyFileNameOnly();    // 파일 명 추가
             DataSet ds = new DataSet();
+            string _KeyFilename = getKeyFileNameOnly();    // 파일 명 추가
+            if (_KeyFilename != "")
+            {
+                try
+                {
+                    string _text = string.Empty;
+                    using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                    {
+                        conn.Open();
+                        string sql = "Select count(*) as Cnt, sum(case updYN when 'N' then 1 else 0 end) as YNCnt From TBL_TalkBoxLayer with(nolock) where KeyFilename ='" + _KeyFilename + "' ";
+                        using (SqlCommand cmd = new SqlCommand(sql, conn))
+                        {
+                            var adapt = new SqlDataAdapter();
+                            adapt.SelectCommand = cmd;
+                            adapt.Fill(ds);
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //MessageBox.Show(ex.Message);
+                }
+            }
+            return ds;
+        }
+        /// <summary>
+        /// DB 의 updYN 값이 Y 인 애들을 찾아서 을 N 으로 원복 
+        /// </summary>
+        private void SetDBupdYNMakeN()
+        {
+            string _KeyFilename = getKeyFileNameOnly();    // 파일 명 추가
             try
             {
-                string _text = string.Empty;
-                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                string constr = Helpers.dbCon;
+                using (SqlConnection conn = new SqlConnection(constr))
                 {
                     conn.Open();
-                    string sql = "Select count(*) From TBL_TalkBoxLayer with(nolock) where KeyFilename ='" + _KeyFilename + "' ";
+                    string sql = "update TBL_TalkBoxLayer SET updYN='N' WHERE KeyFilename = '" + _KeyFilename + "' and updYN='Y';";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
-                        var adapt = new SqlDataAdapter();
-                        adapt.SelectCommand = cmd;
-                        adapt.Fill(ds);
+                        int result = cmd.ExecuteNonQuery();
+                        if (result == 1)
+                        {
+                        }
                     }
                     conn.Close();
                 }
             }
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.Message);
-            }
-            rtn = Convert.ToInt32(ds.Tables[0].Rows[0][0].ToString());
-            return rtn;
+            catch (Exception ex) { }
         }
+
         private void Reload_Right_Text()
         {
             #region ########## text 바인딩 S ##########
