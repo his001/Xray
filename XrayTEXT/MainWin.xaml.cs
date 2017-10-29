@@ -933,6 +933,43 @@ namespace XrayTEXT
 
         #endregion ######################### 좌측 트리에서 사진 #########################
 
+        /// <summary>
+        /// FileTitle 에 엔터티가 입력시 제목을 업데이트
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnTxtFileTitleKeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Enter)
+            {
+                string _KeyFilename = getKeyFileNameOnly();    // 파일 명 추가
+                string _FileTitle = TxtFileTitle.Text;
+                if (_FileTitle.Trim().Length > 0)
+                {
+                    try
+                    {
+                        string constr = Helpers.dbCon;
+                        using (SqlConnection conn = new SqlConnection(constr))
+                        {
+                            conn.Open();
+                            string sql = "update TBL_TalkBoxLayer SET FileTitle='" + Helpers.rtnSQLInj(_FileTitle) + "',updYN='N' WHERE KeyFilename = '" + _KeyFilename + "' ;";
+                            using (SqlCommand cmd = new SqlCommand(sql, conn))
+                            {
+                                int result = cmd.ExecuteNonQuery();
+                                if (result == 1)
+                                {
+                                }
+                            }
+                            conn.Close();
+                        }
+                    }
+                    catch (Exception ex) { }
+                }
+                else {
+                    MessageBox.Show("내용을 입력해 주세요.");
+                }
+            }
+        }
+
         #region ######### tree #########
         //private void ListDirectory(TreeView treeView, string path)
         //{
