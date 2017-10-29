@@ -410,6 +410,7 @@ namespace XrayTEXT
                 }
                 if (e.RightButton == MouseButtonState.Pressed)
                 {
+                    #region ############# 이미지 이동 #############
                     Mouse.OverrideCursor = Cursors.Hand;
                     this.root.CaptureMouse();
                     Image image = ViewedPhoto;
@@ -419,6 +420,7 @@ namespace XrayTEXT
 
                     image.SetCurrentValue(LeftProperty, imgX);
                     image.SetCurrentValue(TopProperty, imgY);
+                    #endregion ############# 이미지 이동 #############
                 }
                 else
                 {
@@ -903,6 +905,11 @@ namespace XrayTEXT
             TxtFileTitle.Text = string.Empty; // 소견 data 삭제
             TxtcutMemo.Text = string.Empty;  // 우상단
             curUIMemoCnt = 0;   // 20171027 추가
+            scaleX = 1;
+            scaleY = 1;
+            Zoom.ScaleX = scaleX;
+            Zoom.ScaleY = scaleY;
+
             ImageSource imageSource = new BitmapImage(new Uri(PhotosListBox.SelectedItem.ToString()));
             ViewedPhoto.Source = imageSource;
 

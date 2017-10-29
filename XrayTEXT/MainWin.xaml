@@ -154,17 +154,6 @@
             <!--썸네일-->
                 <GroupBox Grid.Column="0" Grid.Row="1" Width="200">
                     <TabControl x:Name="tabLeft" Grid.Row="1" Grid.Column="0">
-                        <TabItem Header="탐색기">
-                            <TreeView x:Name="LeftTree" Margin="8,0,8,16" Foreground="#FFFFFFFF" ItemsSource="{Binding MyThingyCollection}">
-                                <TreeView.Background>
-                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                        <!--<GradientStop Color="#FFFFFFFF" Offset="1"/>
-                                    <GradientStop Color="#FF630404" Offset="0"/>-->
-                                    </LinearGradientBrush>
-                                </TreeView.Background>
-                            </TreeView>
-                        </TabItem>
-                        
                         <TabItem Header="썸네일">
                             <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" Width="200">
                                 <ListBox DataContext="{Binding Source={StaticResource Photos}}"
@@ -174,14 +163,25 @@
                                     SelectionMode="Extended" 
                                     ItemsSource="{Binding}" 
                                     SelectedIndex="0" 
-                                    MouseDoubleClick="OnPhotoDblClick" Width="180" >    
+                                    MouseDoubleClick="OnPhotoDblClick" Width="180" >
                                     <ListBox.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="삭제" Click="deletePhoto"/>
+                                            <!--<MenuItem Header="삭제" Click="deletePhoto"/>-->
                                         </ContextMenu>
                                     </ListBox.ContextMenu>
                                 </ListBox>
                             </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="탐색기">
+                            <TreeView x:Name="LeftTree" Margin="8,0,8,16" Foreground="#FFFFFFFF" ItemsSource="{Binding MyThingyCollection}">
+                                <TreeView.Background>
+                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                        <!--<GradientStop Color="#FFFFFFFF" Offset="1"/>
+                                    <GradientStop Color="#FF630404" Offset="0"/>-->
+                                    </LinearGradientBrush>
+                                </TreeView.Background>
+                            </TreeView>
                         </TabItem>
                     </TabControl>
                 </GroupBox>
