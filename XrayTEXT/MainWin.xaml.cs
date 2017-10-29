@@ -493,7 +493,7 @@ namespace XrayTEXT
                         //TalkBoxLayerControl _LstTalkBoxLayerControl = new TalkBoxLayerControl(_talkBoxLayer, _cssTalkBox, _cssTalkBoxEdit);
                         //this.CurTalkBoxControl.Add(_LstTalkBoxLayerControl);
                         ///////////////////
-
+                        //MessageBox.Show(talkBoxLocationXY.ToString());
                         Last_talkBoxLayer = _talkBoxLayer; //마지막 작업 레이어를 저장 하기 위해 ...
                         Last_image = image; //마지막 작업 이미지를 저장 하기 위해 ...
                         Helpers.ExportToPng(fullPath +"/"+ cutfileName, image, top, left);
@@ -613,7 +613,6 @@ namespace XrayTEXT
             SetClearTalkBoxLayer();
             TxtLayUICnt.Text = "0"; curUIMemoCnt = 0;
             TxtLayDBCnt.Text = "0";
-                       
         }
 
         /// <summary>
@@ -811,7 +810,7 @@ namespace XrayTEXT
                         );
 
                         this.CurTalkBox.Add(talkBoxLayer);
-                        talkBoxLayer_Last_Add = talkBoxLayer;
+                        //talkBoxLayer_Last_Add = talkBoxLayer;
 
                         //TalkBoxLayerControl _LstTalkBoxLayerControl = new TalkBoxLayerControl(talkBoxLayer, _cssTalkBox, _cssTalkBoxEdit);
                         //this.CurTalkBoxControl.Add(_LstTalkBoxLayerControl);
@@ -821,14 +820,14 @@ namespace XrayTEXT
                     #endregion ################ 동일한 키 _TalkBoxLyercutfileName 이있을 경우 추가 하지 않음 ####################
                 }
                 #region ##### 마지막에 추가된 레이어를 편집 모드에서 해제 #####
-                if (talkBoxLayer_Last_Add != null)
-                {
-                    TalkBoxLayerControl _control;
-                    Style _cssTalkBox = this.FindResource("cssTalkBox") as Style;
-                    Style _cssTalkBoxEdit = this.FindResource("cssTalkBoxEdit") as Style;
-                    _control = new TalkBoxLayerControl(talkBoxLayer_Last_Add, _cssTalkBox, _cssTalkBoxEdit);
-                    _control.IsEnabled = false;
-                }
+                //if (talkBoxLayer_Last_Add != null)
+                //{
+                //    TalkBoxLayerControl _control;
+                //    Style _cssTalkBox = this.FindResource("cssTalkBox") as Style;
+                //    Style _cssTalkBoxEdit = this.FindResource("cssTalkBoxEdit") as Style;
+                //    _control = new TalkBoxLayerControl(talkBoxLayer_Last_Add, _cssTalkBox, _cssTalkBoxEdit);
+                //    _control.IsEnabled = false;
+                //}
                 #endregion ##### 마지막에 추가된 레이어를 편집 모드에서 해제 #####
             }
 
@@ -863,8 +862,6 @@ namespace XrayTEXT
         //        //return _habitatAnnotations;
         //    }
         //}
-        
-
         #endregion ######### 소견로드 #########
 
 
@@ -879,12 +876,8 @@ namespace XrayTEXT
                 });
                 this.CurTalkBox.Clear();
             }
-
             //this.CurTalkBoxControl.Clear();
-
-
             #endregion #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####
-
         }
 
         ////
@@ -1357,4 +1350,5 @@ namespace XrayTEXT
         //TxtcutMemo.PrintNew();
     }
     #endregion  ######### Extension #########
+
 }
