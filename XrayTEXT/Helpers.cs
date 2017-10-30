@@ -19,9 +19,42 @@ namespace XrayTEXT
 
     public class Helpers
     {
-
         public static string dbCon = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
-        public static string PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
+
+        private static string _PicFolder;
+        public static string PicFolder
+        {
+            get {
+                if (_PicFolder == null) { PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images"; }
+                return _PicFolder;
+            }
+            set { _PicFolder = value; }
+        }
+
+        private static Int32 _pageIndex;
+        public static Int32 pageIndex
+        {
+            get
+            {
+                if (_pageIndex == 0) { pageIndex = 1; }
+                return _pageIndex;
+            }
+            set { _pageIndex = value; }
+        }
+
+        private static Int32 _pagesize;
+        public static Int32 pagesize
+        {
+            get
+            {
+                if (_pagesize == 0) { pagesize = 20; }
+                return _pagesize;
+            }
+            set { _pagesize = value; }
+        }
+
+
+
         //public static MainWin mwin = new MainWin();
         //XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
 

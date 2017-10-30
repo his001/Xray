@@ -21,6 +21,7 @@ namespace XrayTEXT
     public partial class MainWin : System.Windows.Window
     {
         #region ######################### 선언 #########################
+        public int pagesize = 20;
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
         public PhotoCollection Photos = new PhotoCollection(Helpers.PicFolder);
@@ -42,7 +43,13 @@ namespace XrayTEXT
         #region ######################### MainWin #########################
         public MainWin()
         {
+            this.Visibility = Visibility.Visible;
+            this.Title = "로딩중입니다.";
+            
             InitializeComponent();
+
+            Helpers.PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
+
             //Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
             //Photos.Path = Helpers.PicFolder;
 
@@ -361,35 +368,6 @@ namespace XrayTEXT
                 }
             }
         }
-
-        //private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        //{
-        //    if (PhotosListBox.SelectedItem != null)
-        //    {
-        //        if (e.Delta > 0)
-        //        {
-        //            scaleX += 0.1;
-        //            scaleY += 0.1;
-        //            Zoom.ScaleX = scaleX;
-        //            Zoom.ScaleY = scaleY;
-        //        }
-        //        else if (e.Delta < 0)
-        //        {
-        //            if (Zoom.ScaleX >= 0.1 && Zoom.ScaleY >= 0.1)
-        //            {
-        //                scaleX = scaleX - 0.1;
-        //                scaleY = scaleY - 0.1;
-        //                Zoom.ScaleX = scaleX;
-        //                Zoom.ScaleY = scaleY;
-
-        //                //Xcanvas.Width = scaleX;
-        //                //Xcanvas.Height = scaleY;
-        //            }
-        //        }
-        //    }
-
-        //    e.Handled = true;
-        //}
 
 
         #endregion ############ 마우스 휠 ############
@@ -908,6 +886,21 @@ namespace XrayTEXT
         //}
         #endregion ######### 소견로드 #########
 
+        private void tb_OnlyNum_KeyPress(object sender, TextCompositionEventArgs e)
+        {
+            foreach (char c in e.Text)
+            {
+                //if (e.Text != ".")
+                //{
+                    if (!char.IsDigit(c))
+                    {
+                        e.Handled = true;
+                        break;
+                    }
+                //}
+            }
+        }
+
 
 
         public void SetClearTalkBoxLayer() {
@@ -945,7 +938,39 @@ namespace XrayTEXT
         {
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
             Photos.Path = Helpers.PicFolder;
+            GetImageTotalCntShow(); // 전체 파일 갯수를 보여준다
         }
+
+        private void GetImageTotalCntShow()
+        {
+            DirectoryInfo _directory = new DirectoryInfo(Helpers.PicFolder);
+            int _cnt = 0;
+            try
+            {
+                foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")))
+                {
+                    _cnt++;
+                }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                //System.Windows.MessageBox.Show("폴더가 없습니다.");
+            }
+            TxtTotalFileCnt.Text = _cnt.ToString();
+        }
+
+        private void OnPageChangeClick(object sender, RoutedEventArgs e)
+        {
+            int _CurPage = Convert.ToInt32(TxtCurPage.Text);
+
+            Helpers.pageIndex= _CurPage;
+            //Helpers.pagesize= pagesize;
+
+            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
+            Photos.Path = Helpers.PicFolder;
+            GetImageTotalCntShow(); // 전체 파일 갯수를 보여준다
+        }
+
 
         /// <summary>
         /// 좌측 트리에서 사진을 더블 클릭했을때
@@ -986,7 +1011,9 @@ namespace XrayTEXT
 
         private void OnImagesDirChangeClick(object sender, RoutedEventArgs e)
         {
+            Helpers.PicFolder = ImagesDir.Text;
             Photos.Path = ImagesDir.Text;
+            GetImageTotalCntShow();     // 전체 파일 갯수를 보여준다
         }
         #endregion ######################### 좌측 트리에서 사진 #########################
 
@@ -1250,6 +1277,7 @@ namespace XrayTEXT
             }
         }
         #endregion #### PropertyChangedEventHandler ####
+
     }
 
 
@@ -1291,16 +1319,30 @@ namespace XrayTEXT
             _source = new Uri(path);
             try
             {
+                // 가장 성능이 좋다고 함...ㅡㅡㅋ 아닌듯
+                //BitmapImage img = new BitmapImage();
+                //img.BeginInit();
+                //img.CacheOption = BitmapCacheOption.OnDemand;
+                //img.CreateOptions = BitmapCreateOptions.DelayCreation;
+                //img.DecodePixelWidth = 180;
+                //img.UriSource = _source;
+                //img.EndInit();
+                //_image = img;
+
+
+                //이게 좀더 빠르긴 함
                 BitmapImage bmi = new BitmapImage();
-                try
-                {
-                    bmi.BeginInit();
-                    bmi.CacheOption = BitmapCacheOption.OnLoad;
-                    bmi.UriSource = _source;
-                    bmi.EndInit();
-                }
-                catch (Exception ex) { }
+                bmi.BeginInit();
+                bmi.CacheOption = BitmapCacheOption.OnLoad;
+                bmi.UriSource = _source;
+                bmi.EndInit();
                 _image = bmi;
+
+                //try
+                //{
+                //}
+                //catch (Exception ex) { }
+
                 GC.Collect();
 
                 OnlyFileName = System.IO.Path.GetFileName(path);
@@ -1412,10 +1454,13 @@ namespace XrayTEXT
 
         private void GetImageRead()
         {
+            int pageIndex = Helpers.pageIndex;
+            int pagesize = Helpers.pagesize;
+
             this.Clear();
             try
             {
-                foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")))
+                foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize))
                 {
                     Add(new Photo(f.FullName));
                 }
@@ -1425,9 +1470,6 @@ namespace XrayTEXT
                 System.Windows.MessageBox.Show("폴더가 없습니다.");
             }
         }
-
-        
-
     }
     #endregion ########### 썸네일용 Photo , PhotoCollection ###########
 
