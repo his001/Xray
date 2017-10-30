@@ -337,6 +337,12 @@ namespace XrayTEXT
                     scaleY += 0.1;
                     Zoom.ScaleX = scaleX;
                     Zoom.ScaleY = scaleY;
+
+                    //ImageScrollViewer.Height = (ViewedPhoto.Height * Zoom.ScaleY) - ImageScrollViewer.Height;
+                    //ImageScrollViewer.Width = (ViewedPhoto.Width * Zoom.ScaleX) - ImageScrollViewer.Width;
+                    //ImageScrollViewer.Height = ViewedPhoto.Height * Zoom.ScaleY;
+                    //ImageScrollViewer.Width = ViewedPhoto.Width * Zoom.ScaleX;
+
                 }
                 else if (e.Delta < 0)
                 {
@@ -346,10 +352,46 @@ namespace XrayTEXT
                         scaleY = scaleY - 0.1;
                         Zoom.ScaleX = scaleX;
                         Zoom.ScaleY = scaleY;
+
+                        //ImageScrollViewer.Height = ImageScrollViewer.Height + (ViewedPhoto.Height * Zoom.ScaleY);
+                        //ImageScrollViewer.Width = ImageScrollViewer.Width + (ViewedPhoto.Width * Zoom.ScaleX);
+                        //ImageScrollViewer.Height = ViewedPhoto.Height;
+                        //ImageScrollViewer.Width = ViewedPhoto.Width;
                     }
                 }
             }
         }
+
+        //private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        //{
+        //    if (PhotosListBox.SelectedItem != null)
+        //    {
+        //        if (e.Delta > 0)
+        //        {
+        //            scaleX += 0.1;
+        //            scaleY += 0.1;
+        //            Zoom.ScaleX = scaleX;
+        //            Zoom.ScaleY = scaleY;
+        //        }
+        //        else if (e.Delta < 0)
+        //        {
+        //            if (Zoom.ScaleX >= 0.1 && Zoom.ScaleY >= 0.1)
+        //            {
+        //                scaleX = scaleX - 0.1;
+        //                scaleY = scaleY - 0.1;
+        //                Zoom.ScaleX = scaleX;
+        //                Zoom.ScaleY = scaleY;
+
+        //                //Xcanvas.Width = scaleX;
+        //                //Xcanvas.Height = scaleY;
+        //            }
+        //        }
+        //    }
+
+        //    e.Handled = true;
+        //}
+
+
         #endregion ############ 마우스 휠 ############
 
         /// <summary>
@@ -893,6 +935,18 @@ namespace XrayTEXT
         //    TxtFileTitle.Text = str;
         //}
         #region ######################### 좌측 트리에서 사진 #########################
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
+            Photos.Path = Helpers.PicFolder;
+        }
+
         /// <summary>
         /// 좌측 트리에서 사진을 더블 클릭했을때
         /// </summary>
@@ -911,10 +965,13 @@ namespace XrayTEXT
             Zoom.ScaleY = scaleY;
 
             ImageSource imageSource = new BitmapImage(new Uri(PhotosListBox.SelectedItem.ToString()));
+            //ImageSource imageSource = BitmapFrame.Create(new Uri(PhotosListBox.SelectedItem.ToString()));
+            //BitmapSource imageSource = BitmapFrame.Create(new Uri(PhotosListBox.SelectedItem.ToString(), UriKind.Absolute));
             ViewedPhoto.Source = imageSource;
 
             _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");    // 더블 클릭시 변경으로
             new Action(() => btnLoadText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent))).SetTimeout(500);
+
         }
 
         private void deletePhoto(object sender, RoutedEventArgs e)
@@ -931,13 +988,6 @@ namespace XrayTEXT
         {
             Photos.Path = ImagesDir.Text;
         }
-
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
-            Photos.Path = Helpers.PicFolder;
-        }
-
         #endregion ######################### 좌측 트리에서 사진 #########################
 
         /// <summary>
@@ -1195,7 +1245,6 @@ namespace XrayTEXT
     /// </summary>
     public class Photo
     {
-
         public Photo(string path)
         {
             _path = path;
@@ -1203,16 +1252,18 @@ namespace XrayTEXT
             try
             {
 
-                //BitmapImage bmi = new BitmapImage();
-                //bmi.BeginInit();
-                //bmi.CacheOption =
-                //          BitmapCacheOption.OnLoad;
-                //bmi.UriSource = _source;
-                //bmi.EndInit();
-                //image1.Source = bmi;
+                BitmapImage bmi = new BitmapImage();
+                bmi.BeginInit();
+                bmi.CacheOption =
+                          BitmapCacheOption.OnLoad;
+                bmi.UriSource = _source;
+                bmi.EndInit();
+                _image = bmi;
 
                 // 기존
-                _image = BitmapFrame.Create(_source);
+                //_image = BitmapFrame.Create(_source);
+                //_image = getPngImage(path);
+
                 //_image.Metadata as BitmapMetadata;
                 //_image = BitmapFrame.Create(_source, BitmapCreateOptions.None, BitmapCacheOption.None);
 
@@ -1271,8 +1322,10 @@ namespace XrayTEXT
         private Uri _source;
         public string Source { get { return _path; } }
 
-        private BitmapFrame _image;
-        public BitmapFrame Image { get { return _image; } set { _image = value; } }
+        //private BitmapFrame _image;
+        //public BitmapFrame Image { get { return _image; } set { _image = value; } }
+        private BitmapImage _image;
+        public BitmapImage Image { get { return _image; } set { _image = value; } }
 
     }
 
