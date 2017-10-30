@@ -1028,6 +1028,35 @@ namespace XrayTEXT
         }
 
         #region ######### tree #########
+        private void TreeViewItem_OnItemSelected(object sender, RoutedEventArgs e)
+        {
+            LeftTree.Tag = e.OriginalSource;
+            TreeViewItem tvi = LeftTree.Tag as TreeViewItem;
+            
+            ImagesDir.Text = GetFullPath(tvi);  //
+        }
+
+        public string GetFullPath(TreeViewItem node)
+        {
+            if (node == null)
+                throw new ArgumentNullException();
+
+            var result = Convert.ToString(node.Header);
+            for (var i = GetParentItem(node); i != null; i = GetParentItem(i))
+            {
+                result = i.Header + "\\" + result;
+            }
+            result = result.Replace("\\\\", "\\");
+            return result;
+        }
+        static TreeViewItem GetParentItem(TreeViewItem item)
+        {
+            for (var i = VisualTreeHelper.GetParent(item); i != null; i = VisualTreeHelper.GetParent(i))
+                if (i is TreeViewItem)
+                    return (TreeViewItem)i;
+
+            return null;
+        }
         //private void ListDirectory(TreeView treeView, string path)
         //{
         //    //treeView.Items.Clear();
@@ -1098,12 +1127,10 @@ namespace XrayTEXT
         {
             item.Items.Add(new DummyTreeViewItem());
         }
-
         private bool HasDummy(TreeViewItem item)
         {
             return item.HasItems && (item.Items.OfType<TreeViewItem>().ToList().FindAll(tvi => tvi is DummyTreeViewItem).Count > 0);
         }
-
         private void RemoveDummy(TreeViewItem item)
         {
             var dummies = item.Items.OfType<TreeViewItem>().ToList().FindAll(tvi => tvi is DummyTreeViewItem);
@@ -1112,6 +1139,7 @@ namespace XrayTEXT
                 item.Items.Remove(dummy);
             }
         }
+
         private void ExploreDirectories(TreeViewItem item)
         {
             var directoryInfo = (DirectoryInfo)null;
@@ -1122,12 +1150,16 @@ namespace XrayTEXT
             else if (item.Tag is DirectoryInfo)
             {
                 directoryInfo = (DirectoryInfo)item.Tag;
+                //ImagesDir.Text = directoryInfo.FullName.ToString();  //
             }
-            else if (item.Tag is FileInfo)
-            {
-                directoryInfo = ((FileInfo)item.Tag).Directory;
+            //else if (item.Tag is FileInfo)
+            //{
+            //    directoryInfo = ((FileInfo)item.Tag).Directory;
+            //}
+            if (object.ReferenceEquals(directoryInfo, null)) {
+                //ImagesDir.Text = directoryInfo.FullName.ToString();  //
+                return;
             }
-            if (object.ReferenceEquals(directoryInfo, null)) return;
             foreach (var directory in directoryInfo.GetDirectories())
             {
                 var isHidden = (directory.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
@@ -1149,22 +1181,23 @@ namespace XrayTEXT
             else if (item.Tag is DirectoryInfo)
             {
                 directoryInfo = (DirectoryInfo)item.Tag;
-                ImagesDir.Text = directoryInfo.FullName.ToString();  //
+                //ImagesDir.Text = directoryInfo.FullName.ToString();  //
             }
             else if (item.Tag is FileInfo)
             {
                 directoryInfo = ((FileInfo)item.Tag).Directory;
             }
             if (object.ReferenceEquals(directoryInfo, null)) return;
-            foreach (var file in directoryInfo.GetFiles())
-            {
-                var isHidden = (file.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
-                var isSystem = (file.Attributes & FileAttributes.System) == FileAttributes.System;
-                if (!isHidden && !isSystem)
-                {
-                    item.Items.Add(this.GetItem(file));
-                }
-            }
+            // 파일은 보여줄 필요가 없어서
+            //foreach (var file in directoryInfo.GetFiles())
+            //{
+            //    var isHidden = (file.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden;
+            //    var isSystem = (file.Attributes & FileAttributes.System) == FileAttributes.System;
+            //    if (!isHidden && !isSystem)
+            //    {
+            //        item.Items.Add(this.GetItem(file));
+            //    }
+            //}
         }
 
         void item_Expanded(object sender, RoutedEventArgs e)
@@ -1175,7 +1208,7 @@ namespace XrayTEXT
                 this.Cursor = Cursors.Wait;
                 this.RemoveDummy(item);
                 this.ExploreDirectories(item);
-                this.ExploreFiles(item);
+                //this.ExploreFiles(item);
                 this.Cursor = Cursors.Arrow;
             }
         }
@@ -1237,7 +1270,7 @@ namespace XrayTEXT
         }
     }
 
-    #region ########### 썸네일용 
+    #region ########### 썸네일용 Photo , PhotoCollection ###########
 
     /// <summary>
     /// This class describes a single photo - its location, the image and 
@@ -1259,11 +1292,14 @@ namespace XrayTEXT
             try
             {
                 BitmapImage bmi = new BitmapImage();
-                bmi.BeginInit();
-                bmi.CacheOption =
-                BitmapCacheOption.OnLoad;
-                bmi.UriSource = _source;
-                bmi.EndInit();
+                try
+                {
+                    bmi.BeginInit();
+                    bmi.CacheOption = BitmapCacheOption.OnLoad;
+                    bmi.UriSource = _source;
+                    bmi.EndInit();
+                }
+                catch (Exception ex) { }
                 _image = bmi;
                 GC.Collect();
 
@@ -1393,7 +1429,7 @@ namespace XrayTEXT
         
 
     }
-    #endregion ########### 썸네일용
+    #endregion ########### 썸네일용 Photo , PhotoCollection ###########
 
     #region ######### Extension #########
     /// <summary>

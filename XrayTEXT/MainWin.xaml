@@ -166,7 +166,8 @@
                         </TabItem>
 
                         <TabItem Header="탐색기">
-                            <TreeView x:Name="LeftTree" Margin="8,0,8,16" Foreground="#FFFFFFFF" ItemsSource="{Binding MyThingyCollection}">
+                            <TreeView x:Name="LeftTree" Margin="8,0,8,16" Foreground="#FFFFFFFF" ItemsSource="{Binding MyThingyCollection}"
+                                      TreeViewItem.Selected="TreeViewItem_OnItemSelected">
                                 <TreeView.Background>
                                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                                         <!--<GradientStop Color="#FFFFFFFF" Offset="1"/>
