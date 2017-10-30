@@ -1245,22 +1245,32 @@ namespace XrayTEXT
     /// </summary>
     public class Photo
     {
+        private string _onlyfileName = string.Empty;
+        public string OnlyFileName
+        {
+            get { return _onlyfileName; }
+            set { _onlyfileName = value; }
+        }
+
         public Photo(string path)
         {
             _path = path;
             _source = new Uri(path);
             try
             {
-
                 BitmapImage bmi = new BitmapImage();
                 bmi.BeginInit();
                 bmi.CacheOption =
-                          BitmapCacheOption.OnLoad;
+                BitmapCacheOption.OnLoad;
                 bmi.UriSource = _source;
                 bmi.EndInit();
                 _image = bmi;
+                GC.Collect();
 
-                // 기존
+                OnlyFileName = System.IO.Path.GetFileName(path);
+                //Photos.OnlyFileName = onlyfileName;
+
+                #region ####### 기존 #######
                 //_image = BitmapFrame.Create(_source);
                 //_image = getPngImage(path);
 
@@ -1288,6 +1298,7 @@ namespace XrayTEXT
                 //        thumbnail.Save("thumb.png");
                 //    }
                 //}
+                #endregion ####### 기존 #######
             }
             catch (NotSupportedException)
             {
@@ -1326,7 +1337,6 @@ namespace XrayTEXT
         //public BitmapFrame Image { get { return _image; } set { _image = value; } }
         private BitmapImage _image;
         public BitmapImage Image { get { return _image; } set { _image = value; } }
-
     }
 
     /// <summary>
