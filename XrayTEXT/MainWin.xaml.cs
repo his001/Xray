@@ -77,7 +77,7 @@ namespace XrayTEXT
             //TreeViewFile treeView = new TreeViewFile(Helpers.PicFolder);
             //LeftTree.Items.Add(treeView);
             LoadDirectories();
-            new Action(() => setLeftTreeBind()).SetTimeout(500);
+            //new Action(() => setLeftTreeBind()).SetTimeout(500);
 
             DataContext = mainViewModel; // 좌측 상단 하단의 TEXT 변경 용
             StartThread();
@@ -230,23 +230,23 @@ namespace XrayTEXT
             TxtFileTitle.Text = _FileTitle;
         }
 
-        private void setLeftTreeBind() {
-            //DirectoryInfo _directory = new DirectoryInfo(Helpers.PicFolder);
-            //item.Items.Add(this.GetItem(directory));
-            //ExploreDirectories(TreeViewItem item)
+        //private void setLeftTreeBind() {
+        //    //DirectoryInfo _directory = new DirectoryInfo(Helpers.PicFolder);
+        //    //item.Items.Add(this.GetItem(directory));
+        //    //ExploreDirectories(TreeViewItem item)
 
-            //Helpers.PicFolder
-            foreach (string s in Directory.EnumerateDirectories(Helpers.PicFolder))
-            {
-                TreeViewItem item = new TreeViewItem();
-                item.Header = s.Substring(s.LastIndexOf('\\') + 1);
-                item.Tag = s;
-                item.FontWeight = FontWeights.Normal;
+        //    //Helpers.PicFolder
+        //    foreach (string s in Directory.EnumerateDirectories(Helpers.PicFolder))
+        //    {
+        //        TreeViewItem item = new TreeViewItem();
+        //        item.Header = s.Substring(s.LastIndexOf('\\') + 1);
+        //        item.Tag = s;
+        //        item.FontWeight = FontWeights.Normal;
 
-                FillTreeView(item, s);
-                LeftTree.Items.Add(item);
-            }
-        }
+        //        FillTreeView(item, s);
+        //        LeftTree.Items.Add(item);
+        //    }
+        //}
 
         private void FillTreeView(TreeViewItem parentItem, string path)
         {
@@ -340,18 +340,23 @@ namespace XrayTEXT
             {
                 if (e.Delta > 0)
                 {
-                    scaleX += 0.1;
-                    scaleY += 0.1;
-                    Zoom.ScaleX = scaleX;
-                    Zoom.ScaleY = scaleY;
-                    //ImageScrollViewer.Height = (ViewedPhoto.Height * Zoom.ScaleY) - ImageScrollViewer.Height;
-                    //ImageScrollViewer.Width = (ViewedPhoto.Width * Zoom.ScaleX) - ImageScrollViewer.Width;
-                    if (Zoom.ScaleY > 1) { Xcanvas.Height = ViewedPhoto.Height * Zoom.ScaleY; }
-                    if (Zoom.ScaleX > 1) { Xcanvas.Width = ViewedPhoto.Width * Zoom.ScaleX;
-                        //ViewedPhoto.SetCurrentValue(LeftProperty, ( (ViewedPhoto.Width * Zoom.ScaleX) - ViewedPhoto.Width) / 2);
-                        //ViewedPhoto.SetCurrentValue(TopProperty, ( (ViewedPhoto.Height * Zoom.ScaleY) - ViewedPhoto.Height) / 2);
-                        ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
-                        ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
+                    if (scaleX < 2)
+                    {
+                        scaleX += 0.1;
+                        scaleY += 0.1;
+                        Zoom.ScaleX = scaleX;
+                        Zoom.ScaleY = scaleY;
+                        //ImageScrollViewer.Height = (ViewedPhoto.Height * Zoom.ScaleY) - ImageScrollViewer.Height;
+                        //ImageScrollViewer.Width = (ViewedPhoto.Width * Zoom.ScaleX) - ImageScrollViewer.Width;
+                        if (Zoom.ScaleY > 1) { Xcanvas.Height = ViewedPhoto.Height * Zoom.ScaleY; }
+                        if (Zoom.ScaleX > 1)
+                        {
+                            Xcanvas.Width = ViewedPhoto.Width * Zoom.ScaleX;
+                            //ViewedPhoto.SetCurrentValue(LeftProperty, ( (ViewedPhoto.Width * Zoom.ScaleX) - ViewedPhoto.Width) / 2);
+                            //ViewedPhoto.SetCurrentValue(TopProperty, ( (ViewedPhoto.Height * Zoom.ScaleY) - ViewedPhoto.Height) / 2);
+                            ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
+                            ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
+                        }
                     }
                 }
                 else if (e.Delta < 0)
