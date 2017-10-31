@@ -1,5 +1,6 @@
 using System;
 using System.Data.SqlClient;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -96,13 +97,27 @@ namespace XrayTEXT
         // 소견 텍스트 삭제시
         void OnDeleteAnnotation(object sender, RoutedEventArgs e)
         {
-            string constr = Helpers.dbCon;
-            using (SqlConnection conn = new SqlConnection(constr))
+            using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
             {
                 conn.Open();
-                string sql = "DELETE FROM TBL_TalkBoxLayer WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' and  CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "' ;";
+                string sql = "DELETE FROM TBL_TalkBoxLayer WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' and  CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "' ";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    int result = cmd.ExecuteNonQuery();
+                    if (result == 1)
+                    {
+                        try
+                        {
+                            string _destinationFile = _talkBoxLayer.TalkBoxLyerCutFullPath + "/" + _talkBoxLayer.TalkBoxLyercutfileName;
+                            File.Delete(_destinationFile);
+                        }
+                        catch (Exception ex) { }
+                    }
+                }
+
+
                 // 삭제 후 numb(index) 재 배열 
-                sql = sql + " UPDATE TBL_TalkBoxLayer SET numb = B.RowNum ";
+                sql = " UPDATE TBL_TalkBoxLayer SET numb = B.RowNum ";
                 sql = sql + " FROM TBL_TalkBoxLayer A JOIN ";
                 sql = sql + " ( ";
                 sql = sql + "  SELECT t.idx , ROW_NUMBER() OVER (ORDER BY t.regdate) AS RowNum ";
@@ -110,16 +125,15 @@ namespace XrayTEXT
                 sql = sql + "  WHERE t.KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' ";
                 sql = sql + " ) AS B on A.idx = B.idx ";
                 sql = sql + " WHERE A.KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "'";
-
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     int result = cmd.ExecuteNonQuery();
-                    if (result == 1)
+                    if (result > 0)
                     {
-                        //MessageBox.Show("Image Added");
-                        //정상
+                        // 성공
                     }
                 }
+
                 conn.Close();
             }
             this.Delete();

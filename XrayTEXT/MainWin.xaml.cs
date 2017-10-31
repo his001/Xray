@@ -1058,6 +1058,7 @@ namespace XrayTEXT
                 else {
                     MessageBox.Show("내용을 입력해 주세요.");
                 }
+                Keyboard.ClearFocus(); // 포커스 아웃
             }
         }
 
