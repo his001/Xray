@@ -100,9 +100,67 @@
             </Setter>
         </Style>
 
+        <!-- 토글 -->
+        <Style x:Key="AnimatedSwitch" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Background" Value="#FAFAFB" />
+            <Setter Property="BorderBrush" Value="#EAEAEB" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Viewbox Stretch="Uniform">
+                            <Canvas Name="Layer_1" Width="20" Height="20" Canvas.Left="10" Canvas.Top="0">
+                                <Ellipse  Canvas.Left="0" Width="20" Height="20" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.5"/>
+                                <Ellipse  Canvas.Left="15" Width="20" Height="20" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.5"/>
+                                <Border Canvas.Left="10" Width="15" Height="20" Name="rect416927" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0.5,0,0.5"/>
+                                <Ellipse x:Name="ellipse"  Canvas.Left="0" Width="20" Height="20" Fill="White" Stroke="{TemplateBinding BorderBrush}" StrokeThickness="0.3">
+                                    <Ellipse.RenderTransform>
+                                        <TranslateTransform X="0" Y="0" />
+                                    </Ellipse.RenderTransform>
+                                    <Ellipse.BitmapEffect>
+                                        <DropShadowBitmapEffect Softness="0.1" ShadowDepth="0.7" Direction="270" Color="#BBBBBB"/>
+                                    </Ellipse.BitmapEffect>
+                                </Ellipse>
+                            </Canvas>
+                        </Viewbox>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True" >
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#52D468" Duration="0:0:0.2" />
+                                            <ColorAnimation Storyboard.TargetProperty="BorderBrush.Color" To="#41C955" Duration="0:0:0.2" />
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.RenderTransform).(TranslateTransform.X)" Storyboard.TargetName="ellipse">
+                                                <SplineDoubleKeyFrame KeyTime="0" Value="0"/>
+                                                <SplineDoubleKeyFrame KeyTime="0:0:0.4" Value="15" KeySpline="0, 1, 0.6, 1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetProperty="Background.Color" To="#FAFAFB" Duration="0:0:0.2" />
+                                            <ColorAnimation Storyboard.TargetProperty="BorderBrush.Color" To="#EAEAEB" Duration="0:0:0.2" />
+                                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(Ellipse.RenderTransform).(TranslateTransform.X)" Storyboard.TargetName="ellipse">
+                                                <SplineDoubleKeyFrame KeyTime="0" Value="15"/>
+                                                <SplineDoubleKeyFrame KeyTime="0:0:0.3" Value="0" KeySpline="0, 0.5, 0.5, 1"/>
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
 
         <ObjectDataProvider x:Key="Photos" ObjectType="{x:Type er:PhotoCollection}" />
     </Window.Resources>
+
+
 
     <DockPanel>
         <Grid Margin="0">
@@ -207,8 +265,9 @@
                             <ScrollViewer x:Name="ImageScrollViewer" Margin="0,0,0,0"
                                 ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Visible" >
                                 <Grid x:Name="root" Background="White" >
-                                    <Canvas Name="Xcanvas" MinWidth="1500" MinHeight="900" > <!-- VerticalAlignment="Center" HorizontalAlignment="Center" -->
-                                            <Image Name="ViewedPhoto" Width="1500" Height="900" Margin="0" Stretch="UniformToFill" >
+                                    <Canvas Name="Xcanvas" MinWidth="1500" MinHeight="900" >
+                                        <!-- VerticalAlignment="Center" HorizontalAlignment="Center" -->
+                                        <Image Name="ViewedPhoto" Width="1500" Height="900" Margin="0" Stretch="UniformToFill" >
                                             <Image.RenderTransform>
                                                 <ScaleTransform x:Name="Zoom" ScaleX="1" ScaleY="1">
 
@@ -237,7 +296,7 @@
                             <ColumnDefinition Width="*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
 
-                        <Label Name="LblcutMemo" Grid.Column="0" Grid.Row="1">소견</Label>
+                        <Label Name="LblcutMemo" Grid.Column="0" Grid.Row="1">질병명</Label>
 
                         <!-- 컷팅 메모 -->
                         <TextBox Name="TxtcutMemo" Grid.Column="0" Grid.Row="2" x:FieldModifier="public"
@@ -249,7 +308,10 @@
                                  IsReadOnly="True"
                          >
                         </TextBox>
-                        <Label Name="LblFileTitle" Grid.Column="0" Grid.Row="3">설명</Label>
+
+                        <DockPanel Grid.Column="0" Grid.Row="3">
+                            <Label Name="LblFileTitle" Grid.Column="0" Grid.Row="3">판독결과</Label>
+                        </DockPanel>
 
                         <TextBox Name="TxtFileTitle" Grid.Column="0" Grid.Row="4" x:FieldModifier="public"
                             Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserFileMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -264,69 +326,94 @@
                     </Grid>
 
                     <!-- 사진 파일 설명 -->
-                    <!--Text="{Binding UserFileMemo, UpdateSourceTrigger=PropertyChanged}"-->
-
-                    <TextBox Name="TxtServerTime" x:FieldModifier="public"
-	                    Width="80" Height="20" Margin="-190,-30" 
-	                    VerticalAlignment="Bottom"
-	                    HorizontalAlignment="Left"
-	                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-	                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-	                    ></TextBox>
-
-                    <TextBox Name="TxtLayUICnt" x:FieldModifier="public"
-	                    Width="40" Height="20" Margin="-100,-30" 
-	                    VerticalAlignment="Bottom"
-	                    HorizontalAlignment="Left"
-	                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-	                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-	                    ></TextBox>
-
-                    <TextBox Name="TxtLayDBCnt" x:FieldModifier="public"
-	                    Width="40" Height="20" Margin="-50,-30" 
-	                    VerticalAlignment="Bottom"
-	                    HorizontalAlignment="Left"
-	                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-	                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-	                    ></TextBox>
-
                 </DockPanel>
 
-                <!--<Button Name="btnCheEnable"
-Grid.Row="2" Grid.Column="1"
-Click="GetTalkBoxEnable"
-HorizontalAlignment="Left"
-Margin="285,0,0,0"
->체크</Button>-->
-                <DockPanel DockPanel.Dock="Bottom" Margin="5" Width="280" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left">
-
-                    <Label DockPanel.Dock="Left" FontSize="12">총파일수</Label>
-                    <TextBox Name="TxtTotalFileCnt" x:FieldModifier="public"
-	                    Width="50" Height="20" Margin="0,0" Text="0" IsReadOnly="True"></TextBox>
-
-                    <Label DockPanel.Dock="Left" FontSize="12">페이지</Label>
-                    <TextBox Name="TxtCurPage" x:FieldModifier="public" 
-	                    Width="30" Height="20" Margin="0,5" Text="1" 
-                             PreviewTextInput="tb_OnlyNum_KeyPress"
-                             ></TextBox>
-                    <Button Margin="0,5" Width="80" Click="OnPageChangeClick" HorizontalAlignment="Right">페이지이동</Button>
-                </DockPanel>
-                <DockPanel DockPanel.Dock="Bottom" Margin="5" Width="500" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
-
-                    <!-- 이미지경로 -->
-                    <TextBox Name="ImagesDir" Margin="0,5,0,5" Width="400" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images"  HorizontalAlignment="Right" />
-                    <!-- 이미지경로 변경 버튼 -->
-                    <Button Margin="20,5,0,5" Width="74" Click="OnImagesDirChangeClick" HorizontalAlignment="Right">폴더변경</Button>
+                <DockPanel>
+                    
                 </DockPanel>
 
-                <!--<DockPanel DockPanel.Dock="Bottom" Margin="5" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
-                    <Label DockPanel.Dock="Left" FontSize="12">Zoom:</Label>
-                    <Slider Name="ZoomImage" Margin="10,0,0,0"  Orientation="Horizontal" Minimum="80"  Maximum="180" Value="120"  TickFrequency="80"
-                        TickPlacement="BottomRight" SmallChange="5" LargeChange="20" Width="110" FontSize="12" />
-                </DockPanel>-->
+                <Grid Margin="0" Grid.Row="3" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="270"></ColumnDefinition>
+                        <ColumnDefinition Width="400"></ColumnDefinition>
+                        <ColumnDefinition Width="140"></ColumnDefinition>
+                        <ColumnDefinition Width="180"></ColumnDefinition>
+                        <ColumnDefinition Width="160"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <!-- 페이징 -->
+                    <DockPanel DockPanel.Dock="Bottom" Margin="5,5,0,5" Width="260" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
+                        <Label DockPanel.Dock="Left" FontSize="12">총파일수</Label>
+                        <TextBox Name="TxtTotalFileCnt" x:FieldModifier="public"
+	                        Width="40" Height="20" Margin="0,0" Text="0" IsReadOnly="True"></TextBox>
+
+                        <Label DockPanel.Dock="Left" FontSize="12">페이지</Label>
+                        <TextBox Name="TxtCurPage" x:FieldModifier="public" 
+	                        Width="25" Height="20" Margin="0,5" Text="1" 
+                                 PreviewTextInput="tb_OnlyNum_KeyPress"
+                                 ></TextBox>
+                        <Button Margin="0,5" Width="80" Click="OnPageChangeClick" HorizontalAlignment="Right">페이지이동</Button>
+                    </DockPanel>
+
+                    <!-- 이미지경로 변경 -->
+                    <DockPanel DockPanel.Dock="Bottom" Margin="1,5" Width="400" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left">
+                        <!-- 이미지경로 -->
+                        <TextBox Name="ImagesDir" Margin="0,5,0,5" Width="320" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images" />
+                        <!-- 이미지경로 변경 버튼 -->
+                        <Button Margin="0,5,0,5" Width="75" Click="OnImagesDirChangeClick">폴더변경</Button>
+                    </DockPanel>
+
+                    <!-- zoom 변경 -->
+                    <DockPanel DockPanel.Dock="Bottom" Margin="1,5" Width="140" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
+                        <Label DockPanel.Dock="Left" FontSize="12">Zoom:</Label>
+                        <Slider Name="ZoomImage" 
+                            Margin="10,0,0,0" Orientation="Horizontal" 
+                            Minimum="80" Maximum="180" 
+                            Value="120" TickFrequency="80"
+                            TickPlacement="BottomRight" SmallChange="5"
+                            LargeChange="20" Width="110" FontSize="12" />
+                    </DockPanel>
+
+                    <!-- 개발자용 -->
+                    <DockPanel Grid.Row="0" Grid.Column="3" Margin="1,5">
+                        <!-- 서버시간 -->
+                        <TextBox Name="TxtServerTime" x:FieldModifier="public"
+	                Width="80" Height="20" Margin="-190,-30" 
+	                VerticalAlignment="Bottom"
+	                HorizontalAlignment="Left"
+	                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+	                ScrollViewer.VerticalScrollBarVisibility="Auto"
+	                ></TextBox>
+                        <!-- UI CNT -->
+                        <TextBox Name="TxtLayUICnt" x:FieldModifier="public"
+	                Width="40" Height="20" Margin="-100,-30" 
+	                VerticalAlignment="Bottom"
+	                HorizontalAlignment="Left"
+	                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+	                ScrollViewer.VerticalScrollBarVisibility="Auto"
+	                ></TextBox>
+                        <!-- 레이어 CNT -->
+                        <TextBox Name="TxtLayDBCnt" x:FieldModifier="public"
+	                Width="40" Height="20" Margin="-50,-30" 
+	                VerticalAlignment="Bottom"
+	                HorizontalAlignment="Left"
+	                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+	                ScrollViewer.VerticalScrollBarVisibility="Auto"
+	                ></TextBox>
+                    </DockPanel>
+
+                    <DockPanel Grid.Row="0" Grid.Column="4" Margin="1,5">
+                        <Label Name="LblShowHide">라벨보이기</Label>
+                        <ToggleButton Name="TbLabelShowHide" Style="{StaticResource AnimatedSwitch}" Width="80" Height="20" MouseLeftButtonDown="TbLabelShowHide_OnClick" ></ToggleButton>
+                    </DockPanel>
+
+                </Grid>
             </Grid>
+
         </Grid>
     </DockPanel>
-
-
+    
 </Window>

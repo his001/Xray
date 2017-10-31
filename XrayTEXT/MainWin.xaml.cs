@@ -380,6 +380,21 @@ namespace XrayTEXT
 
         #endregion ############ 마우스 휠 ############
 
+
+        void TbLabelShowHide_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (TbLabelShowHide.Content.ToString() == "Add")
+            {
+                TbLabelShowHide.Content = "보이기";
+            }
+            else
+            {
+                TbLabelShowHide.Content = "숨기기";
+            }
+        }
+
+
+
         /// <summary>
         /// 마우스 왼쪽 버튼 클릭 이벤트 핸들러
         /// </summary>
