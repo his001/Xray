@@ -344,26 +344,29 @@ namespace XrayTEXT
                     scaleY += 0.1;
                     Zoom.ScaleX = scaleX;
                     Zoom.ScaleY = scaleY;
-
                     //ImageScrollViewer.Height = (ViewedPhoto.Height * Zoom.ScaleY) - ImageScrollViewer.Height;
                     //ImageScrollViewer.Width = (ViewedPhoto.Width * Zoom.ScaleX) - ImageScrollViewer.Width;
-                    //ImageScrollViewer.Height = ViewedPhoto.Height * Zoom.ScaleY;
-                    //ImageScrollViewer.Width = ViewedPhoto.Width * Zoom.ScaleX;
-
+                    if (Zoom.ScaleY > 1) { Xcanvas.Height = ViewedPhoto.Height * Zoom.ScaleY; }
+                    if (Zoom.ScaleX > 1) { Xcanvas.Width = ViewedPhoto.Width * Zoom.ScaleX;
+                        //ViewedPhoto.SetCurrentValue(LeftProperty, ( (ViewedPhoto.Width * Zoom.ScaleX) - ViewedPhoto.Width) / 2);
+                        //ViewedPhoto.SetCurrentValue(TopProperty, ( (ViewedPhoto.Height * Zoom.ScaleY) - ViewedPhoto.Height) / 2);
+                        ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
+                        ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
+                    }
                 }
                 else if (e.Delta < 0)
                 {
-                    if (Zoom.ScaleX >= 0.1 && Zoom.ScaleY >= 0.1)
+                    if (Zoom.ScaleX > 0.2 && Zoom.ScaleY > 0.2)
                     {
                         scaleX = scaleX - 0.1;
                         scaleY = scaleY - 0.1;
                         Zoom.ScaleX = scaleX;
                         Zoom.ScaleY = scaleY;
-
-                        //ImageScrollViewer.Height = ImageScrollViewer.Height + (ViewedPhoto.Height * Zoom.ScaleY);
-                        //ImageScrollViewer.Width = ImageScrollViewer.Width + (ViewedPhoto.Width * Zoom.ScaleX);
-                        //ImageScrollViewer.Height = ViewedPhoto.Height;
-                        //ImageScrollViewer.Width = ViewedPhoto.Width;
+                        if (Zoom.ScaleY < 1) { Xcanvas.Height = ViewedPhoto.Height; }
+                        if (Zoom.ScaleX < 1) { Xcanvas.Width = ViewedPhoto.Width;}
+                        ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
+                        ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
+                        ImageScrollViewer.ScrollToVerticalOffset(Convert.ToDouble(0));
                     }
                 }
             }
@@ -431,15 +434,15 @@ namespace XrayTEXT
                 if (e.RightButton == MouseButtonState.Pressed)
                 {
                     #region ############# 이미지 이동 #############
-                    Mouse.OverrideCursor = Cursors.Hand;
-                    this.root.CaptureMouse();
-                    Image image = ViewedPhoto;
-                    Point mousePre = e.GetPosition(this.root);
-                    double imgX = mousePre.X - (ViewedPhoto.Width / 2);
-                    double imgY = mousePre.Y - (ViewedPhoto.Height / 2);
-
-                    image.SetCurrentValue(LeftProperty, imgX);
-                    image.SetCurrentValue(TopProperty, imgY);
+                    // 우클릭 이미지 이동은 메모등에 영향이 있어 사용하지 않는 것으로 변경
+                    //Mouse.OverrideCursor = Cursors.Hand;
+                    //this.root.CaptureMouse();
+                    //Image image = ViewedPhoto;
+                    //Point mousePre = e.GetPosition(this.root);
+                    //double imgX = mousePre.X - (ViewedPhoto.Width / 2);
+                    //double imgY = mousePre.Y - (ViewedPhoto.Height / 2);
+                    //image.SetCurrentValue(LeftProperty, imgX);
+                    //image.SetCurrentValue(TopProperty, imgY);
                     #endregion ############# 이미지 이동 #############
                 }
                 else
@@ -993,6 +996,10 @@ namespace XrayTEXT
             //ImageSource imageSource = BitmapFrame.Create(new Uri(PhotosListBox.SelectedItem.ToString()));
             //BitmapSource imageSource = BitmapFrame.Create(new Uri(PhotosListBox.SelectedItem.ToString(), UriKind.Absolute));
             ViewedPhoto.Source = imageSource;
+
+            ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
+            ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
+
 
             _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");    // 더블 클릭시 변경으로
             new Action(() => btnLoadText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent))).SetTimeout(500);
