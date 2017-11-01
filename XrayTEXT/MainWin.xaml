@@ -403,6 +403,8 @@
 	                ScrollViewer.HorizontalScrollBarVisibility="Auto"
 	                ScrollViewer.VerticalScrollBarVisibility="Auto"
 	                ></TextBox>
+
+                        <Button Name="BtnPopup" Width="50" PreviewMouseLeftButtonDown="OnOpenPopupClickPRE" >팝업</Button>
                     </DockPanel>
 
                     <DockPanel Grid.Row="0" Grid.Column="4" Margin="1,5">

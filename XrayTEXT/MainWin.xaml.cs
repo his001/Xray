@@ -924,8 +924,6 @@ namespace XrayTEXT
             }
         }
 
-
-
         public void SetClearTalkBoxLayer() {
             #region #### 로딩 전 기존 소견을 지우고 현재 소견을 불러 온다 ####
             if (this.CurTalkBox.Count > 0)
@@ -1081,6 +1079,32 @@ namespace XrayTEXT
                 Keyboard.ClearFocus(); // 포커스 아웃
             }
         }
+
+        #region ######### popup 관련 #########
+
+        public void OnOpenPopupClickPRE(object sender, RoutedEventArgs e)
+        {
+            int j = 0; // 현재 선택된 소견 레이어 번호
+            string _lastMemo = string.Empty;
+            if (this.CurTalkBox.Count > 0)
+            {
+                for (int i = 0; i < CurTalkBox.Count; i++)
+                {
+                    if (CurTalkBox[i].TalkBoxLyerEditModeNow)
+                    {
+                        j = i;// 하단에 text 변경 용
+                        _lastMemo = CurTalkBox[i].Text;
+                        break;
+                    }
+                }
+            }
+            //MessageBox.Show("_lastMemo:" + _lastMemo );
+            MemoSearchWin mswin = new MemoSearchWin(); // 검색 창
+            mswin.ShowDialog();
+            string str_returned = mswin.selectedText; //MessageBox.Show("_lastMemo:" + _lastMemo + "\r\n New Memo : " + str_returned);
+            CurTalkBox[j].Text = _lastMemo +"/"+ str_returned;
+        }
+        #endregion ######### popup 관련 #########
 
         #region ######### tree #########
         private void TreeViewItem_OnItemSelected(object sender, RoutedEventArgs e)

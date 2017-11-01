@@ -7,6 +7,7 @@ namespace XrayTEXT
     /// </summary>
     public partial class MemoSearchWin : Window
     {
+        public string selectedText;
         public MemoSearchWin()
         {
             InitializeComponent();
@@ -34,7 +35,8 @@ namespace XrayTEXT
 
         private void btn_accept_Click(object sender, RoutedEventArgs e)
         {
-            textBox1.Text = string.Empty;
+            selectedText = textBox1.Text;
+            this.Close();
         }
         
     }

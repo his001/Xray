@@ -146,6 +146,10 @@ namespace XrayTEXT
         // 소견 텍스트 편집 모드 시작 시
         void OnTextBoxLoaded(object sender, RoutedEventArgs e)
         {
+            #region ####### 마지막으로 편집 모드로 들어갔던 레이어 저장 #######
+            _talkBoxLayer.TalkBoxLyerEditModeNow = true;    // 현재 편집 상태입니다 2017-11-01 
+            #endregion ####### 마지막으로 편집 모드로 들어갔던 레이어 저장 #######
+
             TextBox txt = sender as TextBox;
             txt.Focus();
 
@@ -178,6 +182,7 @@ namespace XrayTEXT
                     }
                 }
             );
+            _talkBoxLayer.TalkBoxLyerEditModeNow = false;    // 현재 편집 상태입니다 2017-11-01 
         }
 
         // 소견 텍스트 편집 할 때 

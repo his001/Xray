@@ -344,6 +344,7 @@ namespace XrayTEXT
         private string _cutfileName;
         private string _cutfullPath;
         private Int32 _FileNum;
+        private bool _EditModeNow = false;
         #endregion // Data
 
         #region Private Constructor 
@@ -468,6 +469,13 @@ namespace XrayTEXT
         #endregion // IsDeleted
 
         #region #################### TalkBoxLyer ####################
+        public bool TalkBoxLyerEditModeNow
+        {
+            get { return _EditModeNow; }
+            set { _EditModeNow = value; }
+        }
+
+
         public string TalkBoxLyerPointX
         {
             get
