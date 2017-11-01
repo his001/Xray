@@ -137,5 +137,9 @@
   <ItemGroup>
     <Resource Include="x-ray.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="l-arrows.png" />
+    <Resource Include="r-arrows.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

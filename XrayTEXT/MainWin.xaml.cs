@@ -38,6 +38,7 @@ namespace XrayTEXT
         //public event EventHandler<EventArgs> eventMainNeedChange;
         public int curUIMemoCnt = 0;  // 화면 상의 메모 레이어 갯수
         XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
+        public bool ShowHideMemo = true; // 질병명 보이기
         #endregion ######################### 선언 #########################
 
         #region ######################### MainWin #########################
@@ -230,24 +231,6 @@ namespace XrayTEXT
             TxtFileTitle.Text = _FileTitle;
         }
 
-        //private void setLeftTreeBind() {
-        //    //DirectoryInfo _directory = new DirectoryInfo(Helpers.PicFolder);
-        //    //item.Items.Add(this.GetItem(directory));
-        //    //ExploreDirectories(TreeViewItem item)
-
-        //    //Helpers.PicFolder
-        //    foreach (string s in Directory.EnumerateDirectories(Helpers.PicFolder))
-        //    {
-        //        TreeViewItem item = new TreeViewItem();
-        //        item.Header = s.Substring(s.LastIndexOf('\\') + 1);
-        //        item.Tag = s;
-        //        item.FontWeight = FontWeights.Normal;
-
-        //        FillTreeView(item, s);
-        //        LeftTree.Items.Add(item);
-        //    }
-        //}
-
         private void FillTreeView(TreeViewItem parentItem, string path)
         {
             foreach (string str in Directory.EnumerateDirectories(path))
@@ -314,7 +297,6 @@ namespace XrayTEXT
             TxtFileTitle.Text = _FileTitle;
         }
 
-
         #endregion ######################### MainWin #########################
 
         #region ######## DB 키 생성 ########
@@ -330,6 +312,44 @@ namespace XrayTEXT
             return FileNameOnly;
         }
         #endregion ######## DB 키 생성 ########
+
+        #region ############ 질병명 보이기 토글 버튼 ############
+        void cb_TbLabelShowHide_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SetTbLabelHide();            //cb_TbLabelShowHide.Content = "질병명 숨기기";
+            ShowHideMemo = false;
+        }
+
+        void cb_TbLabelShowHide_Checked(object sender, RoutedEventArgs e)
+        {
+            //cb_TbLabelShowHide.Content = "질병명 보이기";
+            //SetTbLabelShow();
+            if (_key == "")
+            {
+                //MessageBox.Show("좌측 이미지를 선택하신 후 삭제 가능 합니다.");
+                return;
+            }
+            if (!ShowHideMemo)
+            {
+                OnPhotoDblClick(sender, e);
+            }
+        }
+
+        private void SetTbLabelHide()
+        {
+            if (_key == "")
+            {
+                //MessageBox.Show("좌측 이미지를 선택하신 후 삭제 가능 합니다.");
+                return;
+            }
+            TxtcutMemo.Text = string.Empty;
+            TxtFileTitle.Text = string.Empty;
+            SetClearTalkBoxLayer();
+            TxtLayUICnt.Text = "0"; curUIMemoCnt = 0;
+            TxtLayDBCnt.Text = "0";
+        }
+
+        #endregion ############ 질병명 보이기 토글 버튼 ############
 
         #region ######## 마우스 관련 ################
 
@@ -376,24 +396,7 @@ namespace XrayTEXT
                 }
             }
         }
-
-
         #endregion ############ 마우스 휠 ############
-
-
-        void TbLabelShowHide_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (TbLabelShowHide.Content.ToString() == "Add")
-            {
-                TbLabelShowHide.Content = "보이기";
-            }
-            else
-            {
-                TbLabelShowHide.Content = "숨기기";
-            }
-        }
-
-
 
         /// <summary>
         /// 마우스 왼쪽 버튼 클릭 이벤트 핸들러
@@ -640,7 +643,7 @@ namespace XrayTEXT
         /// <param name="e"></param>
 		void btnDelText_Click(object sender, RoutedEventArgs e)
         {
-            SetDeleteAllTextBox();
+            //SetDeleteAllTextBox();
         }
 
         /// <summary>
@@ -717,16 +720,6 @@ namespace XrayTEXT
             }
         }
         
-        ///// <summary>
-        ///// 파일로 저장 하는 부분 삭제
-        ///// </summary>
-        ///// <returns></returns>
-        //public string getTxtFileTitle()
-        //{
-        //    string _Talk = string.Empty;
-        //    _Talk = TxtFileTitle.Text.ToString();
-        //    return _Talk;
-        //}
         #endregion ######### 소견저장 #########
 
         #region ######### 소견로드 #########
@@ -897,16 +890,7 @@ namespace XrayTEXT
                 //return _habitatAnnotations;
             }
         }
-
-        //public List<TalkBoxLayerControl> CurTalkBoxControl
-        //{
-        //    get
-        //    {
-        //        //if (this.tabControl.SelectedIndex == 0)
-        //        return _LstTalkBoxLayerControl;
-        //        //return _habitatAnnotations;
-        //    }
-        //}
+        
         #endregion ######### 소견로드 #########
 
         private void tb_OnlyNum_KeyPress(object sender, TextCompositionEventArgs e)
@@ -928,26 +912,11 @@ namespace XrayTEXT
             #region #### 로딩 전 기존 소견을 지우고 현재 소견을 불러 온다 ####
             if (this.CurTalkBox.Count > 0)
             {
-                this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) {
-                    _txt_layer.Delete();
-                    //_txt_layer.SetHidden();
-                });
+                this.CurTalkBox.ForEach(delegate (TalkBoxLayer _txt_layer) { _txt_layer.Delete(); });
                 this.CurTalkBox.Clear();
             }
-            //this.CurTalkBoxControl.Clear();
             #endregion #### 로딩전 기존 소견을 지우고 현재 소견을 불러 온다 ####
         }
-
-        ////
-        //public void GetTalkBoxEnable(object sender, RoutedEventArgs e) {
-        //    string str = CurTalkBoxControl.Count().ToString();
-        //    for (int i = 0; i < CurTalkBoxControl.Count(); i++)
-        //    {
-        //        str = str + "," + CurTalkBoxControl[i].IsEnabled.ToString();
-        //    }
-        //    MessageBox.Show(str);
-        //    TxtFileTitle.Text = str;
-        //}
         #region ######################### 좌측 트리에서 사진 #########################
 
         /// <summary>
@@ -1010,6 +979,11 @@ namespace XrayTEXT
             Zoom.ScaleX = scaleX;
             Zoom.ScaleY = scaleY;
 
+            if (!ShowHideMemo) {
+                ShowHideMemo = true;
+                cb_TbLabelShowHide.IsChecked = true;
+            }
+
             ImageSource imageSource = new BitmapImage(new Uri(PhotosListBox.SelectedItem.ToString()));
             //ImageSource imageSource = BitmapFrame.Create(new Uri(PhotosListBox.SelectedItem.ToString()));
             //BitmapSource imageSource = BitmapFrame.Create(new Uri(PhotosListBox.SelectedItem.ToString(), UriKind.Absolute));
@@ -1018,10 +992,28 @@ namespace XrayTEXT
             ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
             ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
 
-
             _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");    // 더블 클릭시 변경으로
             new Action(() => btnLoadText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent))).SetTimeout(500);
 
+        }
+
+        private void OnleftBtnClick(object sender, RoutedEventArgs e)
+        {
+            if (PhotosListBox.SelectedItem != null)
+            {
+                MessageBox.Show(PhotosListBox.Items.Count.ToString() +"//"+ PhotosListBox.SelectedItem.ToString() + " : leftBtnClick");
+                //OnPhotoDblClick(sender, e);
+            }
+        }
+
+        private void OnrightBtnClick(object sender, RoutedEventArgs e)
+        {
+            if (PhotosListBox.SelectedItem != null)
+            {
+                //PhotosListBox
+                MessageBox.Show("rightBtnClick");
+                //OnPhotoDblClick(sender, e);
+            }
         }
 
         private void deletePhoto(object sender, RoutedEventArgs e)

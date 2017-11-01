@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:er="clr-namespace:XrayTEXT" 
     xmlns:MyNamespace="clr-namespace:XrayTEXT.ViewModels"
-    Title="Xray Marker" Width="1200" Height="650"
+    Title="Xray Marker" Width="1920" Height="1080"
     FontSize="14"  WindowStartupLocation="CenterScreen"
     WindowState="Maximized" 
     Loaded="OnLoaded"
@@ -156,6 +156,157 @@
             </Setter>
         </Style>
 
+        <!-- 버튼 -->
+        <Style x:Key="ButtonFocusVisual">
+            <Setter
+            Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MetroButton" TargetType="{x:Type Button}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource ButtonFocusVisual}"/>
+            <Setter Property="Background" Value="#EEEEEEEE"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="10 5"/>
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid>
+                            <Border
+                                x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" />
+
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                Margin="{TemplateBinding Padding}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="OpacityMask" Value="#AA888888"/>
+                                <Setter Property="Margin" Value="2 1" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <!--<Setter Property="Background" Value="DimGray"/>-->
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#ADADAD"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <!-- InformButton S -->
+        <Style x:Key="MyFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Control}">
+                        <Grid Margin="3 2">
+                            <Rectangle Name="r1" StrokeThickness="1" Stroke="Black" StrokeDashArray="2 2"/>
+                            <Border Name="border" Width="{TemplateBinding ActualWidth}" Height="{TemplateBinding ActualHeight}"  CornerRadius="2" BorderThickness="1" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ShadowStyle">
+            <Setter Property="Control.Foreground" Value="LightGray" />
+        </Style>
+        
+        <Style x:Key="InformButton" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="FontFamily" Value="Verdana"/>
+            <Setter Property="FontSize" Value="11px"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource MyFocusVisual}" />
+            <Setter Property="Background" >
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" >
+                        <GradientStop Color="#FFFFD190" Offset="0.2"/>
+                        <GradientStop Color="Orange" Offset="0.85"/>
+                        <GradientStop Color="#FFFFD190" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border" 
+        				BorderThickness="1"
+        				Padding="4,2" 
+        				BorderBrush="DarkGray" 
+        				CornerRadius="3" 
+        				Background="{TemplateBinding Background}">
+                            <Grid >
+                                <ContentPresenter HorizontalAlignment="Center" 
+        	                           VerticalAlignment="Center" Name="contentShadow" 
+        					Style="{StaticResource ShadowStyle}">
+                                    <ContentPresenter.RenderTransform>
+                                        <TranslateTransform X="1.0" Y="1.0" />
+                                    </ContentPresenter.RenderTransform>
+                                </ContentPresenter>
+                                <ContentPresenter HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center" Name="content"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FF4788c8" />
+                                <Setter Property="Foreground" Value="#FF4788c8" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" >
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" >
+                                            <GradientStop Color="#FFFFD190" Offset="0.35"/>
+                                            <GradientStop Color="Orange" Offset="0.95"/>
+                                            <GradientStop Color="#FFFFD190" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="content" Property="RenderTransform" >
+                                    <Setter.Value>
+                                        <TranslateTransform Y="1.0" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsDefaulted" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FF282828" />
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#FF282828" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7" />
+                                <Setter Property="Foreground" Value="Gray" />
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- InformButton E -->
 
         <ObjectDataProvider x:Key="Photos" ObjectType="{x:Type er:PhotoCollection}" />
     </Window.Resources>
@@ -288,6 +439,8 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="22" />
                             <RowDefinition Height="30" />
+                            <RowDefinition Height="640" />
+                            <RowDefinition Height="30" />
                             <RowDefinition Height="*" />
                             <RowDefinition Height="30" />
                             <RowDefinition Height="120" />
@@ -309,11 +462,17 @@
                          >
                         </TextBox>
 
-                        <DockPanel Grid.Column="0" Grid.Row="3">
-                            <Label Name="LblFileTitle" Grid.Column="0" Grid.Row="3">판독결과</Label>
+                        <DockPanel Grid.Column="0" Grid.Row="3" VerticalAlignment="Top">
+                            <Button Name="BtnPopup" Width="120" PreviewMouseLeftButtonDown="OnOpenPopupClickPRE" 
+                                    Style="{StaticResource InformButton}"
+                                    >질병명 검색</Button>
+                        </DockPanel>
+                        
+                        <DockPanel Grid.Column="0" Grid.Row="5">
+                            <Label Name="LblFileTitle" >판독결과</Label>
                         </DockPanel>
 
-                        <TextBox Name="TxtFileTitle" Grid.Column="0" Grid.Row="4" x:FieldModifier="public"
+                        <TextBox Name="TxtFileTitle" Grid.Column="0" Grid.Row="6" x:FieldModifier="public"
                             Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserFileMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Width="190" Height="120" Margin="1,0" 
                             VerticalAlignment="Bottom"
@@ -328,13 +487,27 @@
                     <!-- 사진 파일 설명 -->
                 </DockPanel>
 
-                <DockPanel>
-                    
+                <DockPanel Grid.Column="2" Grid.Row="2">
+                    <Button Name="leftBtn" Width="45" Margin="10,0,0,0" Click="OnleftBtnClick">
+                        <ContentControl>
+                            <StackPanel Orientation="Horizontal" Width="Auto" HorizontalAlignment="Left">
+                                <Image Source="l-arrows.png" Margin="0,0,0,0" Width="40" Height="30" />
+                            </StackPanel>
+                        </ContentControl>
+                    </Button>
+                    <Button Name="rightBtn" Width="40" HorizontalAlignment="Right" Margin="0,0,10,0" Click="OnrightBtnClick">
+                        <ContentControl>
+                            <StackPanel Orientation="Horizontal" Width="Auto" HorizontalAlignment="Left">
+                                <Image Source="r-arrows.png" Margin="0,0,0,0" Width="40" Height="30" />
+                            </StackPanel>
+                        </ContentControl>
+                    </Button>
+
                 </DockPanel>
 
                 <Grid Margin="0" Grid.Row="3" Grid.Column="1">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="40" />
+                        <RowDefinition Height="50" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="270"></ColumnDefinition>
@@ -355,7 +528,7 @@
 	                        Width="25" Height="20" Margin="0,5" Text="1" 
                                  PreviewTextInput="tb_OnlyNum_KeyPress"
                                  ></TextBox>
-                        <Button Margin="0,5" Width="80" Click="OnPageChangeClick" HorizontalAlignment="Right">페이지이동</Button>
+                        <Button Margin="0,5" Width="89" Click="OnPageChangeClick" HorizontalAlignment="Right" Style="{StaticResource InformButton}" >페이지이동</Button>
                     </DockPanel>
 
                     <!-- 이미지경로 변경 -->
@@ -363,7 +536,7 @@
                         <!-- 이미지경로 -->
                         <TextBox Name="ImagesDir" Margin="0,5,0,5" Width="320" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images" />
                         <!-- 이미지경로 변경 버튼 -->
-                        <Button Margin="0,5,0,5" Width="75" Click="OnImagesDirChangeClick">폴더변경</Button>
+                        <Button Margin="0,0,0,0" Width="75" Height="40" Click="OnImagesDirChangeClick" Style="{StaticResource InformButton}">폴더변경</Button>
                     </DockPanel>
 
                     <!-- zoom 변경 -->
@@ -377,41 +550,42 @@
                             LargeChange="20" Width="110" FontSize="12" />
                     </DockPanel>
 
+
+                    <DockPanel Grid.Row="0" Grid.Column="4" Margin="1">
+                        <!--<Label Name="LblShowHide" Margin="0,5,0,0" Width="80">라벨보이기</Label>-->
+                        <!--<ToggleButton Name="TbLabelShowHide" Style="{StaticResource AnimatedSwitch}" Width="60" Height="30"
+                            Command="{Binding CmdTbLabelShowHide}" 
+                            CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" >
+                        </ToggleButton>-->
+
+                        <CheckBox Name="cb_TbLabelShowHide" IsChecked="True" Content="질병명 보이기" Margin="0,5,0,0" Checked="cb_TbLabelShowHide_Checked" Unchecked="cb_TbLabelShowHide_Unchecked"/>
+                    </DockPanel>
+
                     <!-- 개발자용 -->
-                    <DockPanel Grid.Row="0" Grid.Column="3" Margin="1,5">
+                    <DockPanel Grid.Row="0" Grid.Column="5" Margin="5,5">
                         <!-- 서버시간 -->
                         <TextBox Name="TxtServerTime" x:FieldModifier="public"
-	                Width="80" Height="20" Margin="-190,-30" 
-	                VerticalAlignment="Bottom"
+	                Width="80" Height="20" Margin="5,5"
 	                HorizontalAlignment="Left"
 	                ScrollViewer.HorizontalScrollBarVisibility="Auto"
 	                ScrollViewer.VerticalScrollBarVisibility="Auto"
 	                ></TextBox>
                         <!-- UI CNT -->
                         <TextBox Name="TxtLayUICnt" x:FieldModifier="public"
-	                Width="40" Height="20" Margin="-100,-30" 
-	                VerticalAlignment="Bottom"
+	                Width="40" Height="20" Margin="5,5"
 	                HorizontalAlignment="Left"
 	                ScrollViewer.HorizontalScrollBarVisibility="Auto"
 	                ScrollViewer.VerticalScrollBarVisibility="Auto"
 	                ></TextBox>
                         <!-- 레이어 CNT -->
                         <TextBox Name="TxtLayDBCnt" x:FieldModifier="public"
-	                Width="40" Height="20" Margin="-50,-30" 
-	                VerticalAlignment="Bottom"
+	                Width="40" Height="20" Margin="5,5"
 	                HorizontalAlignment="Left"
 	                ScrollViewer.HorizontalScrollBarVisibility="Auto"
 	                ScrollViewer.VerticalScrollBarVisibility="Auto"
 	                ></TextBox>
-
-                        <Button Name="BtnPopup" Width="50" PreviewMouseLeftButtonDown="OnOpenPopupClickPRE" >팝업</Button>
                     </DockPanel>
-
-                    <DockPanel Grid.Row="0" Grid.Column="4" Margin="1,5">
-                        <Label Name="LblShowHide">라벨보이기</Label>
-                        <ToggleButton Name="TbLabelShowHide" Style="{StaticResource AnimatedSwitch}" Width="80" Height="20" MouseLeftButtonDown="TbLabelShowHide_OnClick" ></ToggleButton>
-                    </DockPanel>
-
+                    
                 </Grid>
             </Grid>
 
