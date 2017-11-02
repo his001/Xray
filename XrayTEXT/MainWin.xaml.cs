@@ -1001,18 +1001,42 @@ namespace XrayTEXT
         {
             if (PhotosListBox.SelectedItem != null)
             {
-                MessageBox.Show(PhotosListBox.Items.Count.ToString() +"//"+ PhotosListBox.SelectedItem.ToString() + " : leftBtnClick");
-                //OnPhotoDblClick(sender, e);
+                int j = GetCurPhotosListBoxNo();
+                if (j - 1 == -1) { MessageBox.Show("첫 번째 입니다."); }
+                else{
+                    PhotosListBox.SelectedItem = PhotosListBox.Items[j-1];
+                    OnPhotoDblClick(sender, e);//new Action(() => OnPhotoDblClick(sender, e) ).SetTimeout(500);
+                }
             }
+        }
+
+        private int GetCurPhotosListBoxNo() {
+            int j = 0; // 선택된 item 의 번호
+            if (PhotosListBox.SelectedItem != null)
+            {
+                for (int i = 0; i < PhotosListBox.Items.Count; i++)
+                {
+                    if (PhotosListBox.Items[i] == PhotosListBox.SelectedItem)
+                    {
+                        j = i;
+                        break;
+                    }
+                }
+            }
+            return j;
         }
 
         private void OnrightBtnClick(object sender, RoutedEventArgs e)
         {
             if (PhotosListBox.SelectedItem != null)
             {
-                //PhotosListBox
-                MessageBox.Show("rightBtnClick");
-                //OnPhotoDblClick(sender, e);
+                int j = GetCurPhotosListBoxNo();
+                if (j + 1 == PhotosListBox.Items.Count) { MessageBox.Show("마지막 입니다."); }
+                else
+                {
+                    PhotosListBox.SelectedItem = PhotosListBox.Items[j + 1];
+                    OnPhotoDblClick(sender, e);//new Action(() => OnPhotoDblClick(sender, e) ).SetTimeout(500);
+                }
             }
         }
 
