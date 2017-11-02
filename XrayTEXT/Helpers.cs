@@ -146,7 +146,7 @@ namespace XrayTEXT
                     conn.Open();
 
                     string sql = "";
-                    sql = sql + "IF((SELECT COUNT(*) FROM TBL_TalkBoxLayer WITH(NOLOCK) WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' AND CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "') > 0)";
+                    sql = sql + "IF( EXISTS(SELECT * FROM TBL_TalkBoxLayer WITH(NOLOCK) WHERE KeyFilename = '" + _talkBoxLayer.TalkBoxLyerkeyFilename + "' AND CutFilename = '" + _talkBoxLayer.TalkBoxLyercutfileName + "') > 0)";
                     sql = sql + " BEGIN";
                     sql = sql + " update TBL_TalkBoxLayer set ";
                     sql = sql + " CutFullPath = '" + _talkBoxLayer.TalkBoxLyerCutFullPath + "', ";

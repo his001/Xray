@@ -438,41 +438,47 @@
                     <Grid Margin="0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="22" />
-                            <RowDefinition Height="30" />
-                            <RowDefinition Height="640" />
+                            <RowDefinition Height="60" />
+                            <RowDefinition Height="120" />
+                            
+                            <RowDefinition Height="60" /> <!--질병명검색-->
                             <RowDefinition Height="30" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="30" />
+                            <RowDefinition Height="60" />
                             <RowDefinition Height="120" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
 
-                        <Label Name="LblcutMemo" Grid.Column="0" Grid.Row="1">질병명</Label>
+                        <!-- 판독결과 정상 비정상 -->
+                        <DockPanel Grid.Column="0" Grid.Row="1">
+                            <Grid Margin="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30" />
+                                    <RowDefinition Height="30" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- 컷팅 메모 -->
-                        <TextBox Name="TxtcutMemo" Grid.Column="0" Grid.Row="2" x:FieldModifier="public"
-                         Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserCutMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Width="200" MinHeight="600" Margin="1,0" 
-                         VerticalAlignment="Top"
-                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                 IsReadOnly="True"
-                         >
-                        </TextBox>
+                                <DockPanel Grid.Column="0" Grid.Row="0">
+                                    <Label Name="LblFileTitle" >판독결과 :</Label>
+                                    <Label Name="Lbl_isNormal" ></Label>
+                                </DockPanel>
+                                <DockPanel Grid.Column="0" Grid.Row="1" Name="dc_isNormal">
+                                    <CheckBox Name="cb_isNormal" IsChecked="True" Content="정상소견" Margin="0,5,0,0" HorizontalAlignment="Right"/>
+                                    <!--Checked="cb_isNormal_Checked" Unchecked="cb_isNormal_Unchecked"-->
+                                    <Button Name="Btn_isNormal" Width="60" Click="OnBtn_isNormalClick" 
+                                        Style="{StaticResource InformButton}"
+                                        >저장</Button>
 
-                        <DockPanel Grid.Column="0" Grid.Row="3" VerticalAlignment="Top">
-                            <Button Name="BtnPopup" Width="120" PreviewMouseLeftButtonDown="OnOpenPopupClickPRE" 
-                                    Style="{StaticResource InformButton}"
-                                    >질병명 검색</Button>
+                                </DockPanel>
+                            </Grid>
                         </DockPanel>
-                        
-                        <DockPanel Grid.Column="0" Grid.Row="5">
-                            <Label Name="LblFileTitle" >판독결과</Label>
-                        </DockPanel>
 
-                        <TextBox Name="TxtFileTitle" Grid.Column="0" Grid.Row="6" x:FieldModifier="public"
+                        <!-- 판독결과 -->
+                        <TextBox Name="TxtFileTitle" Grid.Column="0" Grid.Row="2" x:FieldModifier="public"
                             Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserFileMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Width="190" Height="120" Margin="1,0" 
                             VerticalAlignment="Bottom"
@@ -482,6 +488,28 @@
                                  KeyDown="OnTxtFileTitleKeyDown"
                         >
                         </TextBox>
+                        
+                        <DockPanel Grid.Column="0" Grid.Row="3" VerticalAlignment="Bottom">
+                            <Button Name="BtnPopup" Width="120" PreviewMouseLeftButtonDown="OnOpenPopupClickPRE" 
+                                    Style="{StaticResource InformButton}"
+                                    >질병명 검색</Button>
+                        </DockPanel>
+
+
+                        <Label Name="LblcutMemo" Grid.Column="0" Grid.Row="4">질병명</Label>
+
+                        <!-- 컷팅 메모 -->
+                        <TextBox Name="TxtcutMemo" Grid.Column="0" Grid.Row="5" x:FieldModifier="public"
+                         Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserCutMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Width="200" MinHeight="600" Margin="1,0" 
+                         VerticalAlignment="Top"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 IsReadOnly="True"
+                         >
+                        </TextBox>
+
+                                                
                     </Grid>
 
                     <!-- 사진 파일 설명 -->

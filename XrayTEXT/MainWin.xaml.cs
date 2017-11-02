@@ -165,8 +165,7 @@ namespace XrayTEXT
             string _KeyFilename = getKeyFileNameOnly();    // 파일 명 추가
             try
             {
-                string constr = Helpers.dbCon;
-                using (SqlConnection conn = new SqlConnection(constr))
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
                 {
                     conn.Open();
                     string sql = "update TBL_TalkBoxLayer SET updYN='N' WHERE KeyFilename = '" + _KeyFilename + "' and updYN='Y';";
@@ -893,6 +892,11 @@ namespace XrayTEXT
         
         #endregion ######### 소견로드 #########
 
+        /// <summary>
+        /// 숫자만 입력
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void tb_OnlyNum_KeyPress(object sender, TextCompositionEventArgs e)
         {
             foreach (char c in e.Text)
@@ -931,6 +935,9 @@ namespace XrayTEXT
             GetImageTotalCntShow(); // 전체 파일 갯수를 보여준다
         }
 
+        /// <summary>
+        /// 해당 폴더의 총 이미지 갯수
+        /// </summary>
         private void GetImageTotalCntShow()
         {
             DirectoryInfo _directory = new DirectoryInfo(Helpers.PicFolder);
@@ -949,6 +956,11 @@ namespace XrayTEXT
             TxtTotalFileCnt.Text = _cnt.ToString();
         }
 
+        /// <summary>
+        /// 페이지 이동 버튼 클릭
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnPageChangeClick(object sender, RoutedEventArgs e)
         {
             int _CurPage = Convert.ToInt32(TxtCurPage.Text);
@@ -995,8 +1007,36 @@ namespace XrayTEXT
             _key = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");    // 더블 클릭시 변경으로
             new Action(() => btnLoadText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent))).SetTimeout(500);
 
+            string _GetisNormal_DB = GetisNormal_DB();
+            if (_GetisNormal_DB != "")
+            {
+                Btn_isNormal.IsEnabled = false;
+                dc_isNormal.Visibility = Visibility.Hidden;
+                cb_isNormal.IsEnabled = false;
+                if (_GetisNormal_DB == "Y")
+                {
+                    Lbl_isNormal.Content = "정상소견";
+                    cb_isNormal.IsChecked = true;
+                }
+                else
+                {
+                    Lbl_isNormal.Content = "비정상소견";
+                    cb_isNormal.IsChecked = false;
+                }
+            }
+            else {
+                Btn_isNormal.IsEnabled = true;
+                Lbl_isNormal.Content = "";
+                dc_isNormal.Visibility = Visibility.Visible;
+                cb_isNormal.IsEnabled = true;
+            }
         }
 
+        /// <summary>
+        /// 우측 하단 이전 이미지 보기 (좌 화살표)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnleftBtnClick(object sender, RoutedEventArgs e)
         {
             if (PhotosListBox.SelectedItem != null)
@@ -1010,6 +1050,10 @@ namespace XrayTEXT
             }
         }
 
+        /// <summary>
+        /// 좌측 썸네일의 현재 선택된 썸네일이 몇 번째 인지를 가져온다
+        /// </summary>
+        /// <returns></returns>
         private int GetCurPhotosListBoxNo() {
             int j = 0; // 선택된 item 의 번호
             if (PhotosListBox.SelectedItem != null)
@@ -1026,6 +1070,11 @@ namespace XrayTEXT
             return j;
         }
 
+        /// <summary>
+        /// 우측 하단 다음 이미지 보기 (우 화살표)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnrightBtnClick(object sender, RoutedEventArgs e)
         {
             if (PhotosListBox.SelectedItem != null)
@@ -1040,6 +1089,11 @@ namespace XrayTEXT
             }
         }
 
+        /// <summary>
+        /// 사진 삭제 클릭
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void deletePhoto(object sender, RoutedEventArgs e)
         {
             //string _delFile = PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");
@@ -1050,6 +1104,11 @@ namespace XrayTEXT
             }
         }
 
+        /// <summary>
+        /// 디렉토리 변경 클릭
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnImagesDirChangeClick(object sender, RoutedEventArgs e)
         {
             Helpers.PicFolder = ImagesDir.Text;
@@ -1076,7 +1135,7 @@ namespace XrayTEXT
                         using (SqlConnection conn = new SqlConnection(constr))
                         {
                             conn.Open();
-                            string sql = "update TBL_TalkBoxLayer SET FileTitle='" + Helpers.rtnSQLInj(_FileTitle) + "',updYN='N' WHERE KeyFilename = '" + _KeyFilename + "' ;";
+                            string sql = "UPDATE TBL_TalkBoxLayer SET FileTitle='" + Helpers.rtnSQLInj(_FileTitle) + "',updYN='N' WHERE KeyFilename = '" + _KeyFilename + "' ;";
                             using (SqlCommand cmd = new SqlCommand(sql, conn))
                             {
                                 int result = cmd.ExecuteNonQuery();
@@ -1096,10 +1155,114 @@ namespace XrayTEXT
             }
         }
 
+        /// <summary>
+        /// 판독결과 정상인지 아닌지 저장
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnBtn_isNormalClick(object sender, RoutedEventArgs e)
+        {
+            if (cb_isNormal.IsChecked.Value)
+            {
+                if (SetisNormal_DB("Y") == "success") {
+                    MessageBox.Show("정상 소견으로 저장 되었습니다.");
+                }
+            }
+            else {
+                if (SetisNormal_DB("N") == "success")
+                {
+                    MessageBox.Show("비정상 소견으로 저장 되었습니다.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 마스터 정보가 있는지 조회 
+        /// </summary>
+        /// <returns></returns>
+        private string GetisNormal_DB() {
+            string _KeyFilename = getKeyFileNameOnly();    // 파일 명 추가
+            DataSet ds = new DataSet();
+            try
+            {
+                string _text = string.Empty;
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                {
+                    conn.Open();
+                    string sql = "SELECT KeyFilename, isNormalYN, regdate FROM TBL_TalkBoxLayerMst WITH(NOLOCK) WHERE KeyFilename ='" + _KeyFilename + "' ";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        var adapt = new SqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }
+
+            string _isNormalYN = string.Empty;
+            if (ds != null && ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+            {
+                _isNormalYN = ds.Tables[0].Rows[0]["isNormalYN"].ToString();
+            }
+            return _isNormalYN;
+        }
+
+        /// <summary>
+        /// 판독결과 정상인지 아닌지 저장
+        /// </summary>
+        /// <param name="_YN"></param>
+        /// <returns></returns>
+        private string SetisNormal_DB(string _YN)
+        {
+            string _rtn = "err";
+            string _KeyFilename = getKeyFileNameOnly();    // 파일 명 추가
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                {
+                    conn.Open();
+                    string sql = " ";
+                    sql = sql + " IF (EXISTS(SELECT * FROM TBL_TalkBoxLayerMst WITH(NOLOCK) WHERE KeyFilename = '" + _KeyFilename + "')) ";
+                    sql = sql + " BEGIN ";
+                    sql = sql + "     UPDATE TBL_TalkBoxLayerMst SET isNormalYN = '" + _YN + "', FileTitle = '" + Helpers.rtnSQLInj(TxtFileTitle.Text) + "' WHERE KeyFilename = '" + _KeyFilename + "' ";
+                    sql = sql + " END ";
+                    sql = sql + " ELSE ";
+                    sql = sql + " BEGIN ";
+                    sql = sql + "     INSERT INTO TBL_TalkBoxLayerMst(KeyFilename, isNormalYN, FileTitle) ";
+                    sql = sql + "     SELECT '" + _KeyFilename + "' as KeyFilename, '" + _YN + "' as isNormalYN, '" + Helpers.rtnSQLInj(TxtFileTitle.Text) + "' AS FileTitle ";
+                    sql = sql + " END ";
+
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        int result = cmd.ExecuteNonQuery();
+                        if (result == 1)
+                        {
+                            _rtn = "success";
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex) { }
+            return _rtn;
+        }
+
         #region ######### popup 관련 #########
 
         public void OnOpenPopupClickPRE(object sender, RoutedEventArgs e)
         {
+            /////////////////////////////////
+            if (this.CurTalkBox.Count == 0) {
+                MessageBox.Show("좌측 레이어 선택후 클릭 가능하십니다.");
+                return;
+            }
+            /////////////////////////////////
+
             int j = 0; // 현재 선택된 소견 레이어 번호
             string _lastMemo = string.Empty;
             if (this.CurTalkBox.Count > 0)
