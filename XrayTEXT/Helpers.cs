@@ -137,11 +137,9 @@ namespace XrayTEXT
             string rtn = "";
             try
             {
-                string _text = string.Empty;
-                string constr = Helpers.dbCon;
                 byte[] photo = Helpers.GetPhoto(_talkBoxLayer.TalkBoxLyerCutFullPath + "/" + _talkBoxLayer.TalkBoxLyercutfileName);
 
-                using (SqlConnection conn = new SqlConnection(constr))
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
                 {
                     conn.Open();
 

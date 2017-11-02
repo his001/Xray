@@ -46,7 +46,7 @@ namespace XrayTEXT
         {
             this.Visibility = Visibility.Visible;
             this.Title = "로딩중입니다.";
-            
+
             InitializeComponent();
 
             Helpers.PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
@@ -112,7 +112,7 @@ namespace XrayTEXT
             //}
 
             // 화면의 ui 수와 db 의 ui 수가 다르면 같게 맞춘다.
-            if ((curUIMemoCnt>0 || chkDBCnt>0) && (curUIMemoCnt != chkDBCnt) || (chkDBCnt!= chkDBYNCnt)) {
+            if ((curUIMemoCnt > 0 || chkDBCnt > 0) && (curUIMemoCnt != chkDBCnt) || (chkDBCnt != chkDBYNCnt)) {
                 if (chkDBCnt != chkDBYNCnt)
                 {
                     SetDBupdYNMakeN();
@@ -136,7 +136,6 @@ namespace XrayTEXT
             {
                 try
                 {
-                    string _text = string.Empty;
                     using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
                     {
                         conn.Open();
@@ -189,7 +188,6 @@ namespace XrayTEXT
             DataSet ds = new DataSet();
             try
             {
-                string _text = string.Empty;
                 using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
                 {
                     conn.Open();
@@ -253,9 +251,7 @@ namespace XrayTEXT
             DataSet ds = new DataSet();
             try
             {
-                string _text = string.Empty;
-                string constr = Helpers.dbCon;
-                using (SqlConnection conn = new SqlConnection(constr))
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
                 {
                     conn.Open();
                     string sql = "Select KeyFilename, CutFilename, CutFullPath, FileTitle, numb, memo, PointX, PointY, SizeW, SizeH, Fileimg ";
@@ -287,7 +283,7 @@ namespace XrayTEXT
                     sb2.AppendLine(_innerMemo);
                 }
             }
-            
+
             #endregion ########## text 바인딩 E ##########
             mainViewModel.UserCutMemo = sb2.ToString();
             mainViewModel.UserFileMemo = _FileTitle;
@@ -411,7 +407,7 @@ namespace XrayTEXT
         private void OnZoomImage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!IsInitialized) return;
-            if (PhotosListBox.SelectedItem != null) return;
+            if (PhotosListBox.SelectedItem == null) return;
 
             lblZoom.Content = ZoomImage.Value + "%";
             double scale = (double)(ZoomImage.Value / 100.0);
@@ -564,7 +560,7 @@ namespace XrayTEXT
                         //MessageBox.Show(talkBoxLocationXY.ToString());
                         Last_talkBoxLayer = _talkBoxLayer; //마지막 작업 레이어를 저장 하기 위해 ...
                         Last_image = image; //마지막 작업 이미지를 저장 하기 위해 ...
-                        Helpers.ExportToPng(fullPath +"/"+ cutfileName, image, top, left);
+                        Helpers.ExportToPng(fullPath + "/" + cutfileName, image, top, left);
 
                         #endregion ########## 사각형 안에 _talkLayer 삽입 end ##########
                         root.Children.Remove(currentRect); // 그려진 네모는 삭제 - obj 삭제 했더니 재사용이 안되 히든 및 null 처리
@@ -581,7 +577,7 @@ namespace XrayTEXT
                 #endregion ############
             }
         }
-        
+
         /// <summary>
         /// 저장될 파일 경로
         /// </summary>
@@ -600,7 +596,7 @@ namespace XrayTEXT
         /// 저장될 파일명
         /// </summary>
         /// <returns></returns>
-        public string getSaveFile(string _extension=".dat")
+        public string getSaveFile(string _extension = ".dat")
         {
             string _saveFileName = getSavePath() + "\\" + System.IO.Path.GetFileNameWithoutExtension(
                 getKeyWithPath() //PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/")
@@ -610,7 +606,7 @@ namespace XrayTEXT
 
         public string getSaveFileNoPath(string _extension = ".dat")
         {
-            string _saveFileName = System.IO.Path.GetFileNameWithoutExtension( getKeyWithPath() ) + _extension;
+            string _saveFileName = System.IO.Path.GetFileNameWithoutExtension(getKeyWithPath()) + _extension;
             return _saveFileName;
         }
 
@@ -739,7 +735,7 @@ namespace XrayTEXT
                 }
             }
         }
-        
+
         #endregion ######### 소견저장 #########
 
         #region ######### 소견로드 #########
@@ -768,7 +764,6 @@ namespace XrayTEXT
             DataSet ds = new DataSet();
             try
             {
-                string _text = string.Empty;
                 using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
                 {
                     conn.Open();
@@ -910,7 +905,7 @@ namespace XrayTEXT
                 //return _habitatAnnotations;
             }
         }
-        
+
         #endregion ######### 소견로드 #########
 
         /// <summary>
@@ -924,11 +919,11 @@ namespace XrayTEXT
             {
                 //if (e.Text != ".")
                 //{
-                    if (!char.IsDigit(c))
-                    {
-                        e.Handled = true;
-                        break;
-                    }
+                if (!char.IsDigit(c))
+                {
+                    e.Handled = true;
+                    break;
+                }
                 //}
             }
         }
@@ -953,8 +948,101 @@ namespace XrayTEXT
         {
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
             Photos.Path = Helpers.PicFolder;
+
+            //string _strTemp = Photos[1].OnlyFileName;
+            //DependencyProperty dp = new DependencyProperty(ie as IsEnabledProperty);
+            //Photos[0].Image.SetCurrentValue() //IsEnabled
+
             GetImageTotalCntShow(); // 전체 파일 갯수를 보여준다
         }
+
+        //private void LoadAfter_Photo_Check_PreWork()
+        //{
+        //    for (int i = 0; i < Photos.Count; i++)
+        //    {
+        //        if (Photos[i].isNormalYN == "")
+        //        {
+
+        //        }
+        //        else
+        //        {
+        //            //Photos[i].Image.WidthStyle = (Style)(this.Resources["PhotoListBoxStyle2"]);
+        //            Photos[i].Image.Format..colo
+        //        }
+        //    }
+        //}
+        //private void LoadAfter_Photo_Check_PreWork() {
+        //    string _list = ""; 
+        //    for (int i = 0; i < PhotosListBox.Items.Count; i++)
+        //    {
+        //        if (_list == "")
+        //        {
+        //            _list = "'" + System.IO.Path.GetFileName(PhotosListBox.Items[i].ToString().Replace("file:///", "").Replace("\\", "/")) + "'";
+        //        } else {
+        //            _list = _list +",'"+ System.IO.Path.GetFileName(PhotosListBox.Items[i].ToString().Replace("file:///", "").Replace("\\", "/")) + "'";
+        //        }
+        //    }
+        //    if (_list != "") {
+        //        DataSet ds = new DataSet();
+        //        ds = getMasterKeyWork(_list);
+
+        //        if (ds != null && ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+        //        {
+        //            //_isNormalYN = ds.Tables[0].Rows[0]["isNormalYN"].ToString();
+        //            string _KeyFilename = ""; string _isNormalYN = "";
+        //            for (int i = 0; i < ds.Tables[0].Rows.Count; i++) {
+        //                _KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();
+        //                _isNormalYN =  ds.Tables[0].Rows[i]["isNormalYN"].ToString();
+
+        //                if (_isNormalYN != "") {
+        //                    //_KeyFilename = PhotosListBox.Items[]
+        //                    // 여기서 좌측 트리에 작업이 되었는지 Set 을 해줘야 함
+
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        //private void setPhotoBgChange(string keyFile) {
+        //    for (int i = 0; i < PhotosListBox.Items.Count; i++)
+        //    {
+        //        if (keyFile == System.IO.Path.GetFileName(PhotosListBox.Items[i].ToString().Replace("file:///", "").Replace("\\", "/"))) {
+        //            //PhotosListBox.Items[i].
+        //        }
+        //    }
+        //}
+
+        //private DataSet getMasterKeyWork(string _where)
+        //{
+        //    DataSet ds = new DataSet();
+        //    if (_where != "")
+        //    {
+        //        try
+        //        {
+        //            using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+        //            {
+        //                conn.Open();
+        //                string sql = "SELECT KeyFilename, isNormalYN FROM TBL_TalkBoxLayerMst WITH(NOLOCK) WHERE KeyFilename in ('" + _where + "') ";
+        //                using (SqlCommand cmd = new SqlCommand(sql, conn))
+        //                {
+        //                    var adapt = new SqlDataAdapter();
+        //                    adapt.SelectCommand = cmd;
+        //                    adapt.Fill(ds);
+        //                }
+        //                conn.Close();
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            //MessageBox.Show(ex.Message);
+        //        }
+        //    }
+        //    return ds;
+        //}
+
+
+
 
         /// <summary>
         /// 해당 폴더의 총 이미지 갯수
@@ -1206,7 +1294,6 @@ namespace XrayTEXT
             DataSet ds = new DataSet();
             try
             {
-                string _text = string.Empty;
                 using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
                 {
                     conn.Open();
@@ -1565,6 +1652,13 @@ namespace XrayTEXT
             set { _onlyfileName = value; }
         }
 
+        private string _isNormalYN = string.Empty;
+        public string isNormalYN
+        {
+            get { return _isNormalYN; }
+            set { _isNormalYN = value; }
+        }
+
         public Photo(string path)
         {
             _path = path;
@@ -1598,6 +1692,7 @@ namespace XrayTEXT
                 GC.Collect();
 
                 OnlyFileName = System.IO.Path.GetFileName(path);
+                isNormalYN = GetisNormalYN_DB(OnlyFileName);
                 //Photos.OnlyFileName = onlyfileName;
 
                 #region ####### 기존 #######
@@ -1634,6 +1729,40 @@ namespace XrayTEXT
             {
                 //MessageBox.Show("NotSupportedException");
             }
+        }
+
+        private string GetisNormalYN_DB(string _OnlyFileName)
+        {
+            string _rtn = "";
+            DataSet ds = new DataSet();
+            if (_OnlyFileName != "")
+            {
+                try
+                {
+                    using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                    {
+                        conn.Open();
+                        string sql = "SELECT KeyFilename, isNormalYN FROM TBL_TalkBoxLayerMst WITH(NOLOCK) WHERE KeyFilename = '" + _OnlyFileName + "' ";
+                        using (SqlCommand cmd = new SqlCommand(sql, conn))
+                        {
+                            var adapt = new SqlDataAdapter();
+                            adapt.SelectCommand = cmd;
+                            adapt.Fill(ds);
+                        }
+                        conn.Close();
+
+                        if (ds != null && ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+                        {
+                            _rtn = ds.Tables[0].Rows[0]["isNormalYN"].ToString();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //MessageBox.Show(ex.Message);
+                }
+            }
+            return _rtn;
         }
 
         private Image getPngImage(string path) {
