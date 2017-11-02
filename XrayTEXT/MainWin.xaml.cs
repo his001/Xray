@@ -353,49 +353,70 @@ namespace XrayTEXT
         #region ######## 마우스 관련 ################
 
         #region ####### 마우스 휠 ###########
+        /// <summary>
+        /// 마우스 휠 확대축소기능 이나 현재 사용 하지 않음 - 슬라이더 줌바 로 변경 2017-11-02
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void root_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (PhotosListBox.SelectedItem != null)
             {
-                if (e.Delta > 0)
-                {
-                    if (scaleX < 2)
-                    {
-                        scaleX += 0.1;
-                        scaleY += 0.1;
-                        Zoom.ScaleX = scaleX;
-                        Zoom.ScaleY = scaleY;
-                        //ImageScrollViewer.Height = (ViewedPhoto.Height * Zoom.ScaleY) - ImageScrollViewer.Height;
-                        //ImageScrollViewer.Width = (ViewedPhoto.Width * Zoom.ScaleX) - ImageScrollViewer.Width;
-                        if (Zoom.ScaleY > 1) { Xcanvas.Height = ViewedPhoto.Height * Zoom.ScaleY; }
-                        if (Zoom.ScaleX > 1)
-                        {
-                            Xcanvas.Width = ViewedPhoto.Width * Zoom.ScaleX;
-                            //ViewedPhoto.SetCurrentValue(LeftProperty, ( (ViewedPhoto.Width * Zoom.ScaleX) - ViewedPhoto.Width) / 2);
-                            //ViewedPhoto.SetCurrentValue(TopProperty, ( (ViewedPhoto.Height * Zoom.ScaleY) - ViewedPhoto.Height) / 2);
-                            ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
-                            ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
-                        }
-                    }
-                }
-                else if (e.Delta < 0)
-                {
-                    if (Zoom.ScaleX > 0.2 && Zoom.ScaleY > 0.2)
-                    {
-                        scaleX = scaleX - 0.1;
-                        scaleY = scaleY - 0.1;
-                        Zoom.ScaleX = scaleX;
-                        Zoom.ScaleY = scaleY;
-                        if (Zoom.ScaleY < 1) { Xcanvas.Height = ViewedPhoto.Height; }
-                        if (Zoom.ScaleX < 1) { Xcanvas.Width = ViewedPhoto.Width;}
-                        ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
-                        ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
-                        ImageScrollViewer.ScrollToVerticalOffset(Convert.ToDouble(0));
-                    }
-                }
+                #region ####### 마우스 휠 확대 축소 S ###########
+                //if (e.Delta > 0)
+                //{
+                //    if (scaleX < 2)
+                //    {
+                //        scaleX += 0.1;
+                //        scaleY += 0.1;
+                //        Zoom.ScaleX = scaleX;
+                //        Zoom.ScaleY = scaleY;
+                //        //ImageScrollViewer.Height = (ViewedPhoto.Height * Zoom.ScaleY) - ImageScrollViewer.Height;
+                //        //ImageScrollViewer.Width = (ViewedPhoto.Width * Zoom.ScaleX) - ImageScrollViewer.Width;
+                //        if (Zoom.ScaleY > 1) { Xcanvas.Height = ViewedPhoto.Height * Zoom.ScaleY; }
+                //        if (Zoom.ScaleX > 1)
+                //        {
+                //            Xcanvas.Width = ViewedPhoto.Width * Zoom.ScaleX;
+                //            //ViewedPhoto.SetCurrentValue(LeftProperty, ( (ViewedPhoto.Width * Zoom.ScaleX) - ViewedPhoto.Width) / 2);
+                //            //ViewedPhoto.SetCurrentValue(TopProperty, ( (ViewedPhoto.Height * Zoom.ScaleY) - ViewedPhoto.Height) / 2);
+                //            ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
+                //            ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
+                //        }
+                //    }
+                //}
+                //else if (e.Delta < 0)
+                //{
+                //    if (Zoom.ScaleX > 0.2 && Zoom.ScaleY > 0.2)
+                //    {
+                //        scaleX = scaleX - 0.1;
+                //        scaleY = scaleY - 0.1;
+                //        Zoom.ScaleX = scaleX;
+                //        Zoom.ScaleY = scaleY;
+                //        if (Zoom.ScaleY < 1) { Xcanvas.Height = ViewedPhoto.Height; }
+                //        if (Zoom.ScaleX < 1) { Xcanvas.Width = ViewedPhoto.Width;}
+                //        ViewedPhoto.SetCurrentValue(LeftProperty, Convert.ToDouble(0));
+                //        ViewedPhoto.SetCurrentValue(TopProperty, Convert.ToDouble(0));
+                //        ImageScrollViewer.ScrollToVerticalOffset(Convert.ToDouble(0));
+                //    }
+                //}
+                #endregion ####### 마우스 휠 확대 축소 E ###########
             }
         }
         #endregion ############ 마우스 휠 ############
+        /// <summary>
+        /// 이미지 확대 축소 - 마우스 휠대신 슬라이더 바로 변경 2017-11-02 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnZoomImage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!IsInitialized) return;
+            if (PhotosListBox.SelectedItem != null) return;
+
+            lblZoom.Content = ZoomImage.Value + "%";
+            double scale = (double)(ZoomImage.Value / 100.0);
+            Xcanvas.LayoutTransform = new ScaleTransform(scale, scale);
+        }
 
         /// <summary>
         /// 마우스 왼쪽 버튼 클릭 이벤트 핸들러
@@ -986,11 +1007,11 @@ namespace XrayTEXT
             TxtFileTitle.Text = string.Empty; // 소견 data 삭제
             TxtcutMemo.Text = string.Empty;  // 우상단
             curUIMemoCnt = 0;   // 20171027 추가
-            scaleX = 1;
-            scaleY = 1;
-            Zoom.ScaleX = scaleX;
-            Zoom.ScaleY = scaleY;
-
+            //scaleX = 1;
+            //scaleY = 1;
+            //Zoom.ScaleX = scaleX;
+            //Zoom.ScaleY = scaleY; // 상단 마우스 휠로 확대 축소는 일단 막기
+            ZoomImage.Value = 100; // 줌바로 변경
             if (!ShowHideMemo) {
                 ShowHideMemo = true;
                 cb_TbLabelShowHide.IsChecked = true;

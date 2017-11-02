@@ -81,6 +81,12 @@
             </Setter>
         </Style>
 
+        <!--<Style TargetType="{x:Type Canvas}" x:Key="XcanvasStyle"
+               Height="{Binding ElementName=ZoomImage, Path='Value'}" 
+               Width="{Binding ElementName=ZoomImage, Path='Value'}" >
+        </Style>-->
+
+
         <!-- Style for an individual generic item -->
         <Style TargetType="{x:Type ListBoxItem}">
             <Setter Property="Background" Value="Transparent" />
@@ -540,18 +546,18 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="270"></ColumnDefinition>
                         <ColumnDefinition Width="400"></ColumnDefinition>
-                        <ColumnDefinition Width="140"></ColumnDefinition>
+                        <ColumnDefinition Width="220"></ColumnDefinition>
                         <ColumnDefinition Width="180"></ColumnDefinition>
                         <ColumnDefinition Width="160"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
                     <!-- 페이징 -->
                     <DockPanel DockPanel.Dock="Bottom" Margin="5,5,0,5" Width="260" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
-                        <Label DockPanel.Dock="Left" FontSize="12">총파일수</Label>
+                        <Label DockPanel.Dock="Left" FontSize="12" Margin="0,5,0,0">총파일수</Label>
                         <TextBox Name="TxtTotalFileCnt" x:FieldModifier="public"
 	                        Width="40" Height="20" Margin="0,0" Text="0" IsReadOnly="True"></TextBox>
 
-                        <Label DockPanel.Dock="Left" FontSize="12">페이지</Label>
+                        <Label DockPanel.Dock="Left" FontSize="12" Margin="0,5,0,0">페이지</Label>
                         <TextBox Name="TxtCurPage" x:FieldModifier="public" 
 	                        Width="25" Height="20" Margin="0,5" Text="1" 
                                  PreviewTextInput="tb_OnlyNum_KeyPress"
@@ -568,25 +574,32 @@
                     </DockPanel>
 
                     <!-- zoom 변경 -->
-                    <DockPanel DockPanel.Dock="Bottom" Margin="1,5" Width="140" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
-                        <Label DockPanel.Dock="Left" FontSize="12">Zoom:</Label>
+                    <DockPanel DockPanel.Dock="Bottom" Margin="0,5" Width="220" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
+                        <Label DockPanel.Dock="Left" FontSize="12" Margin="10,5,0,0">Zoom:</Label>
                         <Slider Name="ZoomImage" 
-                            Margin="10,0,0,0" Orientation="Horizontal" 
-                            Minimum="80" Maximum="180" 
-                            Value="120" TickFrequency="80"
+                            Margin="10,5,0,0" Orientation="Horizontal" 
+                            Minimum="40" Maximum="180" 
+                            Value="100" TickFrequency="80"
                             TickPlacement="BottomRight" SmallChange="5"
-                            LargeChange="20" Width="110" FontSize="12" />
+                            LargeChange="20" Width="100" FontSize="12" ValueChanged="OnZoomImage_ValueChanged" />
+                        <Label Name="lblZoom" Margin="0,5,0,0" Content="100%"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Grid.Row="0" Grid.Column="0"/>
                     </DockPanel>
 
 
-                    <DockPanel Grid.Row="0" Grid.Column="4" Margin="1">
+                    <DockPanel Grid.Row="0" Grid.Column="4" Margin="0">
                         <!--<Label Name="LblShowHide" Margin="0,5,0,0" Width="80">라벨보이기</Label>-->
                         <!--<ToggleButton Name="TbLabelShowHide" Style="{StaticResource AnimatedSwitch}" Width="60" Height="30"
                             Command="{Binding CmdTbLabelShowHide}" 
                             CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" >
                         </ToggleButton>-->
 
-                        <CheckBox Name="cb_TbLabelShowHide" IsChecked="True" Content="질병명 보이기" Margin="0,5,0,0" Checked="cb_TbLabelShowHide_Checked" Unchecked="cb_TbLabelShowHide_Unchecked"/>
+                        <CheckBox Name="cb_TbLabelShowHide" IsChecked="True" Content="질병명 보이기" 
+                                  Margin="0,0,0,0" Checked="cb_TbLabelShowHide_Checked" Unchecked="cb_TbLabelShowHide_Unchecked"
+                                  Height="25"
+                                  />
                     </DockPanel>
 
                     <!-- 개발자용 -->
