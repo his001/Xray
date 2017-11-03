@@ -285,8 +285,8 @@ namespace XrayTEXT
                 //MessageBox.Show("좌측 이미지를 선택하신 후 삭제 가능 합니다.");
                 return;
             }
-            TxtcutMemo.Text = string.Empty;
-            TxtFileTitle.Text = string.Empty;
+            //TxtcutMemo.Text = string.Empty;
+            //TxtFileTitle.Text = string.Empty;
             SetClearTalkBoxLayer();
             TxtLayUICnt.Text = "0"; curUIMemoCnt = 0;
             TxtLayDBCnt.Text = "0";
@@ -1327,8 +1327,8 @@ namespace XrayTEXT
             this.Left = mswin.Left + (mswin.Width - this.ActualWidth) / 2;
             this.Top = mswin.Top + (mswin.Height - this.ActualHeight) / 2;
             mswin.ShowDialog();
-            string str_returned = mswin.selectedText; //MessageBox.Show("_lastMemo:" + _lastMemo + "\r\n New Memo : " + str_returned);
-            if (str_returned != "") {
+            string str_returned = mswin.selectedText;
+            if (str_returned !=null && str_returned.Trim().Length > 0) {
                 if (CurTalkBox[j].Text == "[질병명검색]")
                 {
                     CurTalkBox[j].Text = str_returned;

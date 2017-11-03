@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 
 namespace XrayTEXT
 {
@@ -11,6 +12,7 @@ namespace XrayTEXT
         public MemoSearchWin()
         {
             InitializeComponent();
+
             //textBox1.AddItem(new AutoCompleteEntry("Toyota Camry", "Toyota Camry", "camry", "car", "sedan"));
             //textBox1.AddItem(new AutoCompleteEntry("Toyota Corolla", "Toyota Corolla", "corolla", "car", "compact"));
             //textBox1.AddItem(new AutoCompleteEntry("Toyota Tundra", "Toyota Tundra", "tundra", "truck"));
@@ -25,6 +27,14 @@ namespace XrayTEXT
             textBox1.AddItem(new AutoCompleteEntry("B형 간염", null));
             textBox1.AddItem(new AutoCompleteEntry("C형 결핵", null));
             textBox1.AddItem(new AutoCompleteEntry("C형 간염", null));
+        }
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            //App.Current.MainWindow.Focus();
+            //textBox1.Focus();
+
+            Keyboard.Focus(textBox1);
+            textBox1.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));  // 포커스 주기가 이렇게 힘들줄이야 ㅠㅠ
 
         }
 

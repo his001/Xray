@@ -390,7 +390,7 @@
                 </TabControl>
 
                 <!-- 의사 소견 -->
-                <DockPanel DockPanel.Dock="Bottom" Margin="5" Grid.Column="2" Grid.Row="1">
+                <DockPanel DockPanel.Dock="Bottom" Margin="1" Grid.Column="2" Grid.Row="1">
                     <Grid Margin="0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="22" />
@@ -436,6 +436,7 @@
                         <TextBox Name="TxtFileTitle" Grid.Column="0" Grid.Row="2" x:FieldModifier="public"
                             Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserFileMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             Width="190" Height="120" Margin="1,0" 
+                            TextWrapping="Wrap" 
                             VerticalAlignment="Bottom"
                             HorizontalAlignment="Left"
                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -456,7 +457,7 @@
                         <!-- 컷팅 메모 -->
                         <TextBox Name="TxtcutMemo" Grid.Column="0" Grid.Row="5" x:FieldModifier="public"
                          Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserCutMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Width="200" MinHeight="600" Margin="1,0" 
+                         Width="190" MinHeight="600" Margin="1,0" 
                          VerticalAlignment="Top"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
