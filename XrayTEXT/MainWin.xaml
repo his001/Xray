@@ -322,7 +322,8 @@
                                     SelectionMode="Extended" 
                                     ItemsSource="{Binding}" 
                                     SelectedIndex="0" 
-                                    MouseDoubleClick="OnPhotoDblClick" Width="180" >
+                                    MouseDoubleClick="OnPhotoDblClick" 
+                                         Width="180" >
                                     <!--<ListBox.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="삭제" Click="deletePhoto"/>
@@ -399,8 +400,7 @@
                             <RowDefinition Height="60" /> <!--질병명검색-->
                             <RowDefinition Height="30" />
                             <RowDefinition Height="*" />
-                            <RowDefinition Height="60" />
-                            <RowDefinition Height="120" />
+
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"></ColumnDefinition>
