@@ -27,8 +27,9 @@ namespace XrayTEXT
         public PhotoCollection Photos = new PhotoCollection(Helpers.PicFolder);
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
         //List<TalkBoxLayerControl> _LstTalkBoxLayerControl = new List<TalkBoxLayerControl>();  // 소견의 컨트롤
-        double scaleX = 1;
-        double scaleY = 1;
+        //double scaleX = 1;
+        //double scaleY = 1;
+        public string CurPhoto_isNormal_DB = ""; //_GetisNormal_DB; // 현제 선택된 이미지의 상태 정상/비정상/판단전
         TranslateTransform translate = new TranslateTransform();
 
         public TalkBoxLayer Last_talkBoxLayer = null; // 마지막 선택/작업 되었던 레이어
@@ -423,6 +424,7 @@ namespace XrayTEXT
         {
             if (PhotosListBox.SelectedItem != null)
             {
+                if (CurPhoto_isNormal_DB == "N") {MessageBox.Show("정상 소견에는 입력이 불가능 합니다."); return; }
                 //마우스의 좌표를 저장한다.
                 prePosition = e.GetPosition(this.root);
                 //마우스가 Grid밖으로 나가도 위치를 알 수 있도록 마우스 이벤트를 캡처한다.
@@ -500,6 +502,7 @@ namespace XrayTEXT
         {
             if (PhotosListBox.SelectedItem != null)
             {
+                //PhotosListBox..SelectedItem
                 this.root.ReleaseMouseCapture(); //마우스 캡처를 제거한다.
                 SetRectangleProperty();
                 #region ############
@@ -539,7 +542,7 @@ namespace XrayTEXT
                         string fullPath = getSavePath();
                         string info_fileTxt = getSaveFile(".dat");
                         string fileTitle = TxtFileTitle.Text.ToString(); // 우하단
-                        string memo = "";
+                        string memo = "[질병명검색]";    // 최초 그릴시엔 ...
                         TalkBoxLayer _talkBoxLayer = TalkBoxLayer.Create(
                             keyFilename,
                             fileTitle,
@@ -953,7 +956,8 @@ namespace XrayTEXT
             //DependencyProperty dp = new DependencyProperty(ie as IsEnabledProperty);
             //Photos[0].Image.SetCurrentValue() //IsEnabled
 
-            GetImageTotalCntShow(); // 전체 파일 갯수를 보여준다
+            GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
+            
         }
 
         //private void LoadAfter_Photo_Check_PreWork()
@@ -1047,7 +1051,7 @@ namespace XrayTEXT
         /// <summary>
         /// 해당 폴더의 총 이미지 갯수
         /// </summary>
-        private void GetImageTotalCntShow()
+        private void GetImageTotalCntShowFromFolder()
         {
             DirectoryInfo _directory = new DirectoryInfo(Helpers.PicFolder);
             int _cnt = 0;
@@ -1079,7 +1083,7 @@ namespace XrayTEXT
 
             Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
             Photos.Path = Helpers.PicFolder;
-            GetImageTotalCntShow(); // 전체 파일 갯수를 보여준다
+            GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
         }
 
 
@@ -1095,10 +1099,7 @@ namespace XrayTEXT
             TxtFileTitle.Text = string.Empty; // 소견 data 삭제
             TxtcutMemo.Text = string.Empty;  // 우상단
             curUIMemoCnt = 0;   // 20171027 추가
-            //scaleX = 1;
-            //scaleY = 1;
-            //Zoom.ScaleX = scaleX;
-            //Zoom.ScaleY = scaleY; // 상단 마우스 휠로 확대 축소는 일단 막기
+
             ZoomImage.Value = 100; // 줌바로 변경
             if (!ShowHideMemo) {
                 ShowHideMemo = true;
@@ -1126,11 +1127,13 @@ namespace XrayTEXT
                 {
                     Lbl_isNormal.Content = "정상소견";
                     cb_isNormal.IsChecked = true;
+                    CurPhoto_isNormal_DB = "N"; // 현제 선택된 이미지의 상태 정상/비정상/판단전
                 }
                 else
                 {
                     Lbl_isNormal.Content = "비정상소견";
                     cb_isNormal.IsChecked = false;
+                    CurPhoto_isNormal_DB = "Y"; // 현제 선택된 이미지의 상태 정상/비정상/판단전
                 }
             }
             else {
@@ -1138,6 +1141,7 @@ namespace XrayTEXT
                 Lbl_isNormal.Content = "";
                 dc_isNormal.Visibility = Visibility.Visible;
                 cb_isNormal.IsEnabled = true;
+                CurPhoto_isNormal_DB = ""; // 현제 선택된 이미지의 상태 정상/비정상/판단전
             }
         }
 
@@ -1222,7 +1226,7 @@ namespace XrayTEXT
         {
             Helpers.PicFolder = ImagesDir.Text;
             Photos.Path = ImagesDir.Text;
-            GetImageTotalCntShow();     // 전체 파일 갯수를 보여준다
+            GetImageTotalCntShowFromFolder();     // 전체 파일 갯수를 보여준다
         }
         #endregion ######################### 좌측 트리에서 사진 #########################
 
@@ -1271,18 +1275,67 @@ namespace XrayTEXT
         /// <param name="e"></param>
         private void OnBtn_isNormalClick(object sender, RoutedEventArgs e)
         {
+            int j = GetCurPhotosListBoxNo();  // 미리 현재 번호를 쥐고있는다.
+
             if (cb_isNormal.IsChecked.Value)
             {
-                if (SetisNormal_DB("Y") == "success") {
+                if (SetisNormal_DB("Y") == "success")
+                {
+                    GetCurPhotosNumb();
                     MessageBox.Show("정상 소견으로 저장 되었습니다.");
+                    //OnLoaded(sender, e);
+                    GetReBindThum();
+                    #region ###########
+                    if (j + 1 == PhotosListBox.Items.Count) { MessageBox.Show("마지막 입니다."); }
+                    else
+                    {
+                        PhotosListBox.SelectedItem = PhotosListBox.Items[j + 1];
+                        OnPhotoDblClick(sender, e);//new Action(() => OnPhotoDblClick(sender, e) ).SetTimeout(500);
+                    }
+                    #endregion ############
                 }
             }
-            else {
+            else
+            {
                 if (SetisNormal_DB("N") == "success")
                 {
+                    GetCurPhotosNumb();
                     MessageBox.Show("비정상 소견으로 저장 되었습니다.");
+                    //OnLoaded(sender,e);
+                    GetReBindThum();
                 }
             }
+        }
+        private int GetCurPhotosNumb()
+        {
+            int rtn = 0;
+            for (int i = 0; i < Photos.Count; i++)
+            {
+                if (Photos[i] == PhotosListBox.SelectedItem)
+                {
+                    Photos[i].isNormalBorderColor = SetisNormalBorderColor("Y");
+                    //MessageBox.Show(Photos[i].isNormalBorderColor + " : Photos[" + i.ToString() + " / isNormalBorderColor].");
+                }
+            }
+            return rtn;
+        }
+
+        private string SetisNormalBorderColor(string isNormalYN)
+        {
+            string rtn = string.Empty;
+            switch (isNormalYN)
+            {
+                case "Y": rtn = "#FFD8E6FF"; break; // 이상 소견 없음
+                case "N": rtn = "#FFFFD8D8"; break; // 이상 소견 있음
+                default: rtn = "white"; break; // 작업 전
+            }
+            return rtn;
+        }
+
+        private void GetReBindThum() {
+            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
+            Photos.Path = Helpers.PicFolder;
+            GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
         }
 
         /// <summary>
@@ -1385,11 +1438,17 @@ namespace XrayTEXT
                     }
                 }
             }
-            //MessageBox.Show("_lastMemo:" + _lastMemo );
+
             MemoSearchWin mswin = new MemoSearchWin(); // 검색 창
             mswin.ShowDialog();
             string str_returned = mswin.selectedText; //MessageBox.Show("_lastMemo:" + _lastMemo + "\r\n New Memo : " + str_returned);
-            CurTalkBox[j].Text = _lastMemo +"/"+ str_returned;
+            if (CurTalkBox[j].Text == "[질병명검색]")
+            {
+                CurTalkBox[j].Text = str_returned;
+            }
+            else {
+                CurTalkBox[j].Text = _lastMemo + "/" + str_returned;
+            }
         }
         #endregion ######### popup 관련 #########
 
@@ -1652,6 +1711,13 @@ namespace XrayTEXT
             set { _onlyfileName = value; }
         }
 
+        private string _isNormalBorderColor = string.Empty;
+        public string isNormalBorderColor
+        {
+            get { return _isNormalBorderColor; }
+            set { _isNormalBorderColor = value; }
+        }
+
         private string _isNormalYN = string.Empty;
         public string isNormalYN
         {
@@ -1693,6 +1759,12 @@ namespace XrayTEXT
 
                 OnlyFileName = System.IO.Path.GetFileName(path);
                 isNormalYN = GetisNormalYN_DB(OnlyFileName);
+                switch (isNormalYN) {
+                    case "Y": isNormalBorderColor = "#FFD8E6FF"; break; // 이상 소견 없음
+                    case "N": isNormalBorderColor = "#FFFFD8D8"; break; // 이상 소견 있음
+                    default : isNormalBorderColor = "white"; break; // 작업 전
+                }
+
                 //Photos.OnlyFileName = onlyfileName;
 
                 #region ####### 기존 #######
@@ -1730,6 +1802,8 @@ namespace XrayTEXT
                 //MessageBox.Show("NotSupportedException");
             }
         }
+
+
 
         private string GetisNormalYN_DB(string _OnlyFileName)
         {

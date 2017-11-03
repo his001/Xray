@@ -57,7 +57,7 @@
                     </Border.BitmapEffect>
                 </Border>
                 <!-- Image Template -->
-                <Border Padding="2" Background="White" BorderBrush="#22000000" BorderThickness="1">
+                <Border Padding="2" Background="{Binding isNormalBorderColor}" BorderBrush="#22000000" BorderThickness="1">
                     <StackPanel Orientation="Vertical">
                         <Image Source="{Binding Image}" Height="70" />
                         <Label Content="{Binding OnlyFileName}" ToolTip="{Binding Image.UriSource}" Height="30" FontSize="11" ></Label>
