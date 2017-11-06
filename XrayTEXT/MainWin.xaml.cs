@@ -257,6 +257,7 @@ namespace XrayTEXT
         #endregion ######## DB 키 생성 ########
 
         #region ############ 질병명 보이기 토글 버튼 ############
+
         void cb_TbLabelShowHide_Unchecked(object sender, RoutedEventArgs e)
         {
             SetTbLabelHide();            //cb_TbLabelShowHide.Content = "질병명 숨기기";
@@ -290,6 +291,21 @@ namespace XrayTEXT
             SetClearTalkBoxLayer();
             TxtLayUICnt.Text = "0"; curUIMemoCnt = 0;
             TxtLayDBCnt.Text = "0";
+        }
+
+
+        /// <summary>
+        /// 메뉴의 질병명 관리 팝업
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void btnAdmInform_Click(object sender, RoutedEventArgs e)
+        {
+            MemoCRUDWin memoWin = new MemoCRUDWin(); // 검색 창
+            this.Left = memoWin.Left + (memoWin.Width - this.ActualWidth) / 2;
+            this.Top = memoWin.Top + (memoWin.Height - this.ActualHeight) / 2;
+            memoWin.ShowDialog();
+            //string str_returned = memoWin.selectedText;
         }
 
         #endregion ############ 질병명 보이기 토글 버튼 ############

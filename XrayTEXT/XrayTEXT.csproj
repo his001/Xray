@@ -68,6 +68,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="MemoCRUDWin.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MemoSearchWin.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -86,6 +90,9 @@
     </Compile>
     <Compile Include="AutoCompleteTextBox.xaml.cs">
       <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MemoCRUDWin.xaml.cs">
+      <DependentUpon>MemoCRUDWin.xaml</DependentUpon>
     </Compile>
     <Compile Include="MemoSearchWin.xaml.cs">
       <DependentUpon>MemoSearchWin.xaml</DependentUpon>

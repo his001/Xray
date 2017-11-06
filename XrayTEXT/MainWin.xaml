@@ -295,6 +295,11 @@
                         <!--<MenuItem Header="File1"/>-->
                     </MenuItem>
                 </MenuItem>
+                <MenuItem Header="관리자">
+                    <MenuItem Header="질병명관리" Name="btnAdmInform" Click="btnAdmInform_Click">
+                        <!--<MenuItem Header="File1"/>-->
+                    </MenuItem>
+                </MenuItem>
             </Menu>
 
             <Grid Margin="0" Grid.Row="1">
