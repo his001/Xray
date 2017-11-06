@@ -53,23 +53,6 @@ namespace XrayTEXT
             set { _pagesize = value; }
         }
 
-
-
-        //public static MainWin mwin = new MainWin();
-        //XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
-
-        //public static string keyFilename = mwin.PhotosListBox.SelectedItem.ToString().Replace("file:///", "").Replace("\\", "/");  // Key 파일
-        //public static string keyFilename = mwin.getKeyFileNameOnly();
-
-        //MainWin 폼에 있는 텍스트라벨을 갱신하기 위해 델리게이트 사용
-        //public delegate void deleg_TxtcutMemo(string upLabelText); //델리게이트 선언
-        //public event deleg_TxtcutMemo ReturnToText; //델리게이트 이벤트 선언
-
-        //public void SetTextChange()
-        //{
-        //    ReturnToText("이벤트 호출 SetTextChange");//이벤트 호출
-        //}
-
         public static string rtnSQLInj(string strValue)
         {
             string tmp = strValue;
@@ -864,7 +847,28 @@ namespace XrayTEXT
         protected override Visual GetVisualChild(int index) { return visualChildren[index]; }
     }
 
-    
+    public class CL_BCode   // 질병명
+    {
+        private Int32 _BCode;
+        private string _BName;
+        private string _BMemo;
+
+        public Int32 BCode
+        {
+            get { return _BCode; }
+            set { _BCode = value; }
+        }
+        public string BName
+        {
+            get { return _BName; }
+            set { _BName = value; }
+        }
+        public string BMemo
+        {
+            get { return _BMemo; }
+            set { _BMemo = value; }
+        }
+    }
 
 
 }

@@ -5,24 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:XrayTEXT"
         mc:Ignorable="d"
-        Title="질병명관리" Height="420" Width="530">
+        Title="질병명관리" Height="460" Width="540">
     <Grid>
 
         <Label Content="질병명 관리" HorizontalAlignment="Left" Margin="191,8,0,0" VerticalAlignment="Top" FontFamily="Arial Black" FontSize="14"/>
         <DockPanel >
             <Label Content="BName" HorizontalAlignment="Left" Margin="8,39,0,0" VerticalAlignment="Top"/>
-            <TextBox Name="TxtBName" HorizontalAlignment="Left" Height="23" Margin="55,39,0,0" TextWrapping="Wrap" Text="" TabIndex="1" VerticalAlignment="Top" Width="120"/>
+            <TextBox Name="TxtBName" HorizontalAlignment="Left" Height="23" Margin="15,39,0,0" TextWrapping="Wrap" Text="" TabIndex="1" VerticalAlignment="Top" Width="180" />
         </DockPanel>
 
         <DockPanel >
             <Label Content="BMemo" HorizontalAlignment="Left" Margin="8,62,0,0" VerticalAlignment="Top"/>
-            <TextBox Name="TxtBMemo" HorizontalAlignment="Left" Height="23" Margin="52,66,0,0" TextWrapping="Wrap" Text="" TabIndex="2" VerticalAlignment="Top" Width="120"/>
+            <TextBox Name="TxtBMemo" HorizontalAlignment="Left" Height="23" Margin="12,66,0,0" TextWrapping="Wrap" TabIndex="2" VerticalAlignment="Top" Width="180" />
+        </DockPanel>
+
+        <DockPanel >
+            <Label Content="BCode" HorizontalAlignment="Left" Margin="8,90,0,0" VerticalAlignment="Top"/>
+            <TextBox Name="TxtBCode" Width="80" Height="23" Margin="19,93,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" IsReadOnly="True"/>
         </DockPanel>
 
 
-        <Button Content="Save" Name="Cmd_Save" HorizontalAlignment="Left" Margin="285,42,0,0" VerticalAlignment="Top" Width="101" Height="41" Click="Cmd_Save_Click"/>
+        <Button Content="저장" Name="Cmd_Save" HorizontalAlignment="Left" Margin="285,42,0,0" VerticalAlignment="Top" Width="70" Height="41" Click="Cmd_Save_Click"/>
+        <Button Content="삭제" Name="Cmd_Delete" HorizontalAlignment="Left" Margin="365,42,0,0" VerticalAlignment="Top" Width="70" Height="41" Click="Cmd_Del_Click"/>
+        <Button Content="조회" Name="Cmd_Load" HorizontalAlignment="Left" Margin="445,42,0,0" VerticalAlignment="Top" Width="70" Height="41" Click="Cmd_Load_Click"/>
 
 
-        <DataGrid HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Height="268" Width="497" Name="Dtgrid1" SelectionChanged="Dtgrid1_SelectionChanged"/>
+        <DataGrid Name="Dtgrid1" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Height="268" Width="497" SelectionChanged="Dtgrid1_SelectionChanged">
+
+        </DataGrid>
     </Grid>
 </Window>

@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Windows;
 using System.Windows.Input;
 
 namespace XrayTEXT
@@ -8,25 +12,21 @@ namespace XrayTEXT
     /// </summary>
     public partial class MemoSearchWin : Window
     {
+        List<CL_BCode> lstemp = new List<CL_BCode>();
         public string selectedText;
         public MemoSearchWin()
         {
             InitializeComponent();
+            //textBox1.AddItem(new AutoCompleteEntry("결핵", null));
+            //textBox1.AddItem(new AutoCompleteEntry("C형 간염", null));
 
-            //textBox1.AddItem(new AutoCompleteEntry("Toyota Camry", "Toyota Camry", "camry", "car", "sedan"));
-            //textBox1.AddItem(new AutoCompleteEntry("Toyota Corolla", "Toyota Corolla", "corolla", "car", "compact"));
-            //textBox1.AddItem(new AutoCompleteEntry("Toyota Tundra", "Toyota Tundra", "tundra", "truck"));
-            //textBox1.AddItem(new AutoCompleteEntry("Chevy Impala", null));  // null matching string will default with just the name
-            //textBox1.AddItem(new AutoCompleteEntry("Chevy Tahoe", "Chevy Tahoe", "tahoe", "truck", "SUV"));
-            //textBox1.AddItem(new AutoCompleteEntry("Chevrolet Malibu", "Chevrolet Malibu", "malibu", "car", "sedan"));
-            textBox1.AddItem(new AutoCompleteEntry("결핵", null));
-            textBox1.AddItem(new AutoCompleteEntry("간염", null));
-            textBox1.AddItem(new AutoCompleteEntry("A형 결핵", null));
-            textBox1.AddItem(new AutoCompleteEntry("A형 간염", null));
-            textBox1.AddItem(new AutoCompleteEntry("B형 결핵", null));
-            textBox1.AddItem(new AutoCompleteEntry("B형 간염", null));
-            textBox1.AddItem(new AutoCompleteEntry("C형 결핵", null));
-            textBox1.AddItem(new AutoCompleteEntry("C형 간염", null));
+            lstemp.Clear();
+            lstemp = GetB_CODE();
+            if (lstemp.Count > 0) {
+                for (int i = 0; i < lstemp.Count; i++) {
+                    textBox1.AddItem(new AutoCompleteEntry(lstemp[i].BName, lstemp[i].BMemo));
+                }
+            }
         }
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
@@ -48,7 +48,47 @@ namespace XrayTEXT
             selectedText = textBox1.Text;
             this.Close();
         }
-        
+
+        public List<CL_BCode> GetB_CODE()
+        {
+            #region ########## 바인딩 S ##########
+            DataSet ds = new DataSet();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                {
+                    conn.Open();
+                    string sql = "SELECT BCode, BName, BMemo ";
+                    sql = sql + " FROM TBL_B_Code WITH(NOLOCK) ";
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        var adapt = new SqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }
+
+            #endregion ########## 바인딩 E ##########
+            if (ds != null)
+            {
+                for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+                {
+
+                    Int32 _BCode = Int32.Parse(ds.Tables[0].Rows[i]["BCode"].ToString());
+                    string _BName = ds.Tables[0].Rows[i]["BName"].ToString();
+                    string _BMemo = ds.Tables[0].Rows[i]["BMemo"].ToString();
+
+                    lstemp.Add(new CL_BCode() { BCode = _BCode, BName = _BName, BMemo = _BMemo });
+                }
+            }
+            return lstemp;
+        }
     }
 
     public class AutoCompleteEntry
