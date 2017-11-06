@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -62,6 +63,57 @@ namespace XrayTEXT
             tmp = tmp.Replace(";", "");
             return tmp;
         }
+
+
+        #region ###### Progress Bar - Update UI with Dispatcher ######
+        public static BackgroundWorker worker;
+        public static ProgressDialog pd;
+        public static int ShowProgress_maxRecords = 20;
+        public static int ShowProgress_currentNumb = 0;
+        public delegate void UpdateProgressDelegate(int percentage, int recordCount);
+
+        public static void UpdateProgressText(int percentage, int recordCount)
+        {
+            pd.ProgressText = string.Format("{0}% of {1} Records", percentage.ToString(), recordCount);
+            pd.ProgressValue = percentage;
+        }
+
+        public static void CancelProcess(object sender, EventArgs e)
+        {
+            worker.CancelAsync();
+        }
+        //public void GetShowProgress_start()  //object sender, RoutedEventArgs e   // int maxRecords, int curCnt
+        //{
+        //    pd = new ProgressDialog();
+        //    pd.Cancel += CancelProcess;
+        //    System.Windows.Threading.Dispatcher pdDispatcher = pd.Dispatcher;
+        //    worker = new BackgroundWorker();
+        //    worker.WorkerSupportsCancellation = true;
+        //    worker.DoWork += delegate (object s, DoWorkEventArgs args)
+        //    {
+        //        for (int x = 0; x < ShowProgress_maxRecords; x++)
+        //        {
+        //            if (worker.CancellationPending)
+        //            {
+        //                args.Cancel = true;
+        //                return;
+        //            }
+        //            System.Threading.Thread.Sleep(300);
+        //            //MessageBox.Show(Photos.Count.ToString() + " : Photos.Count ");
+        //            UpdateProgressDelegate update = new UpdateProgressDelegate(UpdateProgressText);
+        //            pdDispatcher.BeginInvoke(update, Convert.ToInt32(((decimal)x / (decimal)ShowProgress_maxRecords) * 100), ShowProgress_maxRecords);
+        //        }
+        //    };
+        //    worker.RunWorkerCompleted += delegate (object s, RunWorkerCompletedEventArgs args)
+        //    {
+        //        pd.Close();
+        //    };
+
+        //    worker.RunWorkerAsync();
+        //    pd.ShowDialog();
+        //}
+        #endregion ###### Progress Bar - Update UI with Dispatcher ######
+        
 
         /// <summary>
         /// 폴더에서 사진을 가져와 byte[]로 변환

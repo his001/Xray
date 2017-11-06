@@ -24,7 +24,7 @@ namespace XrayTEXT
         public int pagesize = 20;
         Point prePosition; //드레그를 시작한 마우스 좌표;
         Rectangle currentRect; //현재 그려지는 네모
-        public PhotoCollection Photos = new PhotoCollection(Helpers.PicFolder);
+        public PhotoCollection Photos;//= new PhotoCollection(Helpers.PicFolder);
         readonly List<TalkBoxLayer> _LstTalkBoxLayer = new List<TalkBoxLayer>();  // 소견 데이터
         //List<TalkBoxLayerControl> _LstTalkBoxLayerControl = new List<TalkBoxLayerControl>();  // 소견의 컨트롤
         //double scaleX = 1;
@@ -41,49 +41,46 @@ namespace XrayTEXT
         public int curUIMemoCnt = 0;  // 화면 상의 메모 레이어 갯수
         XrayTEXT.ViewModels.MainViewModel mainViewModel = new ViewModels.MainViewModel();
         public bool ShowHideMemo = true; // 질병명 보이기
+
         #endregion ######################### 선언 #########################
 
         #region ######################### MainWin #########################
         public MainWin()
         {
-            this.Visibility = Visibility.Visible;
-            this.Title = "로딩중입니다.";
+            //this.Visibility = Visibility.Visible;
+            //this.Title = "로딩중입니다.";
 
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
 
             Helpers.PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
-
-            //Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
-            //Photos.Path = Helpers.PicFolder;
 
             this.root.MouseLeftButtonDown += new MouseButtonEventHandler(root_MouseLeftButtonDown);
             this.root.MouseLeftButtonUp += new MouseButtonEventHandler(root_MouseLeftButtonUp);
             this.root.MouseWheel += new MouseWheelEventHandler(root_MouseWheel);
             this.root.MouseMove += new MouseEventHandler(root_MouseMove);
 
-            // 좌표를 나타내는 TextBlock을 최상위로 ...
-            //Grid.SetZIndex(this.tbPosition, 99999);
-
-            // Zoom In, Zoom Out을 위한 Center 좌표 설정
-            Zoom.CenterX = ViewedPhoto.Width / 2;
+            Zoom.CenterX = ViewedPhoto.Width / 2;  // Zoom In, Zoom Out을 위한 Center 좌표 설정
             Zoom.CenterY = ViewedPhoto.Height / 2;
             //회전은 Angle 만 돌리면 되나 일단 보류
 
-            //DataContext = new ModelTextbox() { TxWidth = 100, TxHeight=100 };
-
-            //우측 상단 주석들
-            //Helpers helper = new Helpers(); //class1을 동적할당
-            //helper.ReturnToText += new Helpers.deleg_TxtcutMemo(TxtcutMemo_set);//이벤트 핸들러 연결
-            //helper.SetTextChange();//이벤트 호출 값을 지닌 함수 호출
-
-
-            //TreeViewFile treeView = new TreeViewFile(Helpers.PicFolder);
-            //LeftTree.Items.Add(treeView);
             LoadDirectories();
-            //new Action(() => setLeftTreeBind()).SetTimeout(500);
 
             DataContext = mainViewModel; // 좌측 상단 하단의 TEXT 변경 용
             StartThread();
+
+
+            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
+            Photos.Path = Helpers.PicFolder;
+            GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
         }
 
         private void StartThread()
@@ -130,6 +127,7 @@ namespace XrayTEXT
             //TxtcutMemo.Text = mainViewModel.UserCutMemo;
             //TxtFileTitle.Text = mainViewModel.UserFileMemo;
         }
+
         private DataSet GetMemoDBCnt()
         {
             DataSet ds = new DataSet();
@@ -240,7 +238,12 @@ namespace XrayTEXT
             }
         }
 
+
+
+
         #endregion ######################### MainWin #########################
+
+
 
         #region ######## DB 키 생성 ########
         public string getKeyWithPath()
@@ -918,18 +921,7 @@ namespace XrayTEXT
         }
         #region ######################### 좌측 트리에서 사진 #########################
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
-            Photos.Path = Helpers.PicFolder;
-            GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
-            
-        }
+        
 
         /// <summary>
         /// 해당 폴더의 총 이미지 갯수
@@ -966,12 +958,6 @@ namespace XrayTEXT
             Photos.Path = Helpers.PicFolder;
             GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
         }
-
-        // 마우스 좌클릭 추가
-        //private void OnPhotosListBoxClick(object sender, RoutedEventArgs e)
-        //{
-        //    new Action(() => OnPhotoDblClick(sender, e)).SetTimeout(100); //추가한 레이어에 검색 추가
-        //}
 
         /// <summary>
         /// 좌측 트리에서 사진을 더블 클릭했을때
@@ -1107,8 +1093,10 @@ namespace XrayTEXT
         /// <param name="e"></param>
         private void OnImagesDirChangeClick(object sender, RoutedEventArgs e)
         {
+            Photos.Clear();
             Helpers.PicFolder = ImagesDir.Text;
             Photos.Path = ImagesDir.Text;
+
             GetImageTotalCntShowFromFolder();     // 전체 파일 갯수를 보여준다
         }
         #endregion ######################### 좌측 트리에서 사진 #########################
@@ -1652,17 +1640,6 @@ namespace XrayTEXT
             _source = new Uri(path);
             try
             {
-                // 가장 성능이 좋다고 함...ㅡㅡㅋ 아닌듯
-                //BitmapImage img = new BitmapImage();
-                //img.BeginInit();
-                //img.CacheOption = BitmapCacheOption.OnDemand;
-                //img.CreateOptions = BitmapCreateOptions.DelayCreation;
-                //img.DecodePixelWidth = 180;
-                //img.UriSource = _source;
-                //img.EndInit();
-                //_image = img;
-
-
                 //이게 좀더 빠르긴 함
                 BitmapImage bmi = new BitmapImage();
                 bmi.BeginInit();
@@ -1670,11 +1647,6 @@ namespace XrayTEXT
                 bmi.UriSource = _source;
                 bmi.EndInit();
                 _image = bmi;
-
-                //try
-                //{
-                //}
-                //catch (Exception ex) { }
 
                 GC.Collect();
 
@@ -1685,46 +1657,12 @@ namespace XrayTEXT
                     case "N": isNormalBorderColor = "#FFFFD8D8"; break; // 이상 소견 있음
                     default : isNormalBorderColor = "white"; break; // 작업 전
                 }
-
-                //Photos.OnlyFileName = onlyfileName;
-
-                #region ####### 기존 #######
-                //_image = BitmapFrame.Create(_source);
-                //_image = getPngImage(path);
-
-                //_image.Metadata as BitmapMetadata;
-                //_image = BitmapFrame.Create(_source, BitmapCreateOptions.None, BitmapCacheOption.None);
-
-                //// 신규
-                //BitmapImage image = new BitmapImage();
-                //using (FileStream stream = File.OpenRead(path))
-                //{
-                //    image.BeginInit();
-                //    image.StreamSource = stream;
-                //    image.CacheOption = BitmapCacheOption.OnLoad;
-                //    image.EndInit(); // load the image from the stream
-                //    _image = BitmapFrame.Create(_source, stream);
-                //} 
-                //_image = image;
-
-                //case 2
-                //var filename = "fb.png";
-                //using (var image = Image.FromFile(filename))
-                //{
-                //    using (var thumbnail = image.GetThumbnailImage(20/*width*/, 40/*height*/, null, IntPtr.Zero))
-                //    {
-                //        thumbnail.Save("thumb.png");
-                //    }
-                //}
-                #endregion ####### 기존 #######
             }
             catch (NotSupportedException)
             {
                 //MessageBox.Show("NotSupportedException");
             }
         }
-
-
 
         private string GetisNormalYN_DB(string _OnlyFileName)
         {
@@ -1787,8 +1725,6 @@ namespace XrayTEXT
         private Uri _source;
         public string Source { get { return _path; } }
 
-        //private BitmapFrame _image;
-        //public BitmapFrame Image { get { return _image; } set { _image = value; } }
         private BitmapImage _image;
         public BitmapImage Image { get { return _image; } set { _image = value; } }
     }
@@ -1828,7 +1764,9 @@ namespace XrayTEXT
             get { return _directory; }
         }
 
-        private void GetImageRead()
+
+
+        public void GetImageRead()
         {
             int pageIndex = Helpers.pageIndex;
             int pagesize = Helpers.pagesize;
@@ -1836,16 +1774,56 @@ namespace XrayTEXT
             this.Clear();
             try
             {
-                foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize))
-                {
-                    Add(new Photo(f.FullName));
-                }
+                int _maxCnt = _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize).Count();
+
+                #region ################# progress bar 시작부 S ####################
+                //Helpers.pd = new ProgressDialog();
+                //Helpers.pd.Cancel += Helpers.CancelProcess;
+                //System.Windows.Threading.Dispatcher pdDispatcher = Helpers.pd.Dispatcher;
+                //Helpers.worker = new BackgroundWorker();
+                //Helpers.worker.WorkerSupportsCancellation = true;
+                //Helpers.worker.DoWork += delegate (object s, DoWorkEventArgs args)
+                //{
+                    #endregion ################# progress bar 시작부 E ####################
+
+
+                    #region ################# 기존 로직 S ####################
+                    //int x = 0;
+                    foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize))
+                    {
+                        Add(new Photo(f.FullName));
+                        //x++;
+                        //if (Helpers.worker.CancellationPending)
+                        //{
+                        //    args.Cancel = true;
+                        //    return;
+                        //}
+                        //System.Threading.Thread.Sleep(100);
+                        //Helpers.UpdateProgressDelegate update = new Helpers.UpdateProgressDelegate(Helpers.UpdateProgressText);
+                        //pdDispatcher.BeginInvoke(update, Convert.ToInt32(((decimal)x / (decimal)_maxCnt) * 100), _maxCnt);
+                    }
+                    #endregion ################# 기존 로직 E ####################
+
+
+
+                    #region ################# progress bar 종료부 S ####################
+                //};
+                //Helpers.worker.RunWorkerCompleted += delegate (object s, RunWorkerCompletedEventArgs args)
+                //{
+                //    Helpers.pd.Close();
+                //};
+
+                //Helpers.worker.RunWorkerAsync();
+                //Helpers.pd.ShowDialog();
+                #endregion ################# progress bar 종료부 E ####################
+
             }
             catch (DirectoryNotFoundException)
             {
                 System.Windows.MessageBox.Show("폴더가 없습니다.");
             }
         }
+
     }
     #endregion ########### 썸네일용 Photo , PhotoCollection ###########
 
