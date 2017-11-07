@@ -934,6 +934,7 @@ namespace XrayTEXT
             TxtTotalFileCnt.Text = _cnt.ToString();
         }
 
+        #region ################## 페이지 이동 ##################
         /// <summary>
         /// 페이지 이동 버튼 클릭
         /// </summary>
@@ -948,6 +949,34 @@ namespace XrayTEXT
             Photos.Path = Helpers.PicFolder;
             GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
         }
+
+        private void OnPageChangePreClick(object sender, RoutedEventArgs e)
+        {
+            int _CurPage = Convert.ToInt32(TxtCurPage.Text);
+            if (_CurPage == 1) { MessageBox.Show("첫 페이지 입니다."); return; }
+            Helpers.pageIndex = _CurPage - 1;
+
+            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
+            Photos.Path = Helpers.PicFolder;
+            GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
+        }
+
+        private void OnPageChangeNxtClick(object sender, RoutedEventArgs e)
+        {
+            int _CurPage = Convert.ToInt32(TxtCurPage.Text);
+            int _MaxCnt = Convert.ToInt32(TxtTotalFileCnt.Text);
+
+
+            if (_CurPage + 1 > (_MaxCnt/pagesize) ) { MessageBox.Show("마지막 페이지 입니다."); return; }
+
+            Helpers.pageIndex = _CurPage + 1;
+
+            Photos = (PhotoCollection)(this.Resources["Photos"] as ObjectDataProvider).Data;
+            Photos.Path = Helpers.PicFolder;
+            GetImageTotalCntShowFromFolder(); // 전체 파일 갯수를 보여준다
+        }
+
+        #endregion ################## 페이지 이동 ##################
 
         /// <summary>
         /// 좌측 트리에서 사진을 더블 클릭했을때
@@ -1083,6 +1112,7 @@ namespace XrayTEXT
         /// <param name="e"></param>
         private void OnImagesDirChangeClick(object sender, RoutedEventArgs e)
         {
+            tabLeft.SelectedIndex = 0; // 폴더 변경시 썸네일 보기로 변경
             Photos.Clear();
             Helpers.PicFolder = ImagesDir.Text;
             Photos.Path = ImagesDir.Text;
