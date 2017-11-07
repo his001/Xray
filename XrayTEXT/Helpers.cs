@@ -26,7 +26,7 @@ namespace XrayTEXT
         public static string PicFolder
         {
             get {
-                if (_PicFolder == null) { PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images"; }
+                if (_PicFolder == null) { PicFolder = @"D:\XrayMarker\images"; }
                 return _PicFolder;
             }
             set { _PicFolder = value; }

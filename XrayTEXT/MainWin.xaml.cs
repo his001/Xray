@@ -59,7 +59,7 @@ namespace XrayTEXT
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
 
-            Helpers.PicFolder = @"D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images";
+            Helpers.PicFolder = @"D:\XrayMarker\images";
 
             this.root.MouseLeftButtonDown += new MouseButtonEventHandler(root_MouseLeftButtonDown);
             this.root.MouseLeftButtonUp += new MouseButtonEventHandler(root_MouseLeftButtonUp);

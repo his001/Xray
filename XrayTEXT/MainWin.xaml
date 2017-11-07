@@ -523,7 +523,7 @@
                     <!-- 이미지경로 변경 -->
                     <DockPanel DockPanel.Dock="Bottom" Margin="1,5" Width="400" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left">
                         <!-- 이미지경로 -->
-                        <TextBox Name="ImagesDir" Margin="0,5,0,5" Width="320" Text="D:\DEV\WPF\PRJ\XrayTEXT\XrayTEXT\Images" />
+                        <TextBox Name="ImagesDir" Margin="0,5,0,5" Width="320" Text="D:\XrayMarker\images" />
                         <!-- 이미지경로 변경 버튼 -->
                         <Button Margin="0,0,0,0" Width="75" Height="40" Click="OnImagesDirChangeClick" Style="{StaticResource InformButton}">폴더변경</Button>
                     </DockPanel>
