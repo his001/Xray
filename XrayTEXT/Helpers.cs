@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -13,6 +14,8 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using MySql.Data.MySqlClient;
+
 
 namespace XrayTEXT
 {
@@ -21,6 +24,7 @@ namespace XrayTEXT
     public class Helpers
     {
         public static string dbCon = @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\xraydb.mdf;Integrated Security=True;User Instance=True";
+        public static string dbMariaCon = "";
 
         private static string _PicFolder;
         public static string PicFolder
@@ -64,6 +68,27 @@ namespace XrayTEXT
             return tmp;
         }
 
+        public static string getMariaDB()
+        {
+            MySqlConnection connection = new MySqlConnection(dbMariaCon);
+            MySqlCommand command = connection.CreateCommand();
+            MySqlDataReader Reader;
+            command.CommandText = "SELECT idx,filename, label, regdate FROM mysql.TBL_DLImage";
+            connection.Open();
+            Reader = command.ExecuteReader();
+
+            StringBuilder sb = new StringBuilder();
+            while (Reader.Read())
+            {
+                string thisrow = "";
+                for (int i = 0; i < Reader.FieldCount; i++)
+                    thisrow += Reader.GetValue(i).ToString() + ",";
+                sb.AppendLine(thisrow);
+            }
+            connection.Close();
+
+            return sb.ToString();
+        }
 
         #region ###### Progress Bar - Update UI with Dispatcher ######
         public static BackgroundWorker worker;
@@ -86,7 +111,7 @@ namespace XrayTEXT
         
 
         /// <summary>
-        /// Æú´õ¿¡¼­ »çÁøÀ» °¡Á®¿Í byte[]·Î º¯È¯
+        /// í´ë”ì—ì„œ ì‚¬ì§„ì„ ê°€ì ¸ì™€ byte[]ë¡œ ë³€í™˜
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
@@ -104,10 +129,10 @@ namespace XrayTEXT
         }
 
         /// <summary>
-        /// png ÆÄÀÏ·Î ºÎºĞ Á¶°¢ ÈÄ ÀúÀå
+        /// png íŒŒì¼ë¡œ ë¶€ë¶„ ì¡°ê° í›„ ì €ì¥
         /// </summary>
         /// <param name="_path"></param>
-        /// <param name="_img">ÀÌ¹ÌÁö¿¡ »çÀÌÁî°¡ µé¾î°¡ÀÖ´Ù</param>
+        /// <param name="_img">ì´ë¯¸ì§€ì— ì‚¬ì´ì¦ˆê°€ ë“¤ì–´ê°€ìˆë‹¤</param>
         /// <param name="top"></param>
         /// <param name="left"></param>
         public static void ExportToPng(string _path, Image _img, double top, double left)
@@ -120,7 +145,7 @@ namespace XrayTEXT
                 BitmapEncoder pngEncoder = new PngBitmapEncoder();
                 pngEncoder.Frames.Add(BitmapFrame.Create(crop));
 
-                //FileInfo file = new FileInfo(_path);  // ÀĞ±âÀü¿ëÀÏ¶§ÀÇ ¿¡·¯ Ã³¸®
+                //FileInfo file = new FileInfo(_path);  // ì½ê¸°ì „ìš©ì¼ë•Œì˜ ì—ëŸ¬ ì²˜ë¦¬
                 //file.IsReadOnly = false;
                 using (var fs = System.IO.File.OpenWrite(_path))
                 {
@@ -134,7 +159,7 @@ namespace XrayTEXT
         }
 
         /// <summary>
-        /// ÇöÀç ÀÛ¼ºÁßÀÎ ¼Ò°ß ·¹ÀÌ¾î Á¤º¸¸¦ DB¿¡ÀúÀå ÇÕ´Ï´Ù.
+        /// í˜„ì¬ ì‘ì„±ì¤‘ì¸ ì†Œê²¬ ë ˆì´ì–´ ì •ë³´ë¥¼ DBì—ì €ì¥ í•©ë‹ˆë‹¤.
         /// </summary>
         /// <returns></returns>
         public static string SaveDB(TalkBoxLayer _talkBoxLayer)
@@ -319,7 +344,7 @@ namespace XrayTEXT
 
     public class TalkBoxLayer : BindableObject
     {
-        #region ¼±¾ğ
+        #region ì„ ì–¸
 
         private TalkBoxLayerCtrl _TxtBoxL_AddCont;
         private AdornerLayer _TxtBoxLayer;
@@ -359,7 +384,7 @@ namespace XrayTEXT
 
                 Size imageSize = _image.RenderSize;
                 if (imageSize.Height == 0 || imageSize.Width == 0)
-                    throw new ArgumentException("ÀÌ¹ÌÁöÀÇ Å©±â°¡ Àß¸øµÇ¾ú½À´Ï´Ù.");
+                    throw new ArgumentException("ì´ë¯¸ì§€ì˜ í¬ê¸°ê°€ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤.");
 
                 _horizPercent = TalkBoxLocation.X / imageSize.Width;
                 _vertPercent = TalkBoxLocation.Y / imageSize.Height;
@@ -436,7 +461,7 @@ namespace XrayTEXT
             private set
             {
                 if (!value)
-                    throw new InvalidOperationException("»èÁ¦¿¡ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+                    throw new InvalidOperationException("ì‚­ì œì— ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 
                 if (_isDeleted)
                     return;
@@ -531,7 +556,7 @@ namespace XrayTEXT
         }
 
         /// <summary>
-        /// Å°ÆÄÀÏ³×ÀÓ 
+        /// í‚¤íŒŒì¼ë„¤ì„ 
         /// </summary>
         public string TalkBoxLyerkeyFilename
         {
@@ -540,7 +565,7 @@ namespace XrayTEXT
         }
 
         /// <summary>
-        /// Àß¶ó³½ ¼­ºê ÀÌ¹ÌÁö ÆÄÀÏ ÀúÀå °æ·Î + ÆÄÀÏ¸í
+        /// ì˜ë¼ë‚¸ ì„œë¸Œ ì´ë¯¸ì§€ íŒŒì¼ ì €ì¥ ê²½ë¡œ + íŒŒì¼ëª…
         /// </summary>
         public string TalkBoxLyercutfileName
         {
@@ -569,7 +594,7 @@ namespace XrayTEXT
         }
 
         /// <summary>
-        /// Àß¶ó³½ ¼­ºê ÀÌ¹ÌÁö ÆÄÀÏ ÀúÀå °æ·Î
+        /// ì˜ë¼ë‚¸ ì„œë¸Œ ì´ë¯¸ì§€ íŒŒì¼ ì €ì¥ ê²½ë¡œ
         /// </summary>
         public string TalkBoxLyerCutFullPath
         {
@@ -589,7 +614,7 @@ namespace XrayTEXT
             private set
             {
                 if (!value)
-                    throw new InvalidOperationException("¼û±â±â¿¡ ½ÇÆĞÇÏ¿´½À´Ï´Ù.");
+                    throw new InvalidOperationException("ìˆ¨ê¸°ê¸°ì— ì‹¤íŒ¨í•˜ì˜€ìŠµë‹ˆë‹¤.");
 
                 if (_isHidden)
                     return;
@@ -614,7 +639,7 @@ namespace XrayTEXT
 
 
         /// <summary>
-        /// Àß¶ó³½ ¼­ºê ÀÌ¹ÌÁö ÆÄÀÏ ¹øÈ£
+        /// ì˜ë¼ë‚¸ ì„œë¸Œ ì´ë¯¸ì§€ íŒŒì¼ ë²ˆí˜¸
         /// </summary>
         public Int32 TalkBoxLyerFileNum
         {
@@ -671,7 +696,7 @@ namespace XrayTEXT
             _TxtBoxLayer = AdornerLayer.GetAdornerLayer(_image);
             if (_TxtBoxLayer == null)
             {
-                throw new ArgumentException("ÅØ½ºÆ® ·¹ÀÌ¾î°¡ ¾ø½À´Ï´Ù.");
+                throw new ArgumentException("í…ìŠ¤íŠ¸ ë ˆì´ì–´ê°€ ì—†ìŠµë‹ˆë‹¤.");
             }
             else
             {
@@ -859,7 +884,7 @@ namespace XrayTEXT
         protected override Visual GetVisualChild(int index) { return visualChildren[index]; }
     }
 
-    public class CL_BCode   // Áúº´¸í
+    public class CL_BCode   // ì§ˆë³‘ëª…
     {
         private Int32 _BCode;
         private string _BName;
@@ -882,7 +907,7 @@ namespace XrayTEXT
         }
     }
 
-    #region ########### ½æ³×ÀÏ¿ë Photo , PhotoCollection ###########
+    #region ########### ì¸ë„¤ì¼ìš© Photo , PhotoCollection ###########
 
     /// <summary>
     /// This class describes a single photo - its location, the image and 
@@ -917,7 +942,7 @@ namespace XrayTEXT
             _source = new Uri(path);
             try
             {
-                //ÀÌ°Ô Á»´õ ºü¸£±ä ÇÔ
+                //ì´ê²Œ ì¢€ë” ë¹ ë¥´ê¸´ í•¨
                 BitmapImage bmi = new BitmapImage();
                 bmi.BeginInit();
                 bmi.CacheOption = BitmapCacheOption.OnLoad;
@@ -931,9 +956,9 @@ namespace XrayTEXT
                 isNormalYN = GetisNormalYN_DB(OnlyFileName);
                 switch (isNormalYN)
                 {
-                    case "Y": isNormalBorderColor = "#FFD8E6FF"; break; // ÀÌ»ó ¼Ò°ß ¾øÀ½
-                    case "N": isNormalBorderColor = "#FFFFD8D8"; break; // ÀÌ»ó ¼Ò°ß ÀÖÀ½
-                    default: isNormalBorderColor = "white"; break; // ÀÛ¾÷ Àü
+                    case "Y": isNormalBorderColor = "#FFD8E6FF"; break; // ì´ìƒ ì†Œê²¬ ì—†ìŒ
+                    case "N": isNormalBorderColor = "#FFFFD8D8"; break; // ì´ìƒ ì†Œê²¬ ìˆìŒ
+                    default: isNormalBorderColor = "white"; break; // ì‘ì—… ì „
                 }
             }
             catch (NotSupportedException)
@@ -1056,7 +1081,7 @@ namespace XrayTEXT
                 //    Add(new Photo(f.FullName));
                 //}
 
-                #region ################# progress bar ½ÃÀÛºÎ S ####################
+                #region ################# progress bar ì‹œì‘ë¶€ S ####################
                 int _maxCnt = _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize).Count();
 
                 Helpers.pd = new ProgressDialog();
@@ -1066,18 +1091,18 @@ namespace XrayTEXT
                 Helpers.worker.WorkerSupportsCancellation = true;
                 Helpers.worker.DoWork += delegate (object s, DoWorkEventArgs args)
                 {
-                #endregion ################# progress bar ½ÃÀÛºÎ E ####################
+                #endregion ################# progress bar ì‹œì‘ë¶€ E ####################
 
-                    #region ################# ±âÁ¸ ·ÎÁ÷ S ####################
+                    #region ################# ê¸°ì¡´ ë¡œì§ S ####################
                     int x = 0;
                     foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize))
                     {
-                        #region ###### err ºÎºĞ Dispatcher.Invoke ·Î ÇØ°á ######
+                        #region ###### err ë¶€ë¶„ Dispatcher.Invoke ë¡œ í•´ê²° ######
                         App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
                         {
                             Add(new Photo(f.FullName));
                         });
-                        #endregion ###### err ºÎºĞ Dispatcher.Invoke ·Î ÇØ°á ######
+                        #endregion ###### err ë¶€ë¶„ Dispatcher.Invoke ë¡œ í•´ê²° ######
 
                         x++;
                         if (Helpers.worker.CancellationPending)
@@ -1089,9 +1114,9 @@ namespace XrayTEXT
                         Helpers.UpdateProgressDelegate update = new Helpers.UpdateProgressDelegate(Helpers.UpdateProgressText);
                         pdDispatcher.BeginInvoke(update, Convert.ToInt32(((decimal)x / (decimal)_maxCnt) * 100), _maxCnt);
                     }
-                    #endregion ################# ±âÁ¸ ·ÎÁ÷ E ####################
+                    #endregion ################# ê¸°ì¡´ ë¡œì§ E ####################
 
-                #region ################# progress bar Á¾·áºÎ S ####################
+                #region ################# progress bar ì¢…ë£Œë¶€ S ####################
                 };
                 Helpers.worker.RunWorkerCompleted += delegate (object s, RunWorkerCompletedEventArgs args)
                 {
@@ -1100,16 +1125,16 @@ namespace XrayTEXT
 
                 Helpers.worker.RunWorkerAsync();
                 Helpers.pd.ShowDialog();
-                #endregion ################# progress bar Á¾·áºÎ E ####################
+                #endregion ################# progress bar ì¢…ë£Œë¶€ E ####################
 
             }
             catch (DirectoryNotFoundException)
             {
-                System.Windows.MessageBox.Show("Æú´õ°¡ ¾ø½À´Ï´Ù.");
+                System.Windows.MessageBox.Show("í´ë”ê°€ ì—†ìŠµë‹ˆë‹¤.");
             }
         }
     }
 
-    #endregion ########### ½æ³×ÀÏ¿ë Photo , PhotoCollection ###########
+    #endregion ########### ì¸ë„¤ì¼ìš© Photo , PhotoCollection ###########
 
 }

@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
+
 namespace XrayTEXT
 {
     public partial class MainWin : System.Windows.Window
@@ -49,6 +50,8 @@ namespace XrayTEXT
             //this.Title = "로딩중입니다.";
 
             InitializeComponent();
+            string _test = Helpers.getMariaDB();
+            //MessageBox.Show(_test + " : MySQL 접속 성공");
         }
 
         /// <summary>
