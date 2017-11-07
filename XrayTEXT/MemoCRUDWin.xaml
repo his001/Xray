@@ -25,7 +25,7 @@
         </DockPanel>
 
 
-        <Button Content="저장" Name="Cmd_Save" HorizontalAlignment="Left" Margin="285,42,0,0" VerticalAlignment="Top" Width="70" Height="41" Click="Cmd_Save_Click"/>
+        <Button Content="추가" Name="Cmd_Save" HorizontalAlignment="Left" Margin="285,42,0,0" VerticalAlignment="Top" Width="70" Height="41" Click="Cmd_Save_Click"/>
         <Button Content="삭제" Name="Cmd_Delete" HorizontalAlignment="Left" Margin="365,42,0,0" VerticalAlignment="Top" Width="70" Height="41" Click="Cmd_Del_Click"/>
         <Button Content="조회" Name="Cmd_Load" HorizontalAlignment="Left" Margin="445,42,0,0" VerticalAlignment="Top" Width="70" Height="41" Click="Cmd_Load_Click"/>
 

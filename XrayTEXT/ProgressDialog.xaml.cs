@@ -21,6 +21,11 @@ namespace XrayTEXT
         public ProgressDialog()
         {
             InitializeComponent();
+
+            Application curApp = Application.Current;
+            Window mainWindow = curApp.MainWindow;
+            this.Left = mainWindow.Left + ((mainWindow.ActualWidth - this.ActualWidth) / 2) - 200;
+            this.Top = mainWindow.Top + ((mainWindow.ActualHeight - this.ActualHeight) / 2) - 200;
         }
 
         public string ProgressText

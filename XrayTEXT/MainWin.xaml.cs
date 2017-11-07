@@ -1144,6 +1144,12 @@ namespace XrayTEXT
 
             if (cb_isNormal.IsChecked.Value)
             {
+                if (TxtcutMemo.Text.Trim().Length > 1) {
+                    if (MessageBox.Show("질병 내용이있습니다.정말 정상 소견으로 저장 하시겠습니까?", "※정상소견 저장시 질병은 삭제됩니다.", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No)== MessageBoxResult.No) {
+                        return;
+                    }
+                    
+                }
                 if (SetisNormal_DB("Y") == "success")
                 {
                     GetCurPhotosNumb();
@@ -1277,7 +1283,11 @@ namespace XrayTEXT
                     sql = sql + "     INSERT INTO TBL_TalkBoxLayerMst(KeyFilename, isNormalYN, FileTitle) ";
                     sql = sql + "     SELECT '" + _KeyFilename + "' as KeyFilename, '" + _YN + "' as isNormalYN, '" + Helpers.rtnSQLInj(TxtFileTitle.Text) + "' AS FileTitle ";
                     sql = sql + " END ";
-
+                    #region #### 판독결과 정상인 경우 TBL_TalkBoxLayer의 data 같이 삭제 ####
+                    if (_YN == "Y") {
+                        sql = sql + " ;DELETE FROM TBL_TalkBoxLayer WHERE KeyFilename = '"+ _KeyFilename + "'";
+                    }
+                    #endregion #### 판독결과 정상인 경우 TBL_TalkBoxLayer의 data 같이 삭제 ####
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
                         int result = cmd.ExecuteNonQuery();
@@ -1333,16 +1343,29 @@ namespace XrayTEXT
                 {
                     CurTalkBox[j].Text = _lastMemo + "/" + str_returned;
                 }
-                //
-                string _strFileTitle = TxtFileTitle.Text;
-                if (_strFileTitle.Trim().Length == 0)
+
+                //메모에 입력된 data 가 첫번째 입력된 data인지 확인
+                string _appendTitle = CurTalkBox[j].Text;
+                if (_appendTitle.IndexOf("/") > -1)
                 {
-                    TxtFileTitle.Text = str_returned;
+                    //string[] _result = _appendTitle.Split('/');
+                    //_appendTitle = _result[0];
                 }
-                else
-                {
-                    TxtFileTitle.Text = _strFileTitle + "/" + str_returned;
+                else {
+                    // 메모의 data 가 첫번째 data 여야 TxtFileTitle 에 추가
+                    string _strFileTitle = TxtFileTitle.Text;
+                    // 첫번째 구분자인지 확인
+                    if (_strFileTitle.Trim().Length == 0)
+                    {
+                        TxtFileTitle.Text = _appendTitle;
+                    }
+                    else
+                    {
+                        TxtFileTitle.Text = _strFileTitle + "/" + _appendTitle;
+                    }
+
                 }
+
 
                 // 만약 첫번째 레이어를 그린것이라면 즉 해당 이미지의 첫번째 소견을 작성 한 것이라면 
                 if (CurTalkBox.Count == 1)

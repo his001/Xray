@@ -427,7 +427,7 @@
                                     <Label Name="Lbl_isNormal" ></Label>
                                 </DockPanel>
                                 <DockPanel Grid.Column="0" Grid.Row="1" Name="dc_isNormal">
-                                    <CheckBox Name="cb_isNormal" IsChecked="True" Content="정상소견" Margin="0,5,0,0" HorizontalAlignment="Right"/>
+                                    <CheckBox Name="cb_isNormal" IsChecked="True" Content="정상소견" Margin="3,5,0,0" HorizontalAlignment="Right"/>
                                     <!--Checked="cb_isNormal_Checked" Unchecked="cb_isNormal_Unchecked"-->
                                     <Button Name="Btn_isNormal" Width="60" Click="OnBtn_isNormalClick" 
                                         Style="{StaticResource InformButton}"
@@ -440,7 +440,7 @@
                         <!-- 판독결과 -->
                         <TextBox Name="TxtFileTitle" Grid.Column="0" Grid.Row="2" x:FieldModifier="public"
                             Text="{Binding XrayTEXT.ViewModels.MainViewModel.UserFileMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            Width="190" Height="120" Margin="1,0" 
+                            Width="190" Height="120" Margin="3,0" 
                             TextWrapping="Wrap" 
                             VerticalAlignment="Bottom"
                             HorizontalAlignment="Left"

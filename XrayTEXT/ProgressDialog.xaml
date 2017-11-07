@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:XrayTEXT"
         mc:Ignorable="d"
-    Title="ProgressDialog" Height="115" Width="300" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+    Title="이미지 로딩중" Height="130" Width="300" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
     <Grid>
         <StackPanel>
             <Label x:Name="lblProgress" Content="0%"/>
-            <ProgressBar x:Name="progress" Height="25" IsIndeterminate="False"></ProgressBar>
+            <ProgressBar x:Name="progress" Height="25" IsIndeterminate="False" Margin="5,0,5,5"></ProgressBar>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="btnCancel" Click="btnCancel_Click">Cancel</Button>
+                <Button x:Name="btnCancel" Click="btnCancel_Click" Margin="5,0,5,5">취소</Button>
             </StackPanel>
         </StackPanel>
     </Grid>
