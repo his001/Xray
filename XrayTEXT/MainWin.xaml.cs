@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -1564,41 +1562,9 @@ namespace XrayTEXT
 
         #endregion  ######### tree #########
 
-        #region ##################### 기타 차후 사용할수 있어서 일단 주석 처리 #####################
+        
 
-        //public BitmapImage ImageFromBytearray(byte[] imageData)
-        //{
-
-        //    if (imageData == null)
-        //        return null;
-        //    MemoryStream strm = new MemoryStream();
-        //    strm.Write(imageData, 0, imageData.Length);
-        //    strm.Position = 0;
-        //    Image img = Image.FromStream(strm);
-
-        //    BitmapImage bitmapImage = new BitmapImage();
-        //    bitmapImage.BeginInit();
-        //    MemoryStream memoryStream = new MemoryStream();
-        //    img.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Bmp);
-        //    memoryStream.Seek(0, SeekOrigin.Begin);
-        //    bitmapImage.StreamSource = memoryStream;
-        //    bitmapImage.EndInit();
-
-        //    return bitmapImage;
-        //}
-
-        #endregion ##################### 기타 차후 사용할수 있어서 일단 주석 처리 #####################
-
-        #region #### PropertyChangedEventHandler ####
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        #endregion #### PropertyChangedEventHandler ####
+        
 
     }
 
@@ -1662,21 +1628,6 @@ namespace XrayTEXT
         {
             SetTimeout(action, TimeSpan.FromMilliseconds(timeout), args);
         }
-    }
-
-    /// <summary>
-    /// PrintNew UI 갱신용
-    /// </summary>
-    public static class ExtensionMethods
-    {
-        private static Action EmptyDelegate = delegate () { };
-
-        public static void PrintNew(this UIElement uiElement)
-        {
-            uiElement.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
-        }
-        //TxtFileTitle.PrintNew();
-        //TxtcutMemo.PrintNew();
     }
     #endregion  ######### Extension #########
 }

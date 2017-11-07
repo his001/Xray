@@ -6,17 +6,17 @@ using System.Reflection;
 
 namespace XrayTEXT
 {
-	/// <summary>
-	/// Implements the INotifyPropertyChanged interface and 
-	/// exposes a RaisePropertyChanged method for derived 
-	/// classes to raise the PropertyChange event.  The event 
-	/// arguments created by this class are cached to prevent 
-	/// managed heap fragmentation.
-	/// </summary>
-	/// <remarks>
-	/// Documentation: http://joshsmithonwpf.wordpress.com/2007/08/29/a-base-class-which-implements-inotifypropertychanged/
-	/// </remarks>
-	[Serializable]
+    /// <summary>
+    /// Implements the INotifyPropertyChanged interface and 
+    /// exposes a RaisePropertyChanged method for derived 
+    /// classes to raise the PropertyChange event.  The event 
+    /// arguments created by this class are cached to prevent 
+    /// managed heap fragmentation.
+    /// </summary>
+    /// <remarks>
+    /// Documentation: http://joshsmithonwpf.wordpress.com/2007/08/29/a-base-class-which-implements-inotifypropertychanged/
+    /// </remarks>
+    [Serializable]
 	public abstract class BindableObject : INotifyPropertyChanged
 	{
 		private static readonly Dictionary<string, PropertyChangedEventArgs> eventArgCache;

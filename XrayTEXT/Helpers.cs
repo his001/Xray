@@ -82,36 +82,6 @@ namespace XrayTEXT
         {
             worker.CancelAsync();
         }
-        //public void GetShowProgress_start()  //object sender, RoutedEventArgs e   // int maxRecords, int curCnt
-        //{
-        //    pd = new ProgressDialog();
-        //    pd.Cancel += CancelProcess;
-        //    System.Windows.Threading.Dispatcher pdDispatcher = pd.Dispatcher;
-        //    worker = new BackgroundWorker();
-        //    worker.WorkerSupportsCancellation = true;
-        //    worker.DoWork += delegate (object s, DoWorkEventArgs args)
-        //    {
-        //        for (int x = 0; x < ShowProgress_maxRecords; x++)
-        //        {
-        //            if (worker.CancellationPending)
-        //            {
-        //                args.Cancel = true;
-        //                return;
-        //            }
-        //            System.Threading.Thread.Sleep(300);
-        //            //MessageBox.Show(Photos.Count.ToString() + " : Photos.Count ");
-        //            UpdateProgressDelegate update = new UpdateProgressDelegate(UpdateProgressText);
-        //            pdDispatcher.BeginInvoke(update, Convert.ToInt32(((decimal)x / (decimal)ShowProgress_maxRecords) * 100), ShowProgress_maxRecords);
-        //        }
-        //    };
-        //    worker.RunWorkerCompleted += delegate (object s, RunWorkerCompletedEventArgs args)
-        //    {
-        //        pd.Close();
-        //    };
-
-        //    worker.RunWorkerAsync();
-        //    pd.ShowDialog();
-        //}
         #endregion ###### Progress Bar - Update UI with Dispatcher ######
         
 
@@ -228,16 +198,6 @@ namespace XrayTEXT
             {
                 //MessageBox.Show(ex.Message);
             }
-            //(Application.Current.MainWindow as MainWin).btnUpText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
-            //mwin.btnUpText.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent)); // 저장 후 화면의 소견을 리로드 하기위해
-
-            //mainViewModel.UserCutMemo = _talkBoxLayer.Text;//.ToString();
-            //mainViewModel.UserFileMemo = _talkBoxLayer.TalkBoxLyerFileTitle;
-            //SetDeleteAllTextBox();
-            //mwin.TxtcutMemo.Text = _talkBoxLayer.Text;
-            //mwin.TxtFileTitle.Text = _talkBoxLayer.TalkBoxLyerFileTitle;
-
-            //new Action(() => mwin.btnLoadText.RaiseEvent(new RoutedEventArgs(Button.ClickEvent))).SetTimeout(500);
             return rtn;
         }
     }

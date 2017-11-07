@@ -288,7 +288,7 @@
                 <MenuItem Header="소견">
                     <MenuItem Header="불러오기" Name="btnLoadText" Click="btnLoadText_Click"/>
                     <MenuItem Header="저장" Name="btnSaveDBText" Click="btnSaveDBText_Click"/>
-                    <MenuItem Header="삭제" Name="btnDelText" Click="btnDelText_Click"/>
+                    <MenuItem Header="삭제" Name="btnDelText" Click="btnDelText_Click" Visibility="Hidden" />
                 </MenuItem>
                 <MenuItem Header="전송">
                     <MenuItem Header="Data전송">
