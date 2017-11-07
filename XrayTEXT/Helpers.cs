@@ -922,5 +922,234 @@ namespace XrayTEXT
         }
     }
 
+    #region ########### 썸네일용 Photo , PhotoCollection ###########
+
+    /// <summary>
+    /// This class describes a single photo - its location, the image and 
+    /// the metadata extracted from the image.
+    /// </summary>
+    public class Photo
+    {
+        private string _onlyfileName = string.Empty;
+        public string OnlyFileName
+        {
+            get { return _onlyfileName; }
+            set { _onlyfileName = value; }
+        }
+
+        private string _isNormalBorderColor = string.Empty;
+        public string isNormalBorderColor
+        {
+            get { return _isNormalBorderColor; }
+            set { _isNormalBorderColor = value; }
+        }
+
+        private string _isNormalYN = string.Empty;
+        public string isNormalYN
+        {
+            get { return _isNormalYN; }
+            set { _isNormalYN = value; }
+        }
+
+        public Photo(string path)
+        {
+            _path = path;
+            _source = new Uri(path);
+            try
+            {
+                //이게 좀더 빠르긴 함
+                BitmapImage bmi = new BitmapImage();
+                bmi.BeginInit();
+                bmi.CacheOption = BitmapCacheOption.OnLoad;
+                bmi.UriSource = _source;
+                bmi.EndInit();
+                _image = bmi;
+
+                GC.Collect();
+
+                OnlyFileName = System.IO.Path.GetFileName(path);
+                isNormalYN = GetisNormalYN_DB(OnlyFileName);
+                switch (isNormalYN)
+                {
+                    case "Y": isNormalBorderColor = "#FFD8E6FF"; break; // 이상 소견 없음
+                    case "N": isNormalBorderColor = "#FFFFD8D8"; break; // 이상 소견 있음
+                    default: isNormalBorderColor = "white"; break; // 작업 전
+                }
+            }
+            catch (NotSupportedException)
+            {
+                //MessageBox.Show("NotSupportedException");
+            }
+        }
+
+        private string GetisNormalYN_DB(string _OnlyFileName)
+        {
+            string _rtn = "";
+            DataSet ds = new DataSet();
+            if (_OnlyFileName != "")
+            {
+                try
+                {
+                    using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                    {
+                        conn.Open();
+                        string sql = "SELECT KeyFilename, isNormalYN FROM TBL_TalkBoxLayerMst WITH(NOLOCK) WHERE KeyFilename = '" + _OnlyFileName + "' ";
+                        using (SqlCommand cmd = new SqlCommand(sql, conn))
+                        {
+                            var adapt = new SqlDataAdapter();
+                            adapt.SelectCommand = cmd;
+                            adapt.Fill(ds);
+                        }
+                        conn.Close();
+
+                        if (ds != null && ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+                        {
+                            _rtn = ds.Tables[0].Rows[0]["isNormalYN"].ToString();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //MessageBox.Show(ex.Message);
+                }
+            }
+            return _rtn;
+        }
+
+        private Image getPngImage(string path)
+        {
+            Image myImage = new Image();
+            myImage.Width = 200;
+
+            // Create source
+            BitmapImage myBitmapImage = new BitmapImage();
+
+            // BitmapImage.UriSource must be in a BeginInit/EndInit block
+            myBitmapImage.BeginInit();
+            myBitmapImage.UriSource = new Uri(path);
+            myBitmapImage.DecodePixelWidth = 200;
+            myBitmapImage.EndInit();
+            //set image source
+            myImage.Source = myBitmapImage;
+            return myImage;
+        }
+
+        public override string ToString()
+        {
+            return _source.ToString();
+        }
+
+        private string _path;
+
+        private Uri _source;
+        public string Source { get { return _path; } }
+
+        private BitmapImage _image;
+        public BitmapImage Image { get { return _image; } set { _image = value; } }
+    }
+
+    /// <summary>
+    /// This class represents a collection of photos in a directory.
+    /// </summary>
+    public class PhotoCollection : ObservableCollection<Photo>
+    {
+        DirectoryInfo _directory;
+
+        public PhotoCollection() { }
+        public PhotoCollection(string path) : this(new DirectoryInfo(path)) { }
+        public PhotoCollection(DirectoryInfo directory)
+        {
+            _directory = directory;
+            GetImageRead();
+        }
+
+        public string Path
+        {
+            set
+            {
+                _directory = new DirectoryInfo(value);
+                GetImageRead();
+            }
+            get { return _directory.FullName; }
+        }
+
+        public DirectoryInfo Directory
+        {
+            set
+            {
+                _directory = value;
+                GetImageRead();
+            }
+            get { return _directory; }
+        }
+
+        public void GetImageRead()
+        {
+            int pageIndex = Helpers.pageIndex;
+            int pagesize = Helpers.pagesize;
+
+            this.Clear();
+            try
+            {
+                //foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize))
+                //{
+                //    Add(new Photo(f.FullName));
+                //}
+
+                #region ################# progress bar 시작부 S ####################
+                int _maxCnt = _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize).Count();
+
+                Helpers.pd = new ProgressDialog();
+                Helpers.pd.Cancel += Helpers.CancelProcess;
+                System.Windows.Threading.Dispatcher pdDispatcher = Helpers.pd.Dispatcher;
+                Helpers.worker = new BackgroundWorker();
+                Helpers.worker.WorkerSupportsCancellation = true;
+                Helpers.worker.DoWork += delegate (object s, DoWorkEventArgs args)
+                {
+                #endregion ################# progress bar 시작부 E ####################
+
+                    #region ################# 기존 로직 S ####################
+                    int x = 0;
+                    foreach (FileInfo f in _directory.GetFiles("*.jpg").Union(_directory.GetFiles("*.png")).Skip((pageIndex - 1) * pagesize).Take(pagesize))
+                    {
+                        #region ###### err 부분 Dispatcher.Invoke 로 해결 ######
+                        App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                        {
+                            Add(new Photo(f.FullName));
+                        });
+                        #endregion ###### err 부분 Dispatcher.Invoke 로 해결 ######
+
+                        x++;
+                        if (Helpers.worker.CancellationPending)
+                        {
+                            args.Cancel = true;
+                            return;
+                        }
+                        System.Threading.Thread.Sleep(10);
+                        Helpers.UpdateProgressDelegate update = new Helpers.UpdateProgressDelegate(Helpers.UpdateProgressText);
+                        pdDispatcher.BeginInvoke(update, Convert.ToInt32(((decimal)x / (decimal)_maxCnt) * 100), _maxCnt);
+                    }
+                    #endregion ################# 기존 로직 E ####################
+
+                #region ################# progress bar 종료부 S ####################
+                };
+                Helpers.worker.RunWorkerCompleted += delegate (object s, RunWorkerCompletedEventArgs args)
+                {
+                    Helpers.pd.Close();
+                };
+
+                Helpers.worker.RunWorkerAsync();
+                Helpers.pd.ShowDialog();
+                #endregion ################# progress bar 종료부 E ####################
+
+            }
+            catch (DirectoryNotFoundException)
+            {
+                System.Windows.MessageBox.Show("폴더가 없습니다.");
+            }
+        }
+    }
+
+    #endregion ########### 썸네일용 Photo , PhotoCollection ###########
 
 }
