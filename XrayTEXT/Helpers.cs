@@ -68,24 +68,187 @@ namespace XrayTEXT
             return tmp;
         }
 
-        public static string getMariaDB()
+        /// <summary>
+        /// 마리아 DB 에 마스터 Data 를 저장 한다.
+        /// </summary>
+        /// <returns></returns>
+        public static string SetSendMasterToMariaDB()
         {
-            MySqlConnection connection = new MySqlConnection(dbMariaCon);
-            MySqlCommand command = connection.CreateCommand();
-            MySqlDataReader Reader;
-            command.CommandText = "SELECT idx,filename, label, regdate FROM mysql.TBL_DLImage";
-            connection.Open();
-            Reader = command.ExecuteReader();
+            string _rtn = "ERR";
+            ArrayList keyList = new ArrayList();
+
+            DataSet ds = new DataSet();
+            #region ######### SQL Express #########
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                {
+                    conn.Open();
+                    string sql = " ";
+                    sql = sql + " SELECT KeyFilename, isNormalYN, FileTitle, regDate, modiDate, sendDate, sendSubCnt, sendFlag ";
+                    sql = sql + " FROM TBL_TalkBoxLayerMst WITH(nolock) ";
+                    sql = sql + " WHERE (sendFlag is NULL or sendFlag ='N') ";
+
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        var adapt = new SqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex) { _rtn = "ERR MSSQL 1단계 - 조회"; }
+            #endregion ######### SQL Express #########
 
             StringBuilder sb = new StringBuilder();
-            while (Reader.Read())
+            string KeyFilename = "";
+            string FileTitle = "";
+            string isNormalYN = "";
+            if (ds != null && ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
             {
-                string thisrow = "";
-                for (int i = 0; i < Reader.FieldCount; i++)
-                    thisrow += Reader.GetValue(i).ToString() + ",";
-                sb.AppendLine(thisrow);
+                for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+                {
+                    KeyFilename     = ds.Tables[0].Rows[i]["KeyFilename"].ToString();   // 글내용 (의사소견)
+                    keyList.Add(KeyFilename);   // keyList 에 KeyFilename 저장
+
+                    FileTitle = ds.Tables[0].Rows[i]["FileTitle"].ToString();   // 글내용 (의사소견)
+                    isNormalYN      = ds.Tables[0].Rows[i]["isNormalYN"].ToString();   // 글내용 (의사소견)
+
+                    sb.Append(" INSERT INTO TBL_DLImage (KeyFilename, FileTitle, isNormalYN) SELECT '" + KeyFilename + "' as KeyFilename,'" + FileTitle + "' as FileTitle,'" + isNormalYN + "' as isNormalYN WHERE NOT EXISTS (SELECT * FROM TBL_DLImage WHERE KeyFilename = '"+KeyFilename+"' ) ;");
+                }
             }
-            connection.Close();
+
+            #region ######### MySQL insert #########
+            StringBuilder sb2 = new StringBuilder(); // mssql update 용 쿼리
+
+            if (sb.ToString() != "")
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(Helpers.dbMariaCon))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmd = new MySqlCommand(sb.ToString(), conn))
+                        {
+                            int result = cmd.ExecuteNonQuery();
+                            _rtn = result.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _rtn = "ERR MySQL 2단계 - INSERT";
+                }
+            }
+            #endregion ######### MySQL insert #########
+
+            #region ######### MySQL 저장된 값 확인 #########
+            DataSet ds2 = new DataSet();
+            try
+            {
+                string _where = "";
+                for (int i = 0; i < keyList.Count; i++) {
+                    if (_where == "") {
+                        _where = "'" + keyList[i] + "'";
+                    } else {
+                        _where = _where + ",'" + keyList[i] + "'";
+                    }
+                }
+                if (_where != "")
+                {
+                    using (MySqlConnection conn = new MySqlConnection(Helpers.dbMariaCon))
+                    {
+                        conn.Open();
+                        string sql = "SELECT KeyFilename FROM TBL_DLImage WHERE KeyFilename in ("+ _where + ") ";
+                        using (MySqlCommand cmd = new MySqlCommand(sql, conn))
+                        {
+                            var adapt = new MySqlDataAdapter();
+                            adapt.SelectCommand = cmd;
+                            adapt.Fill(ds2);
+                        }
+                        conn.Close();
+                    }
+                    string MyKeyFilename = string.Empty;
+                    if (ds2 != null && ds2.Tables[0] != null && ds2.Tables[0].Rows.Count > 0)
+                    {
+                        for (int i = 0; i < ds2.Tables[0].Rows.Count; i++)
+                        {
+                            MyKeyFilename = ds2.Tables[0].Rows[i]["KeyFilename"].ToString();   // 글내용 (의사소견)
+                            if (MyKeyFilename != "")
+                            {
+                                sb2.Append(" update TBL_TalkBoxLayerMst SET sendDate=getdate(), sendFlag='Y' WHERE KeyFilename='" + MyKeyFilename + "' ;");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _rtn = "ERR MySQL 3단계 - SELECT";
+            }
+            #endregion ######### MySQL 저장된 값 확인 #########
+
+
+            #region ######### SQL Express 전송 완료로 변경 #########
+            if (sb2.ToString() != "")
+            {
+                try
+                {
+                    using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                    {
+                        conn.Open();
+                        using (SqlCommand cmd = new SqlCommand(sb2.ToString(), conn))
+                        {
+                            int result = cmd.ExecuteNonQuery();
+                            _rtn = result.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception ex) { _rtn = "ERR MSSQL 4단계 - update"; }
+            }
+            #endregion ######### SQL Express 전송 완료로 변경 #########
+
+            return _rtn;
+        }
+
+
+
+        public static string getMariaDB()
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(Helpers.dbMariaCon))
+                {
+                    conn.Open();
+                    string sql = "SELECT idx,KeyFilename, FileTitle, isNormalYN, regdate FROM TBL_DLImage ";
+                    using (MySqlCommand cmd = new MySqlCommand(sql, conn))
+                    {
+                        var adapt = new MySqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            if (ds != null && ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+            {
+                string KeyFilename = string.Empty;
+                for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+                {
+                    KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();   // 글내용 (의사소견)
+                    sb.AppendLine(KeyFilename);
+                }
+            }
 
             return sb.ToString();
         }

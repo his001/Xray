@@ -291,7 +291,7 @@
                     <MenuItem Header="삭제" Name="btnDelText" Click="btnDelText_Click" Visibility="Hidden" />
                 </MenuItem>
                 <MenuItem Header="전송">
-                    <MenuItem Header="Data전송">
+                    <MenuItem Header="Data전송" Click="btnMySQLSend_Click">
                         <!--<MenuItem Header="File1"/>-->
                     </MenuItem>
                 </MenuItem>

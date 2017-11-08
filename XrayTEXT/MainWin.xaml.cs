@@ -50,8 +50,6 @@ namespace XrayTEXT
             //this.Title = "로딩중입니다.";
 
             InitializeComponent();
-            string _test = Helpers.getMariaDB();
-            //MessageBox.Show(_test + " : MySQL 접속 성공");
         }
 
         /// <summary>
@@ -1333,6 +1331,21 @@ namespace XrayTEXT
             catch (Exception ex) { }
             return _rtn;
         }
+
+
+        void btnMySQLSend_Click(object sender, RoutedEventArgs e)
+        {
+            string _rtn = Helpers.SetSendMasterToMariaDB();
+            if (_rtn.IndexOf("ERR")>-1)
+            {
+                MessageBox.Show(" MySQL 전송 실패 : " + _rtn);
+            }
+            else {
+                MessageBox.Show(" MySQL 전송 성공 : " + _rtn + " 건");
+            }
+
+        }
+
 
         #region ######### popup 관련 #########
 
