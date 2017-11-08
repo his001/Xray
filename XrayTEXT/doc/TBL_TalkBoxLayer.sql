@@ -1,4 +1,4 @@
-/****** Object:  Table [dbo].[TBL_TalkBoxLayer]    Script Date: 2017-11-06 오후 3:00:34 ******/
+/****** Object:  Table [dbo].[TBL_TalkBoxLayer]    Script Date: 2017-11-08 오후 5:24:11 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -20,6 +20,9 @@ CREATE TABLE [dbo].[TBL_TalkBoxLayer](
 	[Fileimg] [image] NULL,
 	[regdate] [datetime] NOT NULL,
 	[updYN] [char](10) NOT NULL,
+	[modiDate] [datetime] NULL,
+	[sendDate] [datetime] NULL,
+	[sendFlag] [nchar](1) NULL,
  CONSTRAINT [PK_TBL_TalkBoxLayer] PRIMARY KEY CLUSTERED 
 (
 	[CutFilename] ASC,
@@ -32,6 +35,12 @@ ALTER TABLE [dbo].[TBL_TalkBoxLayer] ADD  CONSTRAINT [DF_TBL_TalkBoxLayer_regdat
 GO
 
 ALTER TABLE [dbo].[TBL_TalkBoxLayer] ADD  CONSTRAINT [DF_TBL_TalkBoxLayer_updYN]  DEFAULT ('N') FOR [updYN]
+GO
+
+ALTER TABLE [dbo].[TBL_TalkBoxLayer] ADD  CONSTRAINT [DF_TBL_TalkBoxLayer_modiDate]  DEFAULT (getdate()) FOR [modiDate]
+GO
+
+ALTER TABLE [dbo].[TBL_TalkBoxLayer] ADD  CONSTRAINT [DF_TBL_TalkBoxLayer_sendFlag]  DEFAULT (N'N') FOR [sendFlag]
 GO
 
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'유니크 숫자' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'TBL_TalkBoxLayer', @level2type=N'COLUMN',@level2name=N'idx'
@@ -71,6 +80,9 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'이미지바이너리
 GO
 
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'작성일' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'TBL_TalkBoxLayer', @level2type=N'COLUMN',@level2name=N'regdate'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'메인DB전송여부 Y/N' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'TBL_TalkBoxLayer', @level2type=N'COLUMN',@level2name=N'sendFlag'
 GO
 
 

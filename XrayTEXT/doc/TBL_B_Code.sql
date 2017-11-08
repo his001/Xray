@@ -1,4 +1,4 @@
-/****** Object:  Table [dbo].[TBL_B_Code]    Script Date: 2017-11-06 ¿ÀÈÄ 2:59:32 ******/
+/****** Object:  Table [dbo].[TBL_B_Code]    Script Date: 2017-11-08 ¿ÀÈÄ 5:24:28 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -17,13 +17,3 @@ CREATE TABLE [dbo].[TBL_B_Code](
 GO
 
 
-/*
-INSERT INTO TBL_B_Code (BName ,BMemo) VALUES ('°áÇÙ','°áÇÙ')
-INSERT INTO TBL_B_Code (BName ,BMemo) VALUES ('AÇü °£¿°','°£¿°')
-INSERT INTO TBL_B_Code (BName ,BMemo) VALUES ('BÇü °£¿°','°£¿°')
-INSERT INTO TBL_B_Code (BName ,BMemo) VALUES ('CÇü °£¿°','°£¿°')
-INSERT INTO TBL_B_Code (BName ,BMemo) VALUES ('°£¿°','°£¿°')
-INSERT INTO TBL_B_Code (BName ,BMemo) VALUES ('AÇü°áÇÙ','°áÇÙ')
-INSERT INTO TBL_B_Code (BName ,BMemo) VALUES ('BÇü°áÇÙ','°áÇÙ')
-INSERT INTO TBL_B_Code (BName ,BMemo) VALUES ('CÇü°áÇÙ','°áÇÙ')
-*/

@@ -68,6 +68,7 @@ namespace XrayTEXT
             return tmp;
         }
 
+        #region #############    마리아 DB 전송    #############
         /// <summary>
         /// 마리아 DB 에 마스터 Data 를 저장 한다.
         /// </summary>
@@ -76,9 +77,9 @@ namespace XrayTEXT
         {
             string _rtn = "ERR";
             ArrayList keyList = new ArrayList();
-
             DataSet ds = new DataSet();
-            #region ######### SQL Express #########
+
+            #region ######### MSSQL Express 1 - 로컬 자료 조회 후 MySQL 에 추가할 SQL 생성 #########
             try
             {
                 using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
@@ -99,8 +100,8 @@ namespace XrayTEXT
                 }
             }
             catch (Exception ex) { _rtn = "ERR MSSQL 1단계 - 조회"; }
-            #endregion ######### SQL Express #########
 
+            // MySQL 에 추가할 SQL 생성
             StringBuilder sb = new StringBuilder();
             string KeyFilename = "";
             string FileTitle = "";
@@ -109,17 +110,18 @@ namespace XrayTEXT
             {
                 for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                 {
-                    KeyFilename     = ds.Tables[0].Rows[i]["KeyFilename"].ToString();   // 글내용 (의사소견)
+                    KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();   // 글내용 (의사소견)
                     keyList.Add(KeyFilename);   // keyList 에 KeyFilename 저장
 
                     FileTitle = ds.Tables[0].Rows[i]["FileTitle"].ToString();   // 글내용 (의사소견)
-                    isNormalYN      = ds.Tables[0].Rows[i]["isNormalYN"].ToString();   // 글내용 (의사소견)
+                    isNormalYN = ds.Tables[0].Rows[i]["isNormalYN"].ToString();   // 글내용 (의사소견)
 
-                    sb.Append(" INSERT INTO TBL_DLImage (KeyFilename, FileTitle, isNormalYN) SELECT '" + KeyFilename + "' as KeyFilename,'" + FileTitle + "' as FileTitle,'" + isNormalYN + "' as isNormalYN WHERE NOT EXISTS (SELECT * FROM TBL_DLImage WHERE KeyFilename = '"+KeyFilename+"' ) ;");
+                    sb.Append(" INSERT INTO TBL_DLImage (KeyFilename, FileTitle, isNormalYN) SELECT '" + KeyFilename + "' as KeyFilename,'" + FileTitle + "' as FileTitle,'" + isNormalYN + "' as isNormalYN WHERE NOT EXISTS (SELECT * FROM TBL_DLImage WHERE KeyFilename = '" + KeyFilename + "' ) ;");
                 }
             }
+            #endregion ######### MSSQL Express 1 - 로컬 자료 조회 후 MySQL 에 추가할 SQL 생성 #########
 
-            #region ######### MySQL insert #########
+            #region ######### MySQL insert 2 - 로컬 자료 를 MySQL 에 저장 #########
             StringBuilder sb2 = new StringBuilder(); // mssql update 용 쿼리
 
             if (sb.ToString() != "")
@@ -142,9 +144,9 @@ namespace XrayTEXT
                     _rtn = "ERR MySQL 2단계 - INSERT";
                 }
             }
-            #endregion ######### MySQL insert #########
+            #endregion ######### MySQL insert 2 - 로컬 자료 를 MySQL 에 저장 #########
 
-            #region ######### MySQL 저장된 값 확인 #########
+            #region ######### MySQL SELECT 3 - MySQL에 저장된 키값 확인 후 MSSQL 에 Update 준비 #########
             DataSet ds2 = new DataSet();
             try
             {
@@ -188,10 +190,9 @@ namespace XrayTEXT
             {
                 _rtn = "ERR MySQL 3단계 - SELECT";
             }
-            #endregion ######### MySQL 저장된 값 확인 #########
+            #endregion ######### MySQL SELECT 3 - MySQL에 저장된 키값 확인 후 MSSQL 에 Update 준비 #########
 
-
-            #region ######### SQL Express 전송 완료로 변경 #########
+            #region ######### MSSQL UPDATE 4 - 로컬 내용 전송 완료로 변경 #########
             if (sb2.ToString() != "")
             {
                 try
@@ -209,12 +210,10 @@ namespace XrayTEXT
                 }
                 catch (Exception ex) { _rtn = "ERR MSSQL 4단계 - update"; }
             }
-            #endregion ######### SQL Express 전송 완료로 변경 #########
+            #endregion ######### MSSQL UPDATE 4 - 로컬 내용 전송 완료로 변경 #########
 
             return _rtn;
         }
-
-
 
         public static string getMariaDB()
         {
@@ -253,6 +252,8 @@ namespace XrayTEXT
             return sb.ToString();
         }
 
+        #endregion #############    마리아 DB 전송    #############
+
         #region ###### Progress Bar - Update UI with Dispatcher ######
         public static BackgroundWorker worker;
         public static ProgressDialog pd;
@@ -272,7 +273,6 @@ namespace XrayTEXT
         }
         #endregion ###### Progress Bar - Update UI with Dispatcher ######
         
-
         /// <summary>
         /// 폴더에서 사진을 가져와 byte[]로 변환
         /// </summary>
