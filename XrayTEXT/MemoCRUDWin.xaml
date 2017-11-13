@@ -8,6 +8,7 @@
         Title="질병명관리" Height="460" Width="540">
     <Grid>
 
+        <Grid Name="dpPop" Visibility="Hidden">
         <Label Content="질병명 관리" HorizontalAlignment="Left" Margin="191,8,0,0" VerticalAlignment="Top" FontFamily="Arial Black" FontSize="14"/>
         <DockPanel >
             <Label Content="BName" HorizontalAlignment="Left" Margin="8,39,0,0" VerticalAlignment="Top"/>
@@ -33,5 +34,19 @@
         <DataGrid Name="Dtgrid1" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Height="268" Width="497" SelectionChanged="Dtgrid1_SelectionChanged">
 
         </DataGrid>
+        </Grid>
+
+        <Grid Name="dpPassword"  Visibility="Visible" >
+            <DockPanel Margin="0,100,0,0" Height="460" Width="540" VerticalAlignment="Top"></DockPanel>
+
+            <StackPanel Grid.Row="1">
+                <Label DockPanel.Dock="Left" Margin="0,10,0,0" Width="220">비밀번호를 입력해 주세요.</Label>
+                <PasswordBox Name="passBox" Width="220" Margin="0,10,0,0"></PasswordBox>
+                <Button Width="60" Click="Button_Click" Margin="0,10,0,0">확인</Button>
+            </StackPanel>
+        </Grid>
+
     </Grid>
+
+
 </Window>

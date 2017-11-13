@@ -375,6 +375,28 @@ namespace XrayTEXT
             Xcanvas.LayoutTransform = new ScaleTransform(scale, scale);
         }
 
+        private void OnBtnPlusChangeClick(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized) return;
+            if (PhotosListBox.SelectedItem == null) return;
+
+            ZoomImage.Value = ZoomImage.Value + 10;
+
+            lblZoom.Content = ZoomImage.Value + "%";
+            double scale = (double)(ZoomImage.Value / 100.0) * 0.1;
+        }
+
+        private void OnBtnMinusChangeClick(object sender, RoutedEventArgs e)
+        {
+            if (!IsInitialized) return;
+            if (PhotosListBox.SelectedItem == null) return;
+
+            ZoomImage.Value = ZoomImage.Value -10;
+
+            lblZoom.Content = ZoomImage.Value + "%";
+            double scale = (double)(ZoomImage.Value / 100.0) * 0.1;
+        }
+
         /// <summary>
         /// 마우스 왼쪽 버튼 클릭 이벤트 핸들러
         /// </summary>
@@ -1332,20 +1354,35 @@ namespace XrayTEXT
             return _rtn;
         }
 
-
+        /// <summary>
+        /// 마리아 DB에 Data 전송 현재 샘플임 - 스키마에 따라 수정 요망
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void btnMySQLSend_Click(object sender, RoutedEventArgs e)
         {
+            /// 마스터 전송
             string _rtn = Helpers.SetSendMasterToMariaDB();
-            if (_rtn.IndexOf("ERR")>-1)
+            if (_rtn.IndexOf("ERR") > -1)
             {
-                MessageBox.Show(" MySQL 전송 실패 : " + _rtn);
+                MessageBox.Show(" MySQL MASTER 전송 실패 : " + _rtn);
             }
-            else {
-                MessageBox.Show(" MySQL 전송 성공 : " + _rtn + " 건");
+            else
+            {
+                MessageBox.Show(" MySQL MASTER 전송 성공 : " + _rtn + " 건");
             }
 
+            ///// 디테일 전송
+            //string _rtn2 = Helpers.SetSendDtlToMariaDB();
+            //if (_rtn2.IndexOf("ERR") > -1)
+            //{
+            //    MessageBox.Show(" MySQL DETAIL 전송 실패 : " + _rtn2);
+            //}
+            //else
+            //{
+            //    MessageBox.Show(" MySQL DETAIL 전송 성공 : " + _rtn2 + " 건");
+            //}
         }
-
 
         #region ######### popup 관련 #########
 
@@ -1607,11 +1644,7 @@ namespace XrayTEXT
         }
 
         #endregion  ######### tree #########
-
         
-
-        
-
     }
 
     #region ######### 트리뷰 용

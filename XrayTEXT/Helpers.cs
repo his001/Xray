@@ -76,7 +76,7 @@ namespace XrayTEXT
         public static string SetSendMasterToMariaDB()
         {
             string _rtn = "ERR";
-            ArrayList keyList = new ArrayList();
+            ArrayList keyList = new ArrayList();    // Master Key 파일 저장 목록
             DataSet ds = new DataSet();
 
             #region ######### MSSQL Express 1 - 로컬 자료 조회 후 MySQL 에 추가할 SQL 생성 #########
@@ -181,6 +181,239 @@ namespace XrayTEXT
                             if (MyKeyFilename != "")
                             {
                                 sb2.Append(" update TBL_TalkBoxLayerMst SET sendDate=getdate(), sendFlag='Y' WHERE KeyFilename='" + MyKeyFilename + "' ;");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _rtn = "ERR MySQL 3단계 - SELECT";
+            }
+            #endregion ######### MySQL SELECT 3 - MySQL에 저장된 키값 확인 후 MSSQL 에 Update 준비 #########
+
+            #region ######### MSSQL UPDATE 4 - 로컬 내용 전송 완료로 변경 #########
+            if (sb2.ToString() != "")
+            {
+                try
+                {
+                    using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                    {
+                        conn.Open();
+                        using (SqlCommand cmd = new SqlCommand(sb2.ToString(), conn))
+                        {
+                            int result = cmd.ExecuteNonQuery();
+                            _rtn = result.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception ex) { _rtn = "ERR MSSQL 4단계 - update"; }
+            }
+            #endregion ######### MSSQL UPDATE 4 - 로컬 내용 전송 완료로 변경 #########
+
+            return _rtn;
+        }
+
+        /// <summary>
+        /// 상세 전송
+        /// </summary>
+        /// <returns></returns>
+        public static string SetSendDtlToMariaDB()
+        {
+            string _rtn = "ERR";
+            ArrayList keyList = new ArrayList();        // Master Key 파일 저장 목록
+
+            DataSet ds = new DataSet();
+
+            #region ######### MSSQL Express 1 - 로컬 자료 조회 후 MySQL 에 추가할 SQL 생성 #########
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(Helpers.dbCon))
+                {
+                    conn.Open();
+                    string sql = " ";
+                    sql = sql + " SELECT KeyFilename, CutFilename, CutFullPath, FileTitle, numb, ";
+                    sql = sql + " memo, PointX, PointY, SizeW, SizeH,  ";
+                    sql = sql + " Fileimg, regdate, updYN, modiDate, sendDate,  ";
+                    sql = sql + " sendFlag ";
+                    sql = sql + " FROM TBL_TalkBoxLayer WITH(nolock) ";
+                    sql = sql + " WHERE (sendFlag is NULL or sendFlag ='N') ";
+
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        var adapt = new SqlDataAdapter();
+                        adapt.SelectCommand = cmd;
+                        adapt.Fill(ds);
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception ex) { _rtn = "ERR MSSQL 1단계 - 조회"; }
+
+            // MySQL 에 추가할 SQL 생성
+            StringBuilder sb = new StringBuilder();
+
+            string KeyFilename = "";
+            string CutFilename = "";
+            string CutFullPath = "";
+            string FileTitle = "";
+            string memo = "";
+            string PointX = "";
+            string PointY = "";
+            string SizeW = "";
+            string SizeH = "";
+            //byte[] Fileimg = null;    // 업로드한 파일이 이미지로 보이지 않음 일단 업데이트 모듈 추가 후 테스트 필요
+
+            if (ds != null && ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
+            {
+                for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+                {
+                    KeyFilename = ds.Tables[0].Rows[i]["KeyFilename"].ToString();   // 
+                    CutFilename = ds.Tables[0].Rows[i]["CutFilename"].ToString();   // 
+                    CutFullPath = ds.Tables[0].Rows[i]["CutFullPath"].ToString();   // 
+                    keyList.Add(KeyFilename+"*"+ CutFilename+"*"+CutFullPath);   // keyList 에 KeyFilename +"*"+ CutFilename 저장
+
+                    FileTitle   = ds.Tables[0].Rows[i]["FileTitle"].ToString();   // 글내용 (의사소견)
+                    memo        = ds.Tables[0].Rows[i]["memo"].ToString();
+                    PointX      = ds.Tables[0].Rows[i]["PointX"].ToString();
+                    PointY      = ds.Tables[0].Rows[i]["PointY"].ToString();
+                    SizeW       = ds.Tables[0].Rows[i]["SizeW"].ToString();
+                    SizeH       = ds.Tables[0].Rows[i]["SizeH"].ToString();
+                    //Fileimg     = (byte[])ds.Tables[0].Rows[i]["Fileimg"];
+
+                    sb.Append("      INSERT INTO TBL_DLImageCrop(KeyFilename, CutFilename, memo, PointX, PointY, SizeW, SizeH, Fileimg)  ");
+                    sb.Append("      SELECT                                                                                              ");
+                    sb.Append("     '" + KeyFilename + "' as KeyFilename,                                                                ");
+                    sb.Append("     '" + CutFilename + "' as CutFilename,                                                                ");
+                    //sb.Append("     '" + CutFullPath + "' as CutFullPath,                                                                ");
+                    sb.Append("     '" + memo + "' as memo,                                                                              ");
+                    sb.Append("     '" + PointX + "' as PointX,                                                                          ");
+                    sb.Append("     '" + PointY + "' as PointY,                                                                          ");
+                    sb.Append("     '" + SizeW + "' as SizeW,                                                                            ");
+                    sb.Append("     '" + SizeH + "' as SizeH,                                                                            ");
+                    //sb.Append("     '" + Fileimg + "' as Fileimg                                                                         ");
+                    sb.Append("  WHERE NOT EXISTS(SELECT * FROM TBL_DLImageCrop WHERE KeyFilename = '" + KeyFilename + "' and CutFilename = '" + CutFilename + "'); ");
+                }
+            }
+            #endregion ######### MSSQL Express 1 - 로컬 자료 조회 후 MySQL 에 추가할 SQL 생성 #########
+
+            #region ######### MySQL insert 2 - 로컬 자료 를 MySQL 에 저장 #########
+            StringBuilder sb2 = new StringBuilder(); // mssql update 용 쿼리
+
+            if (sb.ToString() != "")
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(Helpers.dbMariaCon))
+                    {
+                        conn.Open();
+                        using (MySqlCommand cmd = new MySqlCommand(sb.ToString(), conn))
+                        {
+                            int result = cmd.ExecuteNonQuery();
+                            _rtn = result.ToString();
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _rtn = "ERR MySQL 2단계 - INSERT";
+                }
+            }
+            #endregion ######### MySQL insert 2 - 로컬 자료 를 MySQL 에 저장 #########
+
+
+            #region ######### MySQL insert 2-2 - 이미지는 따로 MySQL 에 update #########
+            if (sb.ToString() != "")  // 위에서 전송한 이력이 있다면
+            {
+                try
+                {
+                    using (MySqlConnection conn = new MySqlConnection(Helpers.dbMariaCon))
+                    {
+                        conn.Open();
+
+                        FileStream fs;
+                        BinaryReader br;
+                        string _readFile = string.Empty;
+                        for (int i = 0; i < keyList.Count; i++)
+                        {
+                            string[] _split = keyList[i].ToString().Split('*');
+                            _readFile = _split[2] + "\\" + _split[1];
+                            fs = new FileStream(_readFile, FileMode.Open, FileAccess.Read);
+                            br = new BinaryReader(fs);
+                            byte[] rawData = br.ReadBytes((int)fs.Length);
+                            br.Close();
+                            fs.Close();
+
+                            using (MySqlCommand cmd = new MySqlCommand())
+                            {
+                                cmd.Connection = conn;
+                                cmd.CommandText = "update TBL_DLImageCrop set Fileimg = ?rawData WHERE KeyFilename = '" + _split[0] + "' and CutFilename = '" + _split[1] + "' ;";
+                                MySqlParameter fileContentParameter = new MySqlParameter("?rawData", MySqlDbType.Blob, rawData.Length);
+                                fileContentParameter.Value = rawData;
+                                cmd.Parameters.Add(fileContentParameter);
+
+                                int result = cmd.ExecuteNonQuery();
+                                _rtn = result.ToString();
+                            }
+                        }
+                        conn.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _rtn = "ERR MySQL 2-2단계 - 이미지 update";
+                }
+            }
+            #endregion ######### MySQL insert 2-2 - 이미지는 따로 MySQL 에 update #########
+
+
+
+
+            #region ######### MySQL SELECT 3 - MySQL에 저장된 키값 확인 후 MSSQL 에 Update 준비 #########
+            DataSet ds2 = new DataSet();
+            try
+            {
+                string _where = "";
+                string[] _split=null;
+                for (int i = 0; i < keyList.Count; i++)
+                {
+                    _split = keyList[i].ToString().Split('*');
+                    if (_where == "")
+                    {
+                        _where = "  ( KeyFilename= '" + _split[0] + "' and CutFilename='" + _split[1] + "' ) ";
+                    }
+                    else
+                    {
+                        _where = _where + " or ( KeyFilename = '" + _split[0] + "' and CutFilename = '" + _split[1] + "' ) ";
+                    }
+                }
+                if (_where != "")
+                {
+                    using (MySqlConnection conn = new MySqlConnection(Helpers.dbMariaCon))
+                    {
+                        conn.Open();
+                        string sql = "SELECT KeyFilename, CutFilename FROM TBL_DLImageCrop WHERE  ( " + _where + " )  ";
+                        using (MySqlCommand cmd = new MySqlCommand(sql, conn))
+                        {
+                            var adapt = new MySqlDataAdapter();
+                            adapt.SelectCommand = cmd;
+                            adapt.Fill(ds2);
+                        }
+                        conn.Close();
+                    }
+                    string MyKeyFilename = string.Empty;
+                    string MyCutFilename = string.Empty;
+                    if (ds2 != null && ds2.Tables[0] != null && ds2.Tables[0].Rows.Count > 0)
+                    {
+                        for (int i = 0; i < ds2.Tables[0].Rows.Count; i++)
+                        {
+                            MyKeyFilename = ds2.Tables[0].Rows[i]["KeyFilename"].ToString();   // 키 파일
+                            MyCutFilename = ds2.Tables[0].Rows[i]["CutFilename"].ToString();
+                            if (MyKeyFilename != "")
+                            {
+                                sb2.Append(" update TBL_TalkBoxLayer SET sendDate=getdate(), sendFlag='Y' WHERE KeyFilename='" + MyKeyFilename + "' and CutFilename='" + MyCutFilename + "' ;");
                             }
                         }
                     }

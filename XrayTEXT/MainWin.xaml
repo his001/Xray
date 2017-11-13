@@ -501,8 +501,8 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="320"></ColumnDefinition>
                         <ColumnDefinition Width="280"></ColumnDefinition>
-                        <ColumnDefinition Width="220"></ColumnDefinition>
-                        <ColumnDefinition Width="180"></ColumnDefinition>
+                        <ColumnDefinition Width="340"></ColumnDefinition>
+                        <ColumnDefinition Width="80"></ColumnDefinition>
                         <ColumnDefinition Width="160"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
@@ -536,8 +536,10 @@
                     </DockPanel>
 
                     <!-- zoom 변경 -->
-                    <DockPanel DockPanel.Dock="Bottom" Margin="0,5" Width="220" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
+                    <DockPanel DockPanel.Dock="Bottom" Margin="0,5,0,5" Width="300" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
                         <Label DockPanel.Dock="Left" FontSize="12" Margin="10,5,0,0">Zoom:</Label>
+                        <Button Margin="0,5,0,10" Width="30" Click="OnBtnPlusChangeClick" Style="{StaticResource InformButton}" ToolTip="확대">+</Button>
+                        <Button Margin="5,5,0,10" Width="30" Click="OnBtnMinusChangeClick" Style="{StaticResource InformButton}" ToolTip="축소">-</Button>
                         <Slider Name="ZoomImage" 
                             Margin="10,5,0,0" Orientation="Horizontal" 
                             Minimum="20" Maximum="280" 

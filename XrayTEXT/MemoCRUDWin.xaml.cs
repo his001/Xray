@@ -193,5 +193,25 @@ namespace XrayTEXT
             return _rtn;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (passBox.Password == "0000")
+            {
+                //if password is right, then close login form by set its dialogresult to true.
+                //this.DialogResult = true;
+                dpPassword.Visibility = Visibility.Hidden;
+                dpPop.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                MessageBox.Show("비밀번호가 다릅니다.");
+            }
+        }
+
     }
 }
