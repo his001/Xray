@@ -69,6 +69,8 @@ namespace XrayTEXT
         }
 
         #region #############    마리아 DB 전송    #############
+
+        #region #############    마리아 DB 전송 MASTER    #############
         /// <summary>
         /// 마리아 DB 에 마스터 Data 를 저장 한다.
         /// </summary>
@@ -116,7 +118,7 @@ namespace XrayTEXT
                     FileTitle = ds.Tables[0].Rows[i]["FileTitle"].ToString();   // 글내용 (의사소견)
                     isNormalYN = ds.Tables[0].Rows[i]["isNormalYN"].ToString();   // 글내용 (의사소견)
 
-                    sb.Append(" INSERT INTO TBL_DLImage (KeyFilename, FileTitle, isNormalYN) SELECT '" + KeyFilename + "' as KeyFilename,'" + FileTitle + "' as FileTitle,'" + isNormalYN + "' as isNormalYN WHERE NOT EXISTS (SELECT * FROM TBL_DLImage WHERE KeyFilename = '" + KeyFilename + "' ) ;");
+                    sb.Append(" INSERT INTO TBL_DLImage (idx, KeyFilename, FileTitle, isNormalYN) SELECT (SELECT IFNULL(MAX(idx) ,0)+1 AS m_cn FROM TBL_DLImage), '" + KeyFilename + "' as KeyFilename,'" + FileTitle + "' as FileTitle,'" + isNormalYN + "' as isNormalYN WHERE NOT EXISTS (SELECT * FROM TBL_DLImage WHERE KeyFilename = '" + KeyFilename + "' ) ;");
                 }
             }
             #endregion ######### MSSQL Express 1 - 로컬 자료 조회 후 MySQL 에 추가할 SQL 생성 #########
@@ -214,7 +216,10 @@ namespace XrayTEXT
 
             return _rtn;
         }
+        #endregion #############    마리아 DB 전송 MASTER    #############
 
+
+        #region #############    마리아 DB 전송 DETAIL    #############
         /// <summary>
         /// 상세 전송
         /// </summary>
@@ -447,6 +452,7 @@ namespace XrayTEXT
 
             return _rtn;
         }
+        #endregion #############    마리아 DB 전송 DETAIL    #############
 
         public static string getMariaDB()
         {
