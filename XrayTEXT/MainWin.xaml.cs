@@ -1458,6 +1458,32 @@ namespace XrayTEXT
         #endregion ######### popup 관련 #########
 
         #region ######### tree #########
+        /// <summary>
+        /// 트리 더블 클릭시 폴더 변경 선택한 효과
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void OnItemMouseDoubleClick(object sender, MouseButtonEventArgs args)
+        {
+            if (sender is TreeViewItem)
+            {
+                if (!((TreeViewItem)sender).IsSelected)
+                {
+                    new Action(() => OnImagesDirChangeClick(sender, args)).SetTimeout(100); //추가한 레이어에 검색 추가
+                    return;
+                }
+            }
+        }
+
+        TreeViewItem TryGetClickedItem(TreeView treeView, MouseButtonEventArgs e)
+        {
+            var hit = e.OriginalSource as DependencyObject;
+            while (hit != null && !(hit is TreeViewItem))
+                hit = VisualTreeHelper.GetParent(hit);
+
+            return hit as TreeViewItem;
+        }
+
         private void TreeViewItem_OnItemSelected(object sender, RoutedEventArgs e)
         {
             LeftTree.Tag = e.OriginalSource;
@@ -1487,24 +1513,7 @@ namespace XrayTEXT
 
             return null;
         }
-        //private void ListDirectory(TreeView treeView, string path)
-        //{
-        //    //treeView.Items.Clear();
-        //    var rootDirectoryInfo = new DirectoryInfo(path);
-        //    treeView.Items.Add(CreateDirectoryNode(rootDirectoryInfo));
-        //}
-
-        //private static TreeViewItem CreateDirectoryNode(DirectoryInfo directoryInfo)
-        //{
-        //    var directoryNode = new TreeViewItem { Header = directoryInfo.Name };
-        //    foreach (var directory in directoryInfo.GetDirectories())
-        //        directoryNode.Items.Add(CreateDirectoryNode(directory));
-
-        //    foreach (var file in directoryInfo.GetFiles())
-        //        directoryNode.Items.Add(new TreeViewItem { Header = file.Name });
-
-        //    return directoryNode;
-        //}
+        
 
         public void LoadDirectories()
         {
